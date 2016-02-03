@@ -1,0 +1,22 @@
+################### REQUIRED PARAMETERS ###################
+
+NODE_ENV=production
+
+################### OPTIONAL PARAMETERS ###################
+
+### Express ###
+#APP_SSL_PFX=./config/sslcerts/key.pfx
+#PORT=443
+#MAX_ALLOWED_MEM=500
+#SERVER_PING_INTERVAL=300
+
+### MONGODB ###
+#MONGO_SEED=true
+#MONGODB_PATH=mongodb://localhost:27017/mes-suite
+#MONGODB_AUTH_USER=admin
+#MONGODB_AUTH_PASS=password
+#MONGODB_DEBUG=0
+
+### LOGGING ###
+#CONSOLE_LOGGING=1
+#MONGODB_LOGGING=0
