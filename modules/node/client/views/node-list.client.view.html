@@ -1,0 +1,79 @@
+<div class="wrapper wrapper-content row animated fadeInRight" data-ng-init="init()">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content inspinia-timeline">
+            <div class="row">
+                <table class="table table-striped table-bordered table-hover">
+                    <tr>
+                        <td>
+                            <strong>Name</strong>
+                        </td>
+
+                        <td>
+                            <strong>Location</strong>
+                        </td>
+
+                        <td>
+                            <strong>Status</strong>
+                        </td>
+
+                        <td>
+                            <strong>Output Pin</strong>
+                        </td>
+
+                        <td>
+                            <strong>Input Pin</strong>
+                        </td>
+
+                        <td>
+                            <strong>Toggle</strong>
+                        </td>
+
+                        <td class="text-center"></td>
+                    </tr>
+
+                    <tr data-ng-repeat="node in nodes">
+                        <td>{{node.name | uppercase}}</td>
+                        <td>{{node.location}}</td>
+
+                        <td data-ng-class="{'text-success':node.val === 1,'text-danger':node.val === 0}">
+                            <strong>{{node.val === 1 ? 'On' : 'Off'}}</strong>
+                        </td>
+
+                        <td>{{node.pin}}</td>
+                        <td>{{node.inputPin}}</td>
+
+                        <td>
+                            <buton class="btn btn-primary btn-small" ng-click="toggle(node)">
+                                <i class="fa fa-circle-o"></i>
+                            </buton>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="btn-group" data-ng-class='{open: openConfig}'>
+                                <a class="dropdown-toggle" data-toggle="dropdown" data-ng-click='openConfig=!openConfig'><i class="fa fa-sliders fa-2x"></i></a>
+
+                                <ul class="dropdown-menu left">
+                                    <li data-ng-click="on(node);" class="text-center text-danger p-xxs hover">
+                                        <i class="fa fa-circle"></i> On
+                                    </li>
+
+                                    <li role="separator" class="divider"></li>
+
+                                    <li data-ng-click="off(node);" class="text-center text-danger p-xxs hover">
+                                        <i class="fa fa-circle"></i> Off
+                                    </li>
+
+                                    <li role="separator" class="divider"></li>
+
+                                    <li data-ng-click="toggle(node);" class="text-center text-danger p-xxs hover">
+                                        <i class="fa fa-circle"></i> Toggle
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="wrapper wrapper-content row animated fadeInRight" data-ng-init="init()">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content inspinia-timeline">
+            <div class="row m-b-sm">
+                <div class="pull-left col-md-4">
+                    <label>Show </label>
+
+                    <label>
+                        <select class="form-control input-sm" data-ng-model="pagingConfig.itemsPerPage" ng-change="figureOutItemsToDisplay()" >
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="100">100</option>
+                        </select>
+                    </label>
+
+                    <label> entries</label>
+                </div>
+
+                <div class="pull-left col-md-4">
+                    <div class="col-lg-4 col-md-12">
+                        <label>Sort By: </label>
+
+                        <label>
+                            <select class="input-sm" data-ng-model="sortBy">
+                                <option value="username">User</option>
+                                <option value="created">Created</option>
+                                <option value="msg">Message</option>
+                                <option value="type">Type</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="col-md-8" style="margin-top: 5px;">
+                        <i fa-checkbox  ng-size="fa-2x" ng-model="rev" tooltip="Reverse order of rows"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12 col-xs-12 pull-right">
+                    <input class="form-control" type="text" ng-model="pagingConfig.search" placeholder="Search" ng-change="figureOutItemsToDisplay()"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div data-ng-class="{ 'col-xs-8': showMeta, 'col-xs-12': !showMeta }">
+                    <div class="timeline-item" data-ng-repeat="log in pagingConfig.pagedItems | orderBy:sortBy:rev" data-ng-show="($index >= pagingConfig.begin) && ($index < pagingConfig.end)">
+                        <div class="row">
+                            <div class="col-xs-2 date">
+                                <i class="fa hover" data-ng-class="{'fa-trash text-danger': log.type === 'remove', 'fa-plus-circle text-info': log.type === 'update',
+                                    'fa-circle text-success': log.type === 'create', 'fa-cogs text-warning': log.type === 'other'}" tooltip="{{ log.type }}"></i>
+                                <img ng-src="{{log.createdBy.profileImageURL}}" alt="{{log.createdBy.displayName}}"
+                                     class="header-profile-image hover" tooltip="{{log.createdBy.displayName}}"  data-ng-click="goToUser(log.createdBy)"/>
+                                <br/>
+                            </div>
+
+                            <div class="content col-xs-10" data-ng-click="meta(log.data)">
+                                <div class="col-xs-10">
+                                    <p>{{log.msg}}</p>
+                                    <small><strong>{{log.createdBy.displayName}}</strong> <small class="text-muted">{{ moment(log.created).fromNow() }}</small></small>
+                                </div>
+                                <div class="col-xs-2">
+                                    <i class="fa fa-3x pull-right" data-ng-if="log.data"
+                                       data-ng-class="{ 'fa-chevron-right': log.data === currentMeta && showMeta, 'fa-chevron-left': !showMeta || log.data !== currentMeta }"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-4" data-ng-if="showMeta" data-ng-click="meta(currentMeta)">
+                    <pre class="text-left">{{ currentMeta | json }}</pre>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6 col-xs-12">
+                    Showing {{pagingConfig.begin + 1}} to {{(pagingConfig.end < pagingConfig.total) ? pagingConfig.end : pagingConfig.total }} of {{pagingConfig.total}} entries
+                </div>
+
+                <div class="col-xs-12 col-sm-6 text-right">
+                    <pagination boundary-links="true" max-size="8" items-per-page="pagingConfig.itemsPerPage" total-items="pagingConfig.total"
+                                ng-model="pagingConfig.currentPage" ng-change="figureOutItemsToDisplay(currentPage)" class="m-n"></pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,93 @@
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox">
+        <div class="ibox-title">
+            <h5>User List</h5>
+        </div>
+
+        <div class="list-group ibox-content">
+            <div class="clear m-b-sm">
+                <div class="pull-left col-md-4">
+                    <label>Show </label>
+
+                    <label>
+                        <select class="form-control input-sm" data-ng-model="pagingConfig.itemsPerPage" ng-change="figureOutItemsToDisplay()" >
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </label>
+
+                    <label> entries</label>
+                </div>
+
+                <div class="col-md-4 pull-right">
+                    <input class="form-control" type="text" ng-model="pagingConfig.search" placeholder="Search" ng-change="figureOutItemsToDisplay()" />
+                </div>
+            </div>
+
+            <table class="table table-striped table-bordered table-hover">
+                <tr>
+                    <td>
+                        <strong>Username</strong>
+                    </td>
+
+                    <td>
+                        <strong>Full Name</strong>
+                    </td>
+
+                    <td>
+                        <strong>Role</strong>
+                    </td>
+
+                    <td>
+                        <strong>Status</strong>
+                    </td>
+
+                    <td class="text-center"></td>
+                </tr>
+
+                <tr data-ng-repeat="user in pagingConfig.pagedItems | orderBy:sortBy:revOrder"
+                    data-ng-show="($index >= pagingConfig.begin) && ($index < pagingConfig.end)">
+                    <td>{{user.username | uppercase}}</td>
+                    <td>{{user.displayName}}</td>
+                    <td>{{user.roles.join(', ') | uppercase}}</td>
+
+                    <td data-ng-class="{'text-success':user.enabled,'text-danger':!user.enabled}">
+                        <strong>{{user.enabled ? "Enabled" : "Disabled"}}</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <div class="btn-group" data-ng-class='{open: openConfig}'>
+                            <a class="dropdown-toggle" data-toggle="dropdown" data-ng-click='openConfig=!openConfig'><i class="fa fa-sliders fa-2x"></i></a>
+
+                            <ul class="dropdown-menu left">
+                                <li data-ui-sref="admin.users.user.edit({userId: user._id})" data-ng-click="openConfig=!openConfig" class="text-center p-xxs hover">
+                                    <i class="fa fa-cog btn-dropdown"></i> Config
+                                </li>
+
+                                <li role="separator" class="divider"></li>
+
+                                <li data-ng-click="remove(user); openConfig=!openConfig" class="text-center text-danger p-xxs hover">
+                                    <i class="fa fa-trash"></i> Delete
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="row">
+                <div class="col-sm-6 col-xs-12">
+                    Showing {{pagingConfig.begin + 1}} to {{(pagingConfig.end < pagingConfig.total) ? pagingConfig.end : pagingConfig.total }} of {{pagingConfig.total}} entries
+                </div>
+
+                <div class="col-xs-12 col-sm-6 text-right">
+                    <pagination boundary-links="true" max-size="8" items-per-page="pagingConfig.itemsPerPage" total-items="pagingConfig.total"
+                                ng-model="pagingConfig.currentPage" ng-change="figureOutItemsToDisplay(currentPage)" class="m-n"></pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

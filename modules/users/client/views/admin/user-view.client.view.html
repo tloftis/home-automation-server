@@ -1,0 +1,70 @@
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5 data-ng-bind="user.displayName"></h5>
+                    <a ui-sref="admin.users.user.edit({userId: user._id})" class="pull-right"><i class="fa fa-2x fa-edit"></i></a>
+                </div>
+
+            <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-3"><strong>Username</strong></div>
+                        <div class="col-md-6" ng-bind="user.username"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>First Name</strong></div>
+                        <div class="col-md-6" ng-bind="user.firstName"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Last Name</strong></div>
+                        <div class="col-md-6" ng-bind="user.lastName"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Email</strong></div>
+                        <div class="col-md-6" ng-bind="user.email"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Provider</strong></div>
+                        <div class="col-md-6" ng-bind="user.provider"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Created</strong></div>
+                        <div class="col-md-6">{{ user.created | date }}</div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Status</strong></div>
+                        <div class="col-md-6" ng-bind="user.enabled ? 'Enabled' : 'Disabled'" ng-class="{'text-success':user.enabled,'text-danger':!user.enabled}"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-3"><strong>Roles</strong></div>
+                        <div class="col-md-6">{{ user.roles.join(', ') }}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

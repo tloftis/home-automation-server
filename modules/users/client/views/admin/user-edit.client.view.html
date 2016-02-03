@@ -1,0 +1,108 @@
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <form name="userForm" novalidate>
+                        <fieldset>
+                            <div class="form-group" data-show-errors>
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" class="form-control" ng-model="user.username"
+                                       placeholder="Username" lowercase required>
+
+                                <div ng-messages="userForm.username.$error" role="alert">
+                                    <p class="help-block error-text" ng-message="required">Username is required.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group" data-show-errors>
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" class="form-control" data-ng-model="user.firstName"
+                                       placeholder="First Name" required/>
+
+                                <div data-ng-messages="userForm.firstName.$error" role="alert">
+                                    <p class="help-block error-text" data-ng-message="required">First name is required.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group" data-show-errors>
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" class="form-control" data-ng-model="user.lastName"
+                                       placeholder="Last Name" required/>
+
+                                <div data-ng-messages="userForm.lastName.$error" role="alert">
+                                    <p class="help-block error-text" data-ng-message="required">Last name is required.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group" data-show-errors>
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" class="form-control"
+                                       data-ng-model="user.email" placeholder="Email">
+
+                                <div data-ng-messages="userForm.email.$error" role="alert">
+                                    <p class="help-block error-text" data-ng-message="required">Email address is required.</p>
+                                    <p class="help-block error-text" data-ng-message="email">Email address is invalid.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Current Roles</label>
+                                <div class="well well-sm">
+                                    <span class="label label-info btn" ng-click="possibleRoles.push(role); user.roles.splice($index, 1)"
+                                          data-ng-repeat="role in user.roles track by $index" style="margin-right: 3px;">{{role}}</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Possible Roles</label>
+                                <div class="well well-sm">
+                                    <span class="label label-default btn" ng-click="user.roles.push(role); possibleRoles.splice($index, 1)"
+                                          data-ng-repeat="role in possibleRoles track by $index" style="margin-right: 3px;">{{role}}</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group" data-ng-class="{'text-success': user.enabled, 'text-danger': !user.enabled }">
+                                Account Enabled <fa-checkbox ng-size="fa-2x" ng-model="user.enabled"></fa-checkbox>
+                            </div>
+
+                            <div data-ng-if="authentication.user._id !== user._id" class="form-group" ng-show="!userForm.password.$error.required">
+                                <div class="form-group">
+                                    Reset Password <fa-checkbox ng-size="fa-2x" ng-model="showPassword"></fa-checkbox>
+                                </div>
+
+                                <div class="form-group" show-errors data-ng-show="showPassword">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" class="form-control" ng-model="user.password"
+                                           placeholder="Password" popover="{{popoverMsg}}" popover-trigger="focus" password-validator>
+
+                                    <div ng-messages="userForm.password.$error" role="alert">
+                                        <div ng-repeat="passwordError in passwordErrors">
+                                            <p class="help-block error-text" ng-show="userForm.password.$error.requirements">{{passwordError}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" ng-show="!userForm.password.$error.required" data-ng-show="showPassword">
+                                    <label data-ng-show="showPassword && requirementsProgress">Password Requirements</label>
+
+                                    <progressbar value="requirementsProgress" type="{{requirementsColor}}" data-ng-show="showPassword">
+                                        <span style="color:white; white-space:nowrap;">{{requirementsProgress}}%</span>
+                                    </progressbar>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div data-ng-click="update(userForm.$valid)" class="btn btn-primary">Update</div>
+                            </div>
+
+                            <div data-ng-show="error" class="text-danger">
+                                <strong data-ng-bind="error"></strong>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
