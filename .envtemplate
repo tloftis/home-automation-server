@@ -7,6 +7,7 @@ NODE_ENV=production
 ### Express ###
 #APP_SSL_PFX=./config/sslcerts/key.pfx
 #PORT=443
+#RELAY_PORT=2000
 #MAX_ALLOWED_MEM=500
 #SERVER_PING_INTERVAL=300
 

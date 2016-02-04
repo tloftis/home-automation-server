@@ -4,17 +4,44 @@
  * Module dependencies.
  */
 
+//Only can find address in a subnet mask of 255.255.255.0
 var path = require('path'),
-    //mongoose = require('mongoose'),
-    //User = mongoose.model('User'),
 	async = require('async'),
 	request = require('request'),
 	_ = require('lodash'),
     testAddresses = [],
-    addresses = [''];
+    addresses = [],
+    os = require('os');
 
-for(var i = 2; i <= 256; i++){
-    testAddresses.push('10.0.0.' + i + ':2000');
+var netMask, localIp;
+var interfaces = os.networkInterfaces();
+
+for (var j in interfaces) {
+    for (var i in interfaces[j]) {
+        var address = interfaces[j][i];
+
+        if (address.family === 'IPv4' && !address.internal) {
+            netMask = address.netmask;
+            localIp = address.address;
+        }
+    }
+}
+
+var end = 0; //because this is the best option
+var ipIntro = '10.0.0.'; //becasue my default network
+
+if(netMask){
+    end = +netMask.split('.').pop();
+}
+
+if(localIp){
+    var ipArr = localIp.split('.');
+    ipArr.pop();
+    ipIntro = ipArr.join('.') + '.';
+}
+
+for(var i = end; i <= 255; i++){
+    testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
 }
 
 async.each(testAddresses, function(addresss, next){
@@ -26,7 +53,7 @@ async.each(testAddresses, function(addresss, next){
         next();
     });
 }, function(){
-    console.log('Found servers');
+    console.log('Found ' + addresses.length + ' Servers');
 });
 
 /**
