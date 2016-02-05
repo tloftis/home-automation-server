@@ -3,6 +3,11 @@
 var defaultEnvConfig = require('./default');
 
 module.exports = {
+  secure: {
+    ssl: (process.env.APP_SSL_CERT && process.env.APP_SSL_KEY) ? true: false,
+    privateKey: process.env.APP_SSL_KEY,
+    certificate: process.env.APP_SSL_CERT
+  },
   db: {
     uri: process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://' + (process.env.DB_1_PORT_27017_TCP_ADDR || 'localhost') + '/mean-dev',
     options: {

@@ -5,7 +5,8 @@ NODE_ENV=production
 ################### OPTIONAL PARAMETERS ###################
 
 ### Express ###
-#APP_SSL_PFX=./config/sslcerts/key.pfx
+#APP_SSL_CERT=./config/sslcerts/cert.pem
+#APP_SSL_KEY=./config/sslcerts/key.pem
 #PORT=443
 #RELAY_PORT=2000
 #MAX_ALLOWED_MEM=500

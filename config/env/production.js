@@ -2,9 +2,9 @@
 
 module.exports = {
   secure: {
-    ssl: true,
-    privateKey: './config/sslcerts/key.pem',
-    certificate: './config/sslcerts/cert.pem'
+    ssl: (process.env.APP_SSL_CERT && process.env.APP_SSL_KEY) ? true: false,
+    privateKey: process.env.APP_SSL_KEY,
+    certificate: process.env.APP_SSL_CERT
   },
   port: process.env.PORT || 8443,
   // Binding to 127.0.0.1 is safer in production.
