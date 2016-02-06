@@ -7,7 +7,7 @@ angular.module('node').run(['Menus',
             title: 'Relay Nodes',
             state: 'node',
             type: 'dropdown',
-            roles: ['admin']
+            roles: ['user', 'admin']
         });
 
         Menus.addSubMenuItem('topbar', 'node', {
