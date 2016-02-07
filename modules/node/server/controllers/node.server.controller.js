@@ -65,8 +65,10 @@ exports.list = function (req, res){
     async.forEach(addresses, function(address, next){
         request.get('http://' + address + '/api/status', function(err, res, body){
             if(!err) {
+                var newNodes;
+
                 try {
-                    var newNodes = JSON.parse(body);
+                    newNodes = JSON.parse(body);
                 }catch(err){
                     return next();
                 }
@@ -103,6 +105,6 @@ exports.set = function (req, res){
 		var newNode = JSON.parse(body);
 		newNode.url = node.url;
 		
-		res.json(newNode)
+		res.json(newNode);
 	});
 };

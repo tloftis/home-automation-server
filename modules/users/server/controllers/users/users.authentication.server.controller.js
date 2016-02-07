@@ -21,10 +21,6 @@ var noReturnUrls = [
  */
 exports.signin = function (req, res, next) {
     passport.authenticate('local', function (err, user, info) {
-        console.log(user);
-        console.log(info);
-        console.log(err);
-
         if (!_.isObject(user) || !user.enabled){
             return res.status(400).send('User Account Is Disabled!');
         }
