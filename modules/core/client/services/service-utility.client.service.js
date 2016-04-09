@@ -1,9 +1,8 @@
 'use strict';
 
-angular.module('core').factory('Utility', ['$q', '$http', 'MessageParserService', '$location',
-    function ($q, $http, MessageParserService, $location) {
+angular.module('core').factory('Utility', ['$q', '$http', 'MessageParserService',
+    function ($q, $http, MessageParserService) {
         var service = {};
-
         var parseErrorMessage = MessageParserService.parseMessage;
 
         service.log = {

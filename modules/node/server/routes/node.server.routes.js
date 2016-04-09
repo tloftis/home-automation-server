@@ -4,18 +4,27 @@
  * Module dependencies.
  */
 var adminPolicy = require('../policies/node.server.policy'),
-    node = require('../controllers/node.server.controller');
+    node = require('../controllers/node.server.controller.js'),
+    outputs = require('../controllers/node-outputs.server.controller.js'),
+    inputs = require('../controllers/node-inputs.server.controller.js');
 
 module.exports = function (app) {
     // Users collection routes
-    app.route('/api/node/list').
-        get(node.list);//.
-        //post(adminPolicy.isAllowed, admin.createUser);
+    app.route('/api/node').
+        get(node.list);
 
-    // Single user routes
-    app.route('/api/node/set').
-        post(node.set);
+    app.route('/api/node/:nodeId').
+        get(node.get).
+        put(node.update);
 
-    // Finish by binding the user middleware
-    //app.param('userId', admin.userByID);
+    app.route('/api/node/:nodeId/output').
+        post(outputs.add);
+
+    app.route('/api/node/:nodeId/input').
+        post(inputs.add);
+
+    app.route('/api/node/:nodeId/update').
+        post(inputs.change);
+
+    app.param('nodeId', node.nodeById);
 };

@@ -11,6 +11,16 @@ angular.module('node').run(['Menus',
         });
 
         Menus.addSubMenuItem('topbar', 'node', {
+            title: 'Node Output List',
+            state: 'node.outputs'
+        });
+
+        Menus.addSubMenuItem('topbar', 'node', {
+            title: 'Node Input List',
+            state: 'node.inputs'
+        });
+
+        Menus.addSubMenuItem('topbar', 'node', {
             title: 'Node List',
             state: 'node.list'
         });

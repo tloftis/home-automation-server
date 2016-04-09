@@ -56,11 +56,6 @@ angular.module('users').controller('ChangeProfilePictureController', ['$scope', 
             //Utility.log.warning(response.message);
         };
 
-        // Called after the user has failed to uploaded a new picture
-        $scope.uploader.onProgressItem = function (fileItem, progress) {
-            //console.log(progress);
-        };
-
         // Change user profile picture
         $scope.uploadProfilePicture = function () {
             // Clear messages

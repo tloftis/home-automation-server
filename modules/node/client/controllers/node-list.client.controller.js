@@ -11,25 +11,16 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
             });
         };
 
-        $scope.on = function(node){
-            nodeService.nodeSet(node, 1).then(function(newNode){
-                var index = $scope.nodes.indexOf(node);
-                $scope.nodes[index] = newNode;
-            });
+        $scope.addOutput = function(node){
+            $state.go('node.add.output', { nodeId: node.id });
         };
 
-        $scope.off = function(node){
-            nodeService.nodeSet(node, 0).then(function(newNode){
-                var index = $scope.nodes.indexOf(node);
-                $scope.nodes[index] = newNode;
-            });
+        $scope.addInput = function(node){
+            $state.go('node.add.input', { nodeId: node.id });
         };
 
-        $scope.toggle = function(node){
-            nodeService.nodeSet(node).then(function(newNode){
-                var index = $scope.nodes.indexOf(node);
-                $scope.nodes[index] = newNode;
-            });
+        $scope.edit = function(node){
+            $state.go('node.edit', { nodeId: node.id });
         };
     }
 ]);

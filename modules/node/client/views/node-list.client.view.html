@@ -5,47 +5,42 @@
                 <table class="table table-striped table-bordered table-hover">
                     <tr>
                         <td>
-                            <strong>Name</strong>
+                            <strong>Id</strong>
                         </td>
 
                         <td>
-                            <strong>Location</strong>
+                            <strong>Address</strong>
                         </td>
 
                         <td>
-                            <strong>Status</strong>
+                            <strong>Has Outputs</strong>
                         </td>
 
                         <td>
-                            <strong>Output Pin</strong>
+                            <strong>Has Inputs</strong>
                         </td>
 
                         <td>
-                            <strong>Input Pin</strong>
-                        </td>
-
-                        <td>
-                            <strong>Toggle</strong>
+                          <strong>Has RFID</strong>
                         </td>
 
                         <td class="text-center"></td>
                     </tr>
 
                     <tr data-ng-repeat="node in nodes">
-                        <td>{{node.name | uppercase}}</td>
-                        <td>{{node.location}}</td>
+                        <td>{{node.id | uppercase}}</td>
+                        <td>{{node.ip}}</td>
 
-                        <td data-ng-class="{'text-success':node.val === 1,'text-danger':node.val === 0}">
-                            <strong>{{node.val === 1 ? 'On' : 'Off'}}</strong>
+                        <td data-ng-class="{'text-success':node.isOutput,'text-danger':!node.isOutput}">
+                            <strong>{{node.isOutput ? 'Yes' : 'No'}}</strong>
                         </td>
 
-                        <td>{{node.pin}}</td>
-                        <td>{{node.inputPin}}</td>
+                        <td data-ng-class="{'text-success':node.isInput,'text-danger':!node.isInput}">
+                          <strong>{{node.isInput ? 'Yes' : 'No'}}</strong>
+                        </td>
 
-                        <td>
-                            <buton class="btn btn-primary btn-small" ng-click="toggle(node)">
-                                <i class="fa fa-circle-o"></i>
-                            </buton>
+                        <td data-ng-class="{'text-success':node.isRfid,'text-danger':!node.isRfid}">
+                          <strong>{{node.isRfid ? 'Yes' : 'No'}}</strong>
                         </td>
 
                         <td class="text-center">
@@ -53,20 +48,20 @@
                                 <a class="dropdown-toggle" data-toggle="dropdown" data-ng-click='openConfig=!openConfig'><i class="fa fa-sliders fa-2x"></i></a>
 
                                 <ul class="dropdown-menu left">
-                                    <li data-ng-click="on(node);" class="text-center text-danger p-xxs hover">
-                                        <i class="fa fa-circle"></i> On
+                                    <li data-ng-click="addOutput(node);" class="text-center text-success p-xxs hover">
+                                        <i class="fa fa-arrow-circle-o-left"></i> Add Output
                                     </li>
 
                                     <li role="separator" class="divider"></li>
 
-                                    <li data-ng-click="off(node);" class="text-center text-danger p-xxs hover">
-                                        <i class="fa fa-circle"></i> Off
+                                    <li data-ng-click="addInput(node);" class="text-center text-danger p-xxs hover">
+                                        <i class="fa fa-arrow-circle-o-right"></i> Add Input
                                     </li>
 
                                     <li role="separator" class="divider"></li>
 
-                                    <li data-ng-click="toggle(node);" class="text-center text-danger p-xxs hover">
-                                        <i class="fa fa-circle"></i> Toggle
+                                    <li data-ng-click="edit(node);" class="text-center text-info p-xxs hover">
+                                        <i class="fa fa-cog"></i> Configure
                                     </li>
                                 </ul>
                             </div>
