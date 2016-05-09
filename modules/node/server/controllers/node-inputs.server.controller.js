@@ -8,8 +8,8 @@ var async = require('async'),
     masterNode = require('./node.server.controller');
 
 var inputs = masterNode.inputs,
-    nodeOutput = masterNode.nodeOutput,
-    nodeInput = masterNode.nodeInput;
+    nodeOutput = masterNode.outputHash,
+    nodeInput = masterNode.inputHash;
 
 exports.list = function(req, res){
     res.json(inputs);
@@ -125,37 +125,15 @@ exports.add = function (req, res){
 };
 
 exports.change = function(req, res){
-    var input,
-        givenInput = req.body.config,
-        node = req.node;
+    var input = req.input,
+        node = input.node,
+        config = req.body;
 
-    if(!givenInput.pin){
-        return res.status(400).send("No pin given with update");
-    }
-
-    input = nodeInput[node.id] ? nodeInput[node.id][+givenInput.pin] : undefined;
-
-    if(!input){
+    if(!input || !node){
         return res.status(400).send("Unable to update pin");
     }
 
-    res.send("Not yet implemented");
-
-    if(givenInput.description){
-        input.descrption = givenInput.description;
-    }
-    if(givenInput.name){
-        input.name = givenInput.name;
-    }
-    if(givenInput.location){
-        input.location = givenInput.location;
-    }
-    if(givenInput.val){
-        input.state = (+givenInput.val === 1);
-    }
-    if(givenInput.invVal){
-        input.invState = (+givenInput.invVal === 1);
-    }
+    iput.value = config.value;
 
     var query = {
             input: {
@@ -228,25 +206,11 @@ exports.change = function(req, res){
 };
 
 exports.inputById = function (req, res, next, id){
-    id = +id;
-    var input;
-
-    if(!masterNode.inputIdValid(id)){
+    if(!(req.input = nodeInput[id])){
         return res.status(400).send({
-            message: 'Input id is invalid'
+            message: 'Input id not found'
         });
     }
 
-    for(var i = 0; i < inputs.length; i++){
-        input = inputs[i];
-
-        if(+input.id === id){
-            req.input = input;
-            return next();
-        }
-    }
-
-    return res.status(400).send({
-        message: 'Input could not be found'
-    });
+    return next();
 };

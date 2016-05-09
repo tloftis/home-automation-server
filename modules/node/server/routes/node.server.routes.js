@@ -23,8 +23,5 @@ module.exports = function (app) {
     app.route('/api/node/:nodeId/input').
         post(inputs.add);
 
-    app.route('/api/node/:nodeId/update').
-        post(inputs.change);
-
     app.param('nodeId', node.nodeById);
 };

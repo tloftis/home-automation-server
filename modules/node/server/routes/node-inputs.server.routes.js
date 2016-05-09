@@ -13,6 +13,7 @@ module.exports = function (app) {
     app.route('/api/input/:inputId').
         get(inputs.get).
         put(inputs.update).
+        post(inputs.change).
         delete(inputs.remove);
 
     /*

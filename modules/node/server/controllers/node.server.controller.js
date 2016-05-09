@@ -9,8 +9,8 @@ var async = require('async'),
 var nodes = [],
     outputs = [],
     inputs = [],
-    nodeOutput = {},
-    nodeInput = {};
+    outputHash = {},
+    inputHash = {};
 
 //Used to generate unique id's for nodes inputs and outputs as a whole regardless of what node they are on
 var outputIdItter = 1,
@@ -76,9 +76,6 @@ function searchForNodes(callback){
                         description: node.description | '',
                         location: node.location | ''
                     });
-
-                    nodeOutput[node.id] = {};
-                    nodeInput[node.id] = {};
                 }
             }
 
@@ -129,11 +126,11 @@ function updateInputs(callback){
                         state: (+input.val === 1),
                         invState: (+input.invVal === 1),
                         node: node,
-                        id: inputIdItter++
+                        id: input.id
                     };
 
                     inputs.push(input);
-                    nodeInput[node.id][input.pin] = input;
+                    inputHash[input.pin] = input;
                     next()
                 },function(){
                     nextMain();
@@ -167,12 +164,11 @@ function updateOutputs(callback){
                         pin: output.pin,
                         state: (+output.val === 1),
                         node: node,
-                        id: outputIdItter++
+                        id: output.id
                     };
 
                     outputs.push(output);
-
-                    nodeOutput[node.id][output.pin] = output;
+                    outputHash[output.id] = output;
                     next()
                 },function(){
                     nextMain();
@@ -206,8 +202,8 @@ exports.nodes = nodes;
 exports.outputs = outputs;
 exports.inputs = inputs;
 
-exports.nodeInput = nodeInput;
-exports.nodeOutput = nodeOutput;
+exports.inputHash = inputHash;
+exports.outputHash = outputHash;
 
 exports.list = function(req, res){
     res.json(nodes);
