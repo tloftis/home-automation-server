@@ -8,15 +8,15 @@ var async = require('async'),
     masterNode = require('./node.server.controller');
 
 var inputs = masterNode.inputs,
-    nodeOutput = masterNode.outputHash,
-    nodeInput = masterNode.inputHash;
+    outputHash = masterNode.outputHash,
+    inputHash = masterNode.inputHash;
 
 exports.list = function(req, res){
     res.json(inputs);
 };
 
 exports.get = function (req, res){
-    res.json(req.input);
+    res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input));
 };
 
 exports.update = function (req, res){
@@ -24,11 +24,11 @@ exports.update = function (req, res){
         node = req.body.node,
         newNode = {};
 
-    if(node.name) newNode.name = node.name;
-    if(node.location) newNode.location = node.location;
-    if(node.description) newNode.description = node.description;
-    if(!_.isUndefined(node.invState)) newNode.invVal = +node.invState;
-    if(node.pin) newNode.pin = node.pin;
+    if(!_.isUndefined(node.name)) newNode.name = node.name;
+    if(!_.isUndefined(node.location)) newNode.location = node.location;
+    if(!_.isUndefined(node.description)) newNode.description = node.description;
+    if(!_.isUndefined(node.config)) newNode.config = node.config;
+    if(!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
 
     var info = {
         url: 'http://' + input.node.ip + '/api/input/' + input.pin,
@@ -37,20 +37,19 @@ exports.update = function (req, res){
 
     request.put(info, function (err, reqs, body){
         if(err) return res.status(400).send('Error attempting to update input');
-        var newOutput;
+        var newInput;
 
         try{
-            newOutput = JSON.parse(body);
+            newInput = JSON.parse(body);
         }catch(err){
             return res.status(400).send('Unable to get updated input config');
         }
 
-        input.state = (+newOutput.val === 1);
-        input.invState = (+newOutput.invVal === 1);
-        input.description = newOutput.description;
-        input.location = newOutput.location;
-        input.name = newOutput.name;
-        input.pin = newOutput.pin;
+        if(!_.isUndefined(newInput.name)) input.name = newInput.name;
+        if(!_.isUndefined(newInput.location)) input.location = newInput.location;
+        if(!_.isUndefined(newInput.description)) input.description = newInput.description;
+        if(!_.isUndefined(newInput.config)) input.config = newInput.config;
+        if(!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
         res.json(input);
     });
 };
@@ -86,9 +85,8 @@ exports.add = function (req, res){
     if(input.name) newInput.name = input.name;
     if(input.location) newInput.location = input.location;
     if(input.description) newInput.description = input.description;
-    if(input.invState) newInput.invVal = input.invState;
 
-    if(input.pin) {
+    if(input.config) {
         newInput.pin = input.pin;
 
         var info = {
@@ -129,11 +127,11 @@ exports.change = function(req, res){
         node = input.node,
         config = req.body;
 
-    if(!input || !node){
-        return res.status(400).send("Unable to update pin");
+    if(!input){
+        return res.status(400).send("Unknown Input posted to server");
     }
 
-    iput.value = config.value;
+    input.config = config;
 
     var query = {
             input: {
@@ -141,8 +139,6 @@ exports.change = function(req, res){
                 pin: input.pin
             }
         };
-
-    console.log(input);
 
     NodeLink.find(query).exec(function(err, links){
         var output;
@@ -153,30 +149,24 @@ exports.change = function(req, res){
 
         links = [
             {
+                pipes:[
+                    'asdfasdf', //Id linking to some pipe object
+                    'asdfasdf' //Order Matters quite a bit, allowed to repeat
+                ],
                 output:{
-                    nodeId: "04:8d:38:c8:fe:f2",
-                    pin: 2
-                },
-                connectionType: 0
+                    id: "00:13:ef:86:05:29"
+                }
             },
             {
+                pipes: [], //Pipes aren't needed
                 output:{
-                    nodeId: "00:13:ef:86:05:29",
-                    pin: 3
-                },
-                connectionType: 1
-            },
-            {
-                output:{
-                    nodeId: "00:13:ef:86:05:29",
-                    pin: 2
-                },
-                connectionType: 2
+                    id: "00:13:ef:86:05:29"
+                }
             }
         ];
 
         async.each(links, function(link, next){
-            output = nodeOutput[link.output.nodeId] ? nodeOutput[link.output.nodeId][link.output.pin] : false;
+            output = outputHash[link.output.id] || false;
 
             if(!output){
                 return next();
@@ -194,19 +184,13 @@ exports.change = function(req, res){
                 }
             };
 
-            if(+link.connectionType === 2){
-                exports.setOutput({ output: output, body: {} }, fakeRes)
-            }else{
-                if(+input.state === +link.connectionType) {
-                    exports.setOutput({ output: output, body: {} }, fakeRes)
-                }
-            }
+            exports.setOutput({ output: output, body: {} }, fakeRes)
         });
     });
 };
 
 exports.inputById = function (req, res, next, id){
-    if(!(req.input = nodeInput[id])){
+    if(!(req.input = inputHash[id])){
         return res.status(400).send({
             message: 'Input id not found'
         });

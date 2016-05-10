@@ -9,6 +9,13 @@ var async = require('async'),
 var nodes = [],
     outputs = [],
     inputs = [],
+
+    outputDrivers = [],
+    inputDrivers = [],
+
+    inputDriverHash = {},
+    outputDriverHash = {},
+
     outputHash = {},
     inputHash = {};
 
@@ -120,13 +127,12 @@ function updateInputs(callback){
                 async.each(newInputs, function (input, next){
                     var input = {
                         name: input.name,
-                        location: input.location || '',
-                        description: input.description || '',
-                        pin: input.pin,
-                        state: (+input.val === 1),
-                        invState: (+input.invVal === 1),
-                        node: node,
-                        id: input.id
+                        location: input.location,
+                        description: input.description,
+                        driverId: input.driverId,
+                        config: input.config,
+                        id: input.id,
+                        node: node
                     };
 
                     inputs.push(input);
@@ -161,10 +167,10 @@ function updateOutputs(callback){
                         name: output.name,
                         location: output.location,
                         description: output.description,
-                        pin: output.pin,
-                        state: (+output.val === 1),
-                        node: node,
-                        id: output.id
+                        driverId: output.driverId,
+                        config: output.config,
+                        id: output.id,
+                        node: node
                     };
 
                     outputs.push(output);
@@ -174,6 +180,78 @@ function updateOutputs(callback){
                     nextMain();
                 });
             }
+        });
+    }, callback);
+}
+
+function updateDrivers(callback){
+    if(!callback) callback = function(){};
+
+    async.each(nodes, function (node, nextMain){
+        async.parallel([function(nextMid){
+            request.get('http://' + node.ip + '/api/output/drivers', function (err, res, body){
+                var newDrivers;
+
+                try {
+                    newDrivers = JSON.parse(body);
+                } catch (err){
+                    return nextMid();
+                }
+
+                if(err){
+                    return nextMid();
+                }else{
+                    async.each(newDrivers, function (driver, next){
+                        var driver = {
+                            name: driver.name,
+                            type: driver.location,
+                            description: driver.description,
+                            config: driver.config,
+                            id: driver.id,
+                            node: node
+                        };
+
+                        outputDrivers.push(driver);
+                        outputDriverHash[driver.id] = driver;
+                        next();
+                    },function(){
+                        nextMid();
+                    });
+                }
+            });
+        }, function(nextMid){
+            request.get('http://' + node.ip + '/api/input/drivers', function (err, res, body){
+                var newDrivers;
+
+                try {
+                    newDrivers = JSON.parse(body);
+                } catch (err){
+                    return nextMid();
+                }
+
+                if(err){
+                    return nextMid();
+                }else{
+                    async.each(newDrivers, function (driver, next){
+                        var driver = {
+                            name: driver.name,
+                            type: driver.location,
+                            description: driver.description,
+                            config: driver.config,
+                            id: driver.id,
+                            node: node
+                        };
+
+                        inputDrivers.push(driver);
+                        inputDriverHash[driver.id] = driver;
+                        next();
+                    },function(){
+                        nextMid();
+                    });
+                }
+            });
+        }], function(){
+            nextMain();
         });
     }, callback);
 }
@@ -190,6 +268,21 @@ function updateAll(){
 
                 updateOutputs(function(){
                     console.log('Updated Outputs');
+
+                    updateDrivers(function(){
+                        console.log('Updated Drivers');
+                        /*
+                        var i, len;
+
+                        for(i = 0, len = inputs.length; i < len; i++){
+                            inputs[i].driver = inputDriverHash[inputs[i].driverId];
+                        }
+
+                        for(i = 0, len = outputs.length; i < len; i++){
+                            outputs[i].driver = outputDriverHash[outputs[i].driverId];
+                        }
+                        */
+                    });
                 });
             });
         })
@@ -197,11 +290,13 @@ function updateAll(){
 }
 
 updateAll();
-
 exports.nodes = nodes;
 exports.outputs = outputs;
 exports.inputs = inputs;
-
+exports.outputDrivers = outputDrivers;
+exports.inputDrivers = inputDrivers;
+exports.outputDriverHash = outputDriverHash;
+exports.inputDriverHash = inputDriverHash;
 exports.inputHash = inputHash;
 exports.outputHash = outputHash;
 

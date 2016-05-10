@@ -5,8 +5,7 @@ var async = require('async'),
     request = require('request'),
     masterNode = require('./node.server.controller');
 
-var outputs = masterNode.outputs,
-    nodeOutput = masterNode.nodeOutput;
+var outputs = masterNode.outputs;
 
 exports.list = function(req, res){
     res.json(outputs);
@@ -44,7 +43,7 @@ exports.set = function (req, res){
 };
 
 exports.get = function (req, res){
-    res.json(req.output);
+    res.json(_.extend({ driver: masterNode.outputDriverHash[req.output.driverId] }, req.output));
 };
 
 exports.update = function (req, res){
