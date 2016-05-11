@@ -12,11 +12,13 @@ var inputs = masterNode.inputs,
     inputHash = masterNode.inputHash;
 
 exports.list = function(req, res){
-    res.json(inputs);
+    res.json(inputs.map(function(input){
+        return _.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
+    }));
 };
 
 exports.get = function (req, res){
-    res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input));
+    res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
 };
 
 exports.update = function (req, res){
@@ -27,11 +29,21 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.name)) newNode.name = node.name;
     if(!_.isUndefined(node.location)) newNode.location = node.location;
     if(!_.isUndefined(node.description)) newNode.description = node.description;
-    if(!_.isUndefined(node.config)) newNode.config = node.config;
     if(!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
 
+    //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
+    if(!_.isUndefined(node.config)){
+        newNode.config = {};
+
+        for(var key in inputHash[input.driverId].config){
+            if(node.config[key]){
+                newNode.config[key] = node.config[key];
+            }
+        }
+    }
+
     var info = {
-        url: 'http://' + input.node.ip + '/api/input/' + input.pin,
+        url: 'http://' + input.node.ip + '/api/input/' + input.id,
         form: { input: newNode }
     };
 
@@ -59,7 +71,7 @@ exports.remove = function (req, res){
         index = -1;
 
     var info = {
-        url: 'http://' + input.node.ip + '/api/input/' + input.pin,
+        url: 'http://' + input.node.ip + '/api/input/' + input.id,
         form: {}
     };
 
@@ -69,8 +81,7 @@ exports.remove = function (req, res){
         index = inputs.indexOf(input);
 
         if(index !== -1){
-            inputs.splice(index, 1);
-            return res.json(input);
+            return inputs.splice(index, 1)[0];
         }
 
         return res.status(400).send('Error attempting to remove input from server memory');
@@ -85,10 +96,10 @@ exports.add = function (req, res){
     if(input.name) newInput.name = input.name;
     if(input.location) newInput.location = input.location;
     if(input.description) newInput.description = input.description;
+    if(input.config) newInput.config = input.config;
+    if(input.driverId) newInput.driverId = input.driverId;
 
-    if(input.config) {
-        newInput.pin = input.pin;
-
+    if(newInput.driverId){
         var info = {
             url: 'http://' + node.ip + '/api/input',
             form: { input: newInput }
@@ -108,9 +119,9 @@ exports.add = function (req, res){
                 name: newInput.name,
                 location: newInput.location,
                 description: newInput.description,
-                pin: newInput.pin,
-                state: (+newInput.val === 1),
-                invState: (+newInput.invVal === 1),
+                driverId: newInput.driverId,
+                config: newInput.config,
+                id: newInput.id,
                 node: node
             };
 
@@ -118,7 +129,7 @@ exports.add = function (req, res){
             return res.json(input);
         });
     }else{
-        return res.status(400).send('No input pin specified, cannot create configuration');
+        return res.status(400).send('No input driver specified, cannot create configuration');
     }
 };
 
@@ -131,12 +142,10 @@ exports.change = function(req, res){
         return res.status(400).send("Unknown Input posted to server");
     }
 
-    input.config = config;
-
+    /* Going to need a lot of work to properly function and do so in a very configurable manner with pipes
     var query = {
             input: {
-                nodeId: node.id,
-                pin: input.pin
+                nodeId: node.id
             }
         };
 
@@ -166,6 +175,11 @@ exports.change = function(req, res){
         ];
 
         async.each(links, function(link, next){
+
+            link.pipes.forEach(function(pipe){
+                //config.value = getPipe(pipe)(config.value);
+            });
+
             output = outputHash[link.output.id] || false;
 
             if(!output){
@@ -187,6 +201,7 @@ exports.change = function(req, res){
             exports.setOutput({ output: output, body: {} }, fakeRes)
         });
     });
+    */
 };
 
 exports.inputById = function (req, res, next, id){

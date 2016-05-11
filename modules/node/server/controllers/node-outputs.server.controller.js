@@ -8,21 +8,19 @@ var async = require('async'),
 var outputs = masterNode.outputs;
 
 exports.list = function(req, res){
-    res.json(outputs);
+    res.json(outputs.map(function(output){
+        return _.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output); //Gives the driver as well as the output info
+    }));
 };
 
 exports.set = function (req, res){
     var output = req.output;
-    var node = output.node;
+    var value = req.body ? req.body.value : undefined;
 
     var info = {
-        url: 'http://' + node.ip + '/api/output/set',
-        form: { pin: output.pin }
+        url: 'http://' + output.node.ip + '/api/output/' + output.id + '/set',
+        form: { value: value }
     };
-
-    if (!_.isUndefined(req.body.val)){
-        info.form.val = +req.body.val;
-    }
 
     request.post(info, function (err, reqs, body){
         if(err){
@@ -37,7 +35,12 @@ exports.set = function (req, res){
             return res.status(400).send('Unable to get new output config');
         }
 
-        output.state = (newOutput.val === 1);
+        if(newOutput.name) output.name = newOutput.name;
+        if(newOutput.location) output.location = newOutput.location;
+        if(newOutput.description) output.description = newOutput.description;
+        if(newOutput.config) output.config = newOutput.config;
+        if(newOutput.driverId) output.driverId = newOutput.driverId;
+
         res.json(output);
     });
 };
@@ -51,13 +54,24 @@ exports.update = function (req, res){
         node = req.body.node,
         newNode = {};
 
-    if(node.name) newNode.name = node.name;
-    if(node.location) newNode.location = node.location;
-    if(node.description) newNode.description = node.description;
-    if(node.pin) newNode.pin = node.pin;
+    if(!_.isUndefined(node.name)) newNode.name = node.name;
+    if(!_.isUndefined(node.location)) newNode.location = node.location;
+    if(!_.isUndefined(node.description)) newNode.description = node.description;
+    if(!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
+
+    //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
+    if(!_.isUndefined(node.config)){
+        newNode.config = {};
+
+        for(var key in inputHash[input.driverId].config){
+            if(node.config[key]){
+                newNode.config[key] = node.config[key];
+            }
+        }
+    }
 
     var info = {
-        url: 'http://' + output.node.ip + '/api/output/' + output.pin,
+        url: 'http://' + output.node.ip + '/api/output/' + output.id,
         form: { output: newNode }
     };
 
@@ -71,11 +85,11 @@ exports.update = function (req, res){
             return res.status(400).send('Unable to get updated output config');
         }
 
-        output.state = (newOutput.val === 1);
-        output.description = newOutput.description;
-        output.location = newOutput.location;
-        output.name = newOutput.name;
-        output.pin = newOutput.pin;
+        if(!_.isUndefined(newOutput.name)) output.name = newOutput.name;
+        if(!_.isUndefined(newOutput.location)) output.location = newOutput.location;
+        if(!_.isUndefined(newOutput.description)) output.description = newOutput.description;
+        if(!_.isUndefined(newOutput.config)) output.config = newOutput.config;
+        if(!_.isUndefined(newOutput.driverId)) output.driverId = newOutput.driverId;
 
         res.json(output);
     });

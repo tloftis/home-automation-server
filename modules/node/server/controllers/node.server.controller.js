@@ -374,11 +374,11 @@ exports.inputIdValid = function(id) {
 
 //Used to register new node input and output, adds to array and gives them new ids
 exports.registerInput = function(config){
-    config.id = inputIdItter++;
     inputs.push(config);
+    inputHash[config.id] = config;
 };
 
 exports.registerOutput = function(config){
-    config.id = outputIdItter++;
     outputs.push(config);
+    outputHash[config.id] = config;
 };
