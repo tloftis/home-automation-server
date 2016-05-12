@@ -47,8 +47,11 @@
                             <pre class="text-left" data-ng-show="showConfig">{{ output.config | json }}</pre>
                         </td>
 
-                        <td class="text-center" ng-click="showConfig = !showConfig">
-                            <input class="btn btn-default"></input>
+                        <td class="text-center">
+                            <fa-checkbox data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'boolean'"></fa-checkbox>
+                            <input data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'number'"></input>
+                            <input data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'string'" type="number"></input>
+                            <button class="btn btn-default row" ng-click="set(output, value)"></button>
                         </td>
 
                         <td class="text-center">
