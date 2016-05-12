@@ -18,6 +18,8 @@ angular.module('node').controller('nodeInputListController', ['$scope', '$state'
                 if(index !== -1){
                     $scope.inputs.splice(index, 1);
                 }
+            }).catch(function(err){
+                console.log(err);
             });
         };
 

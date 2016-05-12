@@ -21,15 +21,15 @@
                         </td>
 
                         <td class="text-center">
-                            <strong>State</strong>
+                            <strong>Driver</strong>
                         </td>
 
                         <td class="text-center">
-                            <strong>Pin</strong>
+                            <strong>Driver Config</strong>
                         </td>
 
                         <td class="text-center">
-                            <strong>Toggle State</strong>
+                            <strong>Set</strong>
                         </td>
 
                         <td class="text-center"></td>
@@ -39,18 +39,16 @@
                         <td>{{output.name}}</td>
                         <td>{{output.location}}</td>
                         <td>{{output.description}}</td>
-                        <td>{{output.node.id}}</td>
+                        <td>{{output.node.name}}</td>
+                        <td>{{output.driver.name}}</td>
 
-                        <td data-ng-class="{'text-success':output.state,'text-danger':!output.state}" class="text-center">
-                            <strong>{{output.state ? 'On' : 'Off'}}</strong>
+                        <td class="text-center" ng-click="showConfig = !showConfig">
+                            <a data-ng-hide="showConfig" class="btn btn-default"><i class="fa fa-eye"></i></a>
+                            <pre class="text-left" data-ng-show="showConfig">{{ output.config | json }}</pre>
                         </td>
 
-                        <td class="text-center">{{output.pin}}</td>
-
-                        <td class="text-center">
-                            <buton class="btn btn-primary btn-small" ng-click="toggle(output)">
-                                <i class="fa fa-circle-o"></i>
-                            </buton>
+                        <td class="text-center" ng-click="showConfig = !showConfig">
+                            <input class="btn btn-default"></input>
                         </td>
 
                         <td class="text-center">
@@ -66,18 +64,6 @@
 
                                     <li data-ng-click="delete(output);" class="text-center text-danger p-xxs hover">
                                       <i class="fa fa-trash-o"></i> Delete
-                                    </li>
-
-                                    <li role="separator" class="divider"></li>
-
-                                    <li data-ng-click="on(output);" class="text-center text-success p-xxs hover">
-                                      <i class="fa fa-play"></i> On
-                                    </li>
-
-                                    <li role="separator" class="divider"></li>
-
-                                    <li data-ng-click="off(output);" class="text-center text-danger p-xxs hover">
-                                      <i class="fa fa-circle"></i> Off
                                     </li>
                                 </ul>
                             </div>

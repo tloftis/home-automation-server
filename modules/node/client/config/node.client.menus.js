@@ -4,7 +4,7 @@
 angular.module('node').run(['Menus',
     function (Menus) {
         Menus.addMenuItem('topbar', {
-            title: 'Relay Nodes',
+            title: 'Nodes',
             state: 'node',
             type: 'dropdown',
             roles: ['user', 'admin']

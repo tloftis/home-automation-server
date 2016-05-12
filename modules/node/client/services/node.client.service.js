@@ -18,7 +18,7 @@ angular.module('node').service('nodeService', ['Utility',
 
         service.getNode = function (node){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             return Utility.http.get('node/' + id);
         };
@@ -32,14 +32,14 @@ angular.module('node').service('nodeService', ['Utility',
 
         service.getOutput = function (node){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             return Utility.http.get('output/' + id);
         };
 
         service.getInput = function (node){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             return Utility.http.get('input/' + id);
         };
@@ -47,14 +47,14 @@ angular.module('node').service('nodeService', ['Utility',
 
         service.removeOutput = function (node){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             return Utility.http.delete('output/' + id, {});
         };
 
         service.removeInput = function (node){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             return Utility.http.delete('input/' + id, {});
         };
@@ -63,10 +63,10 @@ angular.module('node').service('nodeService', ['Utility',
             var id = node,
                 value = {};
 
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
 
             if(!_.isUndefined(val)){
-                value.val = +val;
+                value.value = value;
             }
 
             return Utility.http.post('output/' + id + '/set', value);
@@ -74,13 +74,13 @@ angular.module('node').service('nodeService', ['Utility',
 
         service.outputUpdate = function(node, newNode){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
             return Utility.http.put('output/' + id, { node: newNode});
         };
 
         service.inputUpdate = function(node, newNode){
             var id = node;
-            if(node && node.pin) id = node.id;
+            if(node && node.id) id = node.id;
             return Utility.http.put('input/' + id, { node: newNode});
         };
 

@@ -17,11 +17,15 @@
                         </td>
 
                         <td class="text-center">
-                            <strong>State</strong>
+                            <strong>Node</strong>
                         </td>
 
                         <td class="text-center">
-                            <strong>Pin</strong>
+                            <strong>Driver</strong>
+                        </td>
+
+                        <td class="text-center">
+                            <strong>Driver Config</strong>
                         </td>
 
                         <td class="text-center"></td>
@@ -31,12 +35,13 @@
                         <td>{{input.name}}</td>
                         <td>{{input.location}}</td>
                         <td>{{input.description}}</td>
+                        <td>{{input.node.name}}</td>
+                        <td>{{input.driver.name}}</td>
 
-                        <td data-ng-class="{'text-success':input.state,'text-danger':!input.state}" class="text-center">
-                            <strong>{{input.state ? 'On' : 'Off'}}</strong>
+                        <td class="text-center" ng-click="showConfig = !showConfig">
+                            <a data-ng-hide="showConfig" class="btn btn-default"><i class="fa fa-eye"></i></a>
+                            <pre class="text-left" data-ng-show="showConfig">{{ input.config | json }}</pre>
                         </td>
-
-                        <td class="text-center">{{input.pin}}</td>
 
                         <td class="text-center">
                             <div class="btn-group" data-ng-class='{open: openConfig}'>

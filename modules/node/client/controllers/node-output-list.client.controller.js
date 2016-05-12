@@ -11,27 +11,10 @@ angular.module('node').controller('nodeOutputListController', ['$scope', '$state
             });
         };
 
-        $scope.on = function(output){
-            nodeService.outputSet(output, 1).then(function(newNode){
+        $scope.set = function(output, value){
+            nodeService.outputSet(output, value).then(function(newNode){
                 var index = $scope.outputs.indexOf(output);
                 $scope.outputs[index] = newNode;
-            });
-        };
-
-        $scope.off = function(output){
-            nodeService.outputSet(output, 0).then(function(newNode){
-                var index = $scope.outputs.indexOf(output);
-                $scope.outputs[index] = newNode;
-            });
-        };
-
-        $scope.toggle = function(output){
-            nodeService.outputSet(output).then(function(newNode){
-                var index = $scope.outputs.indexOf(output);
-
-                if(index !== -1){
-                    $scope.outputs[index] = newNode;
-                }
             });
         };
 
