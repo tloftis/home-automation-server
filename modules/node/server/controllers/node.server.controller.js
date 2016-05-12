@@ -16,12 +16,9 @@ var nodes = [],
     inputDriverHash = {},
     outputDriverHash = {},
 
+    nodeHash = {},
     outputHash = {},
     inputHash = {};
-
-//Used to generate unique id's for nodes inputs and outputs as a whole regardless of what node they are on
-var outputIdItter = 1,
-    inputIdItter = 1;
 
 var netMask, localIp;
 var interfaces = os.networkInterfaces();
@@ -83,6 +80,8 @@ function searchForNodes(callback){
                         description: node.description | '',
                         location: node.location | ''
                     });
+
+                    nodeHash[node.id] = nodes[nodes.length - 1];
                 }
             }
 
@@ -297,6 +296,7 @@ exports.outputDrivers = outputDrivers;
 exports.inputDrivers = inputDrivers;
 exports.outputDriverHash = outputDriverHash;
 exports.inputDriverHash = inputDriverHash;
+exports.nodeHash = nodeHash;
 exports.inputHash = inputHash;
 exports.outputHash = outputHash;
 
@@ -340,36 +340,11 @@ exports.update = function (req, res){
 };
 
 exports.nodeById = function (req, res, next, id){
-    var node;
-    var macPatt = new RegExp('^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$');
-
-    if (!macPatt.test(id)){
-        return res.status(400).send({
-            message: 'Node id ' + id + ' is invalid'
-        });
-    }
-
-    for(var i = 0; i < nodes.length; i++){
-        node = nodes[i];
-
-        if(node.id === id){
-            req.node = node;
-            return next();
-        }
-    }
+    if(req.node = nodeHash[id]){ return next(); }
 
     return res.status(400).send({
         message: 'Node could not be found'
     });
-};
-
-//used to check the validity of a id for a input or output
-exports.outputIdValid = function(id) {
-    return !(id === 0 || id >= outputIdItter || id < (outputs.length - outputIdItter));
-};
-
-exports.inputIdValid = function(id) {
-    return !(id === 0 || id >= inputIdItter || id < (outputs.length - inputIdItter));
 };
 
 //Used to register new node input and output, adds to array and gives them new ids

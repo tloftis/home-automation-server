@@ -9,6 +9,7 @@ var async = require('async'),
 
 var inputs = masterNode.inputs,
     outputHash = masterNode.outputHash,
+    inputDriverHash = masterNode.inputDriverHash,
     inputHash = masterNode.inputHash;
 
 exports.list = function(req, res){
@@ -35,7 +36,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config)){
         newNode.config = {};
 
-        for(var key in inputHash[input.driverId].config){
+        for(var key in inputDriverHash[input.driverId].config){
             if(node.config[key]){
                 newNode.config[key] = node.config[key];
             }

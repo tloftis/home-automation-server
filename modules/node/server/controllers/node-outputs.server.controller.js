@@ -5,7 +5,9 @@ var async = require('async'),
     request = require('request'),
     masterNode = require('./node.server.controller');
 
-var outputs = masterNode.outputs;
+var outputs = masterNode.outputs,
+    outputDriverHash = masterNode.outputDriverHash,
+    outputHash = masterNode.outputHash;
 
 exports.list = function(req, res){
     res.json(outputs.map(function(output){
@@ -63,7 +65,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config)){
         newNode.config = {};
 
-        for(var key in inputHash[input.driverId].config){
+        for(var key in outputDriverHash[output.driverId].config){
             if(node.config[key]){
                 newNode.config[key] = node.config[key];
             }
@@ -96,18 +98,16 @@ exports.update = function (req, res){
 };
 
 exports.remove = function (req, res){
-    var output = req.output,
-        index = -1;
+    var output = req.output;
 
     var info = {
-        url: 'http://' + output.node.ip + '/api/output/' + output.pin,
+        url: 'http://' + output.node.ip + '/api/output/' + output.id,
         form: {}
     };
 
     request.del(info, function (err){
-        if(err) return res.status(400).send('Error attempting to remove output');
-
-        index = outputs.indexOf(output);
+        if(err){ return res.status(400).send('Error attempting to remove output'); }
+        var index = outputs.indexOf(output);
 
         if(index !== -1){
             outputs.splice(index, 1);
@@ -119,18 +119,17 @@ exports.remove = function (req, res){
 };
 
 exports.add = function (req, res){
-    var newOutput = { val: 0 },
+    var newOutput = {},
         node = req.node,
         output = req.body.output;
 
-    if(output.name) newOutput.name = output.name;
-    if(output.location) newOutput.location = output.location;
-    if(output.description) newOutput.description = output.description;
-    if(output.state) newOutput.val = +output.state;
+    if(!_.isUndefined(output.name)) newOutput.name = output.name;
+    if(!_.isUndefined(output.location)) newOutput.location = output.location;
+    if(!_.isUndefined(output.description)) newOutput.description = output.description;
+    if(!_.isUndefined(output.driverId)) newOutput.driverId = output.driverId;
+    if(!_.isUndefined(output.config)) newOutput.config = output.config;
 
-    if(output.pin) {
-        newOutput.pin = output.pin;
-
+    if(newOutput.driverId) {
         var info = {
             url: 'http://' + node.ip + '/api/output',
             form: { output: newOutput }
@@ -138,7 +137,6 @@ exports.add = function (req, res){
 
         request.post(info, function (err, resq, body) {
             if (err) return res.status(400).send('Error attempting to add output');
-            var newOutput;
 
             try{
                 newOutput = JSON.parse(body);
@@ -150,8 +148,9 @@ exports.add = function (req, res){
                 name: newOutput.name,
                 location: newOutput.location,
                 description: newOutput.description,
-                pin: newOutput.pin,
-                state: (+newOutput.val === 1),
+                driverId: newOutput.driverId,
+                config: newOutput.config,
+                id: newOutput.id,
                 node: node
             };
 
@@ -159,30 +158,16 @@ exports.add = function (req, res){
             return res.json(output);
         });
     }else{
-        return res.status(400).send('No output pin specified, cannot create configuration');
+        return res.status(400).send('No output driver specified, cannot create configuration');
     }
 };
 
 exports.outputById = function (req, res, next, id){
-    id = +id;
-    var output;
-
-    if(!masterNode.outputIdValid(id)){
+    if(!(req.output = outputHash[id])){
         return res.status(400).send({
-            message: 'Output id is invalid'
+            message: 'Output id not found'
         });
     }
 
-    for(var i = 0; i < outputs.length; i++){
-        output = outputs[i];
-
-        if(+output.id === id){
-            req.output = output;
-            return next();
-        }
-    }
-
-    return res.status(400).send({
-        message: 'Output could not be found'
-    });
+    return next();
 };
