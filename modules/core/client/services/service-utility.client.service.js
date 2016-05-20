@@ -1,11 +1,23 @@
 'use strict';
 
-angular.module('core').factory('Utility', ['$q', '$http', 'MessageParserService',
-    function ($q, $http, MessageParserService) {
-        var service = {};
-        var parseErrorMessage = MessageParserService.parseMessage;
+angular.module('core').factory('Utility', ['$http', 'toastr',
+    function ($http, toastr) {
+        var servUtil = {};
+        var errorParser = function (error) {
+            if (error instanceof String) {
+                return error;
+            }else if (error.message && typeof error.message === 'string') {
+                return error.message;
+            }else if (error.error && typeof error.error === 'string') {
+                return error.error;
+            }else if (error.data && error.data.message &&  typeof error.data.message === 'string') {
+                return error.data.message;
+            }else{
+                return 'Missing or blank error message received';
+            }
+        };
 
-        service.log = {
+        servUtil.log = {
             _post: function (type, msg, consoleType) {
                 //when in development mode, log these messages to the console as well
                 if (window.env === 'development'){
@@ -18,9 +30,8 @@ angular.module('core').factory('Utility', ['$q', '$http', 'MessageParserService'
 
                 if (['error', 'success', 'warning'].indexOf(type) > -1) {
                     msg = msg.message ? msg.message : msg;
-                    console.log(msg);
+                    toastr[type](msg);
                 }
-
             },
             debug: function (msg) {
                 this._post('debug', msg);
@@ -36,77 +47,72 @@ angular.module('core').factory('Utility', ['$q', '$http', 'MessageParserService'
             }
         };
 
-        service.http = {
+        servUtil.http = {
             get: function (rt, params) {
-
-                var deferred = $q.defer(),
-                    query = {};
-
+                var query = {};
                 query.params = params || {};
 
-                $http.get('/api/' + rt, query)
-                    .success(function (data) {
-                        service.log.debug('GET ' + rt + ': success');
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status) {
-                        var errMsg = 'GET ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + parseErrorMessage(data) + '\'';
-                        service.log.error(errMsg);
-                        deferred.reject();
-                    });
+                return new Promise(function(resolve, reject){
+                    $http.get('/api/' + rt, query)
+                        .success(function (data) {
+                            servUtil.log.debug('GET ' + rt + ': success');
+                            resolve(data);
+                        })
+                        .error(function (data, status) {
+                            var errMsg = 'GET ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
+                            servUtil.log.error(errMsg);
+                            reject();
+                        });
+                });
 
-                return deferred.promise;
             },
 
             post: function (rt, payload) {
-                var deferred = $q.defer();
-                $http.post('/api/' + rt, payload)
-                    .success(function (data) {
-                        service.log.debug('POST ' + rt + ': success');
-
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status) {
-                        var errMsg = 'POST ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + parseErrorMessage(data) + '\'';
-                        service.log.error(errMsg);
-                        deferred.reject();
-                    });
-                return deferred.promise;
+                return new Promise(function(resolve, reject){
+                    $http.post('/api/' + rt, payload)
+                        .success(function (data) {
+                            servUtil.log.debug('POST ' + rt + ': success');
+                            resolve(data);
+                        })
+                        .error(function (data, status) {
+                            var errMsg = 'POST ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
+                            servUtil.log.error(errMsg);
+                            reject();
+                        });
+                });
             },
 
             put: function (rt, payload) {
-                var deferred = $q.defer();
-                $http.put('/api/' + rt, payload)
-                    .success(function (data) {
-                        service.log.debug('PUT ' + rt + ': success');
-
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status) {
-                        var errMsg = 'PUT ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + parseErrorMessage(data) + '\'';
-                        service.log.error(errMsg);
-                        deferred.reject();
-                    });
-                return deferred.promise;
+                return new Promise(function(resolve, reject){
+                    $http.put('/api/' + rt, payload)
+                        .success(function (data) {
+                            servUtil.log.debug('PUT ' + rt + ': success');
+                            resolve(data);
+                        })
+                        .error(function (data, status) {
+                            var errMsg = 'PUT ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
+                            servUtil.log.error(errMsg);
+                            reject();
+                        });
+                });
             },
 
             delete: function (rt, payload) {
-                var deferred = $q.defer();
-                $http.delete('/api/' + rt, payload)
-                    .success(function (data) {
-                        service.log.debug('DELETE ' + rt + ': success');
-
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status) {
-                        var errMsg = 'DELETE ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + parseErrorMessage(data) + '\'';
-                        service.log.error(errMsg);
-                        deferred.reject();
-                    });
-                return deferred.promise;
+                return new Promise(function(resolve, reject){
+                    $http.delete('/api/' + rt, payload)
+                        .success(function (data) {
+                            servUtil.log.debug('DELETE ' + rt + ': success');
+                            resolve(data);
+                        })
+                        .error(function (data, status) {
+                            var errMsg = 'DELETE ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
+                            servUtil.log.error(errMsg);
+                            reject();
+                        });
+                });
             }
         };
 
-        return service;
+        return servUtil;
     }]
 );

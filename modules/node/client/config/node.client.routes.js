@@ -12,8 +12,8 @@ angular.module('node').config(['$stateProvider',
 			  roles: ['user', 'admin']
 			}
         }).
-        state('node.list', {
-            url: '/list',
+        state('node.nodes', {
+            url: '/nodes',
             views: {
                 '@node': {
                     templateUrl: 'modules/node/client/views/node-list.client.view.html',
@@ -33,7 +33,7 @@ angular.module('node').config(['$stateProvider',
                 roles: ['user', 'admin']
             }
         }).
-        state('node.edit', {
+        state('node.nodes.edit', {
             url: '/:nodeId',
             views: {
                 '@node': {
@@ -54,11 +54,7 @@ angular.module('node').config(['$stateProvider',
                 roles: ['user', 'admin']
             }
         }).
-        state('node.add', {
-            url: '/:nodeId',
-            abstract: true
-        }).
-        state('node.add.output', {
+        state('node.nodes.edit.output', {
             url: '/output',
             bcName: 'Add Output',
             bcInclude: true,
@@ -78,7 +74,7 @@ angular.module('node').config(['$stateProvider',
                 }
             }
         }).
-        state('node.add.input', {
+        state('node.nodes.edit.input', {
             url: '/input',
             bcName: 'Add Input',
             bcInclude: true,
@@ -140,22 +136,8 @@ angular.module('node').config(['$stateProvider',
                 roles: ['user', 'admin']
             }
         }).
-        state('node.output', {
-            url: '/output/:outputId',
-            abstract: true,
-            bcReDirect: 'node.outputs',
-            bcName: 'Output',
-            bcInclude: true
-        }).
-        state('node.input', {
-            url: '/input/:inputId',
-            abstract: true,
-            bcReDirect: 'node.inputs',
-            bcName: 'Input',
-            bcInclude: true
-        }).
-        state('node.output.edit', {
-            url: '/edit',
+        state('node.outputs.edit', {
+            url: '/:outputId',
             bcName: 'Edit Output',
             bcInclude: true,
             views: {
@@ -174,8 +156,8 @@ angular.module('node').config(['$stateProvider',
                 }
             }
         }).
-        state('node.input.edit', {
-            url: '/edit',
+        state('node.inputs.edit', {
+            url: '/:inputId',
             bcName: 'Edit Input',
             bcInclude: true,
             views: {

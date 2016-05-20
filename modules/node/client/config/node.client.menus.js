@@ -12,17 +12,20 @@ angular.module('node').run(['Menus',
 
         Menus.addSubMenuItem('topbar', 'node', {
             title: 'Node Output List',
-            state: 'node.outputs'
+            state: 'node.outputs',
+            roles: ['user', 'admin']
         });
 
         Menus.addSubMenuItem('topbar', 'node', {
             title: 'Node Input List',
-            state: 'node.inputs'
+            state: 'node.inputs',
+            roles: ['user', 'admin']
         });
 
         Menus.addSubMenuItem('topbar', 'node', {
             title: 'Node List',
-            state: 'node.list'
+            state: 'node.list',
+            roles: ['user', 'admin']
         });
     }
 ]);

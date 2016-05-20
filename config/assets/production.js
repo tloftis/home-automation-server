@@ -7,12 +7,14 @@ module.exports = {
         'public/lib/bootstrap/dist/css/bootstrap.min.css',
         'public/lib/bootstrap/dist/css/bootstrap-theme.min.css',
         'public/lib/font-awesome/css/font-awesome.min.css',
-        'public/lib/sweetalert/dist/sweetalert.min.css'
+        'public/lib/sweetalert/dist/sweetalert.min.css',
+        'public/lib/angular-toastr/dist/angular-toastr.min.css'
       ],
       js: [
         'public/lib/angular/angular.min.js',
         'public/lib/sweetalert/dist/sweetalert.min.js',
         'public/lib/ng-sweet-alert/ng-sweet-alert.js',
+        'public/lib/angular-toastr/dist/angular-toastr.tpls.min.js',
         'public/lib/angular-resource/angular-resource.min.js',
         'public/lib/angular-animate/angular-animate.min.js',
         'public/lib/angular-messages/angular-messages.min.js',

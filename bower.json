@@ -19,7 +19,9 @@
     "moment": "~2.11.1",
     "sweetalert": "*",
     "ng-sweet-alert": "~1.0.5",
-    "bootstrap": "~3.3.6"
+    "bootstrap": "~3.3.6",
+    "toastr": "^2.1.2",
+    "angular-toastr": "^1.7.0"
   },
   "resolutions": {
     "angular": "~1.3"
