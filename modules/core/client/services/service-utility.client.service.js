@@ -4,7 +4,9 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
     function ($http, toastr) {
         var servUtil = {};
         var errorParser = function (error) {
-            if (error instanceof String) {
+            if (typeof error  === 'undefined') {
+                return 'blank error message received';
+            }else if (typeof error  === 'string') {
                 return error;
             }else if (error.message && typeof error.message === 'string') {
                 return error.message;
@@ -13,7 +15,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
             }else if (error.data && error.data.message &&  typeof error.data.message === 'string') {
                 return error.data.message;
             }else{
-                return 'Missing or blank error message received';
+                return 'Missing or strangely formatted error message received';
             }
         };
 
@@ -34,16 +36,16 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                 }
             },
             debug: function (msg) {
-                this._post('debug', msg);
+                servUtil.log._post('debug', msg);
             },
             success: function (msg) {
-                this._post('success', msg, 'info');
+                servUtil.log._post('success', msg, 'info');
             },
             warning: function (msg) {
-                this._post('warning', msg, 'warn');
+                servUtil.log._post('warning', msg, 'warn');
             },
             error: function (msg) {
-                this._post('error', msg);
+                servUtil.log._post('error', msg);
             }
         };
 
@@ -61,7 +63,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                         .error(function (data, status) {
                             var errMsg = 'GET ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
                             servUtil.log.error(errMsg);
-                            reject();
+                            reject(new Error(errMsg));
                         });
                 });
 
@@ -77,7 +79,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                         .error(function (data, status) {
                             var errMsg = 'POST ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
                             servUtil.log.error(errMsg);
-                            reject();
+                            reject(new Error(errMsg));
                         });
                 });
             },
@@ -92,7 +94,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                         .error(function (data, status) {
                             var errMsg = 'PUT ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
                             servUtil.log.error(errMsg);
-                            reject();
+                            reject(new Error(errMsg));
                         });
                 });
             },
@@ -107,7 +109,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                         .error(function (data, status) {
                             var errMsg = 'DELETE ' + rt + ': Failed. Status=' + status + '  - Msg=\'' + errorParser(data) + '\'';
                             servUtil.log.error(errMsg);
-                            reject();
+                            reject(new Error(errMsg));
                         });
                 });
             }

@@ -48,10 +48,15 @@
                         </td>
 
                         <td class="text-center">
-                            <fa-checkbox data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'boolean'"></fa-checkbox>
-                            <input data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'number'"></input>
-                            <input data-ng-model="value" ng-if="output.driver.type.toLowerCase() === 'string'" type="number"></input>
-                            <button class="btn btn-default row" ng-click="set(output, value)"></button>
+                            <div class="row">
+                                <button class="btn btn-default row prepend-top-10" ng-click="set(output, (numValue || strValue || boolValue))">Set</button>
+                            </div>
+
+                            <div class="row">
+                                <input data-ng-model="boolValue" data-ng-show="output.driver.type.toLowerCase() === 'boolean'"  type="checkbox"></input>
+                                <input data-ng-model="strValue" data-ng-show="output.driver.type.toLowerCase() === 'number'" type="number"></input>
+                                <input data-ng-model="numValue" data-ng-show="output.driver.type.toLowerCase() === 'string'" type="text"></input>
+                            </div>
                         </td>
 
                         <td class="text-center">

@@ -66,7 +66,7 @@ angular.module('node').service('nodeService', ['Utility',
             if(node && node.id) id = node.id;
 
             if(!_.isUndefined(val)){
-                value.value = value;
+                value.value = val;
             }
 
             return Utility.http.post('output/' + id + '/set', value);

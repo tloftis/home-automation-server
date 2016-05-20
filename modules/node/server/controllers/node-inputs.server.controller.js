@@ -63,7 +63,7 @@ exports.update = function (req, res){
         if(!_.isUndefined(newInput.description)) input.description = newInput.description;
         if(!_.isUndefined(newInput.config)) input.config = newInput.config;
         if(!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
-        res.json(input);
+        res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
     });
 };
 
@@ -127,7 +127,7 @@ exports.add = function (req, res){
             };
 
             masterNode.registerInput(input);
-            return res.json(input);
+            res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
         });
     }else{
         return res.status(400).send('No input driver specified, cannot create configuration');

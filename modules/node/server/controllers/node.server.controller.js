@@ -73,15 +73,16 @@ function searchForNodes(callback){
                 }
 
                 if(node && (node.id !== '')){
-                    nodes.push({
+                    var newNode = {
                         id: node.id,
                         ip: address,
-                        name: node.name | '',
-                        description: node.description | '',
-                        location: node.location | ''
-                    });
+                        name: node.name || '',
+                        description: node.description || '',
+                        location: node.location || ''
+                    };
 
-                    nodeHash[node.id] = nodes[nodes.length - 1];
+                    nodes.push(newNode);
+                    nodeHash[node.id] = newNode;
                 }
             }
 
@@ -203,8 +204,9 @@ function updateDrivers(callback){
                     async.each(newDrivers, function (driver, next){
                         var driver = {
                             name: driver.name,
-                            type: driver.location,
+                            location: driver.location,
                             description: driver.description,
+                            type: driver.type,
                             config: driver.config,
                             id: driver.id,
                             node: node

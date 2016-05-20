@@ -34,7 +34,7 @@ exports.set = function (req, res){
         try{
             newOutput = JSON.parse(body);
         }catch(err){
-            return res.status(400).send('Unable to get new output config');
+            return res.status(400).send(body || 'Unable to get new output config');
         }
 
         if(newOutput.name) output.name = newOutput.name;
@@ -43,7 +43,7 @@ exports.set = function (req, res){
         if(newOutput.config) output.config = newOutput.config;
         if(newOutput.driverId) output.driverId = newOutput.driverId;
 
-        res.json(output);
+        res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
     });
 };
 
@@ -84,7 +84,7 @@ exports.update = function (req, res){
         try{
             newOutput = JSON.parse(body);
         }catch(err){
-            return res.status(400).send('Unable to get updated output config');
+            return res.status(400).send(body || 'Unable to get updated output config');
         }
 
         if(!_.isUndefined(newOutput.name)) output.name = newOutput.name;
@@ -93,7 +93,7 @@ exports.update = function (req, res){
         if(!_.isUndefined(newOutput.config)) output.config = newOutput.config;
         if(!_.isUndefined(newOutput.driverId)) output.driverId = newOutput.driverId;
 
-        res.json(output);
+        res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
     });
 };
 
@@ -111,7 +111,7 @@ exports.remove = function (req, res){
 
         if(index !== -1){
             outputs.splice(index, 1);
-            return res.json(output);
+            res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         }
 
         return res.status(400).send('Error attempting to remove output from server memory');
@@ -141,7 +141,7 @@ exports.add = function (req, res){
             try{
                 newOutput = JSON.parse(body);
             }catch(err){
-                return res.status(400).send('Unable to get new output config');
+                return res.status(400).send(body || 'Unable to get new output config');
             }
 
             output = {
@@ -155,7 +155,7 @@ exports.add = function (req, res){
             };
 
             masterNode.registerOutput(output);
-            return res.json(output);
+            res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         });
     }else{
         return res.status(400).send('No output driver specified, cannot create configuration');

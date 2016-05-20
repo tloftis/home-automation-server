@@ -10,7 +10,7 @@ angular.module('core').config(function(toastrConfig) {
         positionClass: 'toast-bottom-left',
         maxOpened: 3,
         newestOnTop: true,
-        preventDuplicates: true,
+        preventDuplicates: false,
         progressBar: true
     });
 });
