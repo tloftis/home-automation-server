@@ -29,7 +29,7 @@ angular.module('node').controller('nodeOutputListController', ['$scope', '$state
         };
 
         $scope.edit = function(output){
-            $state.go('node.output.edit', { outputId: output.id });
+            $state.go('node.outputs.edit', { outputId: output.id });
         };
     }
 ]);

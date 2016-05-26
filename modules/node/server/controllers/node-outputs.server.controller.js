@@ -6,6 +6,7 @@ var async = require('async'),
     masterNode = require('./node.server.controller');
 
 var outputs = masterNode.outputs,
+    outputDrivers = masterNode.outputDrivers,
     outputDriverHash = masterNode.outputDriverHash,
     outputHash = masterNode.outputHash;
 
@@ -13,6 +14,10 @@ exports.list = function(req, res){
     res.json(outputs.map(function(output){
         return _.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output); //Gives the driver as well as the output info
     }));
+};
+
+exports.listDrivers = function(req, res){
+    res.json(outputDrivers);
 };
 
 exports.set = function (req, res){
@@ -52,6 +57,11 @@ exports.get = function (req, res){
     res.json(_.extend({ driver: masterNode.outputDriverHash[req.output.driverId] }, req.output));
 };
 
+exports.getDriver = function (req, res){
+    res.json(req.driver);
+};
+
+
 exports.update = function (req, res){
     var output = req.output,
         node = req.body.node,
@@ -67,7 +77,7 @@ exports.update = function (req, res){
         newNode.config = {};
 
         for(var key in outputDriverHash[output.driverId].config){
-            if(node.config[key]){
+            if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
         }
@@ -167,6 +177,16 @@ exports.outputById = function (req, res, next, id){
     if(!(req.output = outputHash[id])){
         return res.status(400).send({
             message: 'Output id not found'
+        });
+    }
+
+    return next();
+};
+
+exports.driverById = function (req, res, next, id){
+    if(!(req.driver = outputDriverHash[id])){
+        return res.status(400).send({
+            message: 'Output driver id not found'
         });
     }
 

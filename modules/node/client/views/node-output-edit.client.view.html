@@ -1,36 +1,41 @@
 <div class="wrapper wrapper-content animated fadeInRight" data-ng-init="init()">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <div class="ibox">
-                <div class="ibox-content">
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" id="name" name="username" class="form-control" ng-model="output.name"
-                               placeholder="Name" required>
-                    </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="username" class="form-control" ng-model="output.name"
+                       placeholder="Name" required>
+            </div>
 
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" name="location" class="form-control" ng-model="output.location"
-                               placeholder="Location of Output" required/>
-                    </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" class="form-control" ng-model="output.location"
+                       placeholder="Location of Output" required/>
+            </div>
 
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <input type="text" id="description" name="description" class="form-control" ng-model="output.description"
-                               placeholder="Description of Output" required/>
-                    </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" class="form-control" ng-model="output.description"
+                       placeholder="Description of Output" required/>
+            </div>
 
-                  <div class="form-group">
-                    <label for="pin">Pin</label>
-                    <input type="number" id="pin" name="pin" class="form-control" ng-model="output.pin"
-                           placeholder="Pin Number" required/>
-                  </div>
+            <div class="form-group">
+                <label for="description">Driver</label>
 
-                    <div class="form-group">
-                        <div data-ng-click="update(output)" class="btn btn-primary">Update</div>
-                    </div>
-                </div>
+                <select id="singleSelect" data-ng-model="output.driver">
+                    <option data-ng-repeat="driver in drivers track by id" value="driver" data-ng-selected="driver.id === output.driverId" required>{{driver.name}}</option>
+                </select>
+            </div>
+
+            <div class="form-group" data-ng-repeat="(key, value) in output.driver.config track by key">
+                <label for="{{key}}">{{value.name}}</label>
+                <input data-ng-model="output.config[key]" data-ng-init="valType = value.type.toLowerCase()" id="{{key}}"
+                       type="{{(valType === 'boolean') ? 'checkbox' : ((valType === 'number') || value.pin) ? 'number' : (valType === 'string') ? 'text' : ''}}"
+                        data-ng-required="value.required || false" class="form-control"></input>
+            </div>
+
+            <div class="form-group">
+                <div data-ng-click="update(output)" class="btn btn-primary">Update</div>
             </div>
         </div>
     </div>

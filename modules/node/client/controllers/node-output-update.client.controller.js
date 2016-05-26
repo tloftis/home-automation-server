@@ -4,19 +4,22 @@ angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$sta
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
         $scope.authentication = Authentication;
         $scope.output = {};
+        $scope.drivers = [];
+        $scope.options = [];
 
         $scope.init = function () {
             nodeService.getOutput($stateParams.outputId).then(function(output){
                 $scope.output = output;
-                $scope.output.pin = +$scope.output.pin;
+            });
+
+            nodeService.getOutputDrivers().then(function(drivers){
+                $scope.drivers = drivers;
             });
         };
 
         $scope.update = function(output){
             nodeService.outputUpdate(output, output).then(function(newNode){
                 $scope.output = newNode;
-                $scope.output.pin = +$scope.output.pin;
-
                 $state.go('node.outputs');
             });
         };

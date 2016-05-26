@@ -12,15 +12,23 @@ module.exports = function (app) {
         get(outputs.list);
 
     // Users collection routes
-    app.route('/api/output/:outputId').
+    app.route('/api/output/edit/:outputId').
         get(outputs.get).
         put(outputs.update).
         delete(outputs.remove);
 
     // Users collection routes
-    app.route('/api/output/:outputId/set').
+    app.route('/api/output/drivers').
+        get(outputs.listDrivers);
+
+    app.route('/api/output/drivers/:outputDriverId').
+        get(outputs.getDriver);
+
+    // Users collection routes
+    app.route('/api/output/edit/:outputId/set').
         post(outputs.set);
 
     // Finish by binding the user middleware
     app.param('outputId', outputs.outputById);
+    app.param('outputDriverId', outputs.driverById);
 };

@@ -8,6 +8,7 @@ var async = require('async'),
     masterNode = require('./node.server.controller');
 
 var inputs = masterNode.inputs,
+    inputDrivers = masterNode.inputDrivers,
     outputHash = masterNode.outputHash,
     inputDriverHash = masterNode.inputDriverHash,
     inputHash = masterNode.inputHash;
@@ -16,6 +17,10 @@ exports.list = function(req, res){
     res.json(inputs.map(function(input){
         return _.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
     }));
+};
+
+exports.listDrivers = function(req, res){
+    res.json(inputDrivers);
 };
 
 exports.get = function (req, res){
@@ -37,7 +42,7 @@ exports.update = function (req, res){
         newNode.config = {};
 
         for(var key in inputDriverHash[input.driverId].config){
-            if(node.config[key]){
+            if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
         }
@@ -209,6 +214,16 @@ exports.inputById = function (req, res, next, id){
     if(!(req.input = inputHash[id])){
         return res.status(400).send({
             message: 'Input id not found'
+        });
+    }
+
+    return next();
+};
+
+exports.driverById = function (req, res, next, id){
+    if(!(req.input = inputDriverHash[id])){
+        return res.status(400).send({
+            message: 'Input driver id not found'
         });
     }
 
