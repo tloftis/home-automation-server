@@ -27,6 +27,10 @@ exports.get = function (req, res){
     res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
 };
 
+exports.getDriver = function (req, res){
+    res.json(req.driver); //Gives the driver as well as the input info
+};
+
 exports.update = function (req, res){
     var input = req.input,
         node = req.body.node,
@@ -60,7 +64,7 @@ exports.update = function (req, res){
         try{
             newInput = JSON.parse(body);
         }catch(err){
-            return res.status(400).send('Unable to get updated input config');
+            return res.status(400).send(body || 'Unable to get updated input config');
         }
 
         if(!_.isUndefined(newInput.name)) input.name = newInput.name;
@@ -97,15 +101,25 @@ exports.remove = function (req, res){
 };
 
 exports.add = function (req, res){
-    var newInput = { val: 0 },
+    var newInput = {},
         node = req.node,
-        input = req.body.input;
+        newNode = req.body.input;
 
-    if(input.name) newInput.name = input.name;
-    if(input.location) newInput.location = input.location;
-    if(input.description) newInput.description = input.description;
-    if(input.config) newInput.config = input.config;
-    if(input.driverId) newInput.driverId = input.driverId;
+    if(!_.isUndefined(newNode.name)) newInput.name = newNode.name;
+    if(!_.isUndefined(newNode.location)) newInput.location = newNode.location;
+    if(!_.isUndefined(newNode.description)) newInput.description = newNode.description;
+
+    //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
+    if(!_.isUndefined(newNode.config) && !_.isUndefined(newNode.driverId)){
+        newInput.driverId = newNode.driverId;
+        newInput.config = {};
+
+        for(var key in inputDriverHash[newNode.driverId].config){
+            if(!_.isUndefined(newNode.config[key])){
+                newInput.config[key] = newNode.config[key];
+            }
+        }
+    }
 
     if(newInput.driverId){
         var info = {
@@ -115,26 +129,23 @@ exports.add = function (req, res){
 
         request.post(info, function (err, resq, body) {
             if (err) return res.status(400).send('Error attempting to add input');
-            var newInput;
+            var newInput, input = {};
 
             try{
                 newInput = JSON.parse(body);
             }catch(err){
-                return res.status(400).send('Unable to get new input config');
+                return res.status(400).send(body || 'Unable to get updated input config');
             }
 
-            input = {
-                name: newInput.name,
-                location: newInput.location,
-                description: newInput.description,
-                driverId: newInput.driverId,
-                config: newInput.config,
-                id: newInput.id,
-                node: node
-            };
-
+            input.name = newInput.name;
+            input.location = newInput.location;
+            input.description = newInput.description;
+            input.id = newInput.id;
+            input.config = newInput.config;
+            input.driverId = newInput.driverId;
+            input.node = node;
             masterNode.registerInput(input);
-            res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
+            res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         });
     }else{
         return res.status(400).send('No input driver specified, cannot create configuration');
@@ -223,7 +234,7 @@ exports.inputById = function (req, res, next, id){
 };
 
 exports.driverById = function (req, res, next, id){
-    if(!(req.input = inputDriverHash[id])){
+    if(!(req.driver = inputDriverHash[id])){
         return res.status(400).send({
             message: 'Input driver id not found'
         });

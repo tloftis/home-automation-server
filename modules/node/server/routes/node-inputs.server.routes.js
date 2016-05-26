@@ -20,7 +20,7 @@ module.exports = function (app) {
         get(inputs.listDrivers);
 
     app.route('/api/input/drivers/:inputDriverId').
-        get(inputs.listDrivers);
+        get(inputs.getDriver);
 
     /*
     app.route('/api/input/:inputId/link/:linkId').

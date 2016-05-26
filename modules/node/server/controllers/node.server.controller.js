@@ -136,7 +136,7 @@ function updateInputs(callback){
                     };
 
                     inputs.push(input);
-                    inputHash[input.pin] = input;
+                    inputHash[input.id] = input;
                     next()
                 },function(){
                     nextMain();

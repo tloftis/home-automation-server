@@ -24,7 +24,7 @@ angular.module('node').controller('nodeInputListController', ['$scope', '$state'
         };
 
         $scope.edit = function(input){
-            $state.go('node.input.edit', { inputId: input.id });
+            $state.go('node.inputs.edit', { inputId: input.id });
         };
     }
 ]);

@@ -21,18 +21,23 @@
                                placeholder="Description of Output" required/>
                     </div>
 
-                  <div class="form-group">
-                    <label for="pin">Pin</label>
-                    <input type="number" id="pin" name="pin" class="form-control" ng-model="input.pin"
-                           placeholder="Pin Number" required/>
-                  </div>
+                    <div class="form-group">
+                        <label for="description">Driver</label>
 
-                  <div class="form-group" data-ng-class="{'text-success': input.invState, 'text-danger': !input.invState }">
-                    Inverse Input <fa-checkbox ng-size="fa-2x" ng-model="input.invState"></fa-checkbox>
-                  </div>
+                        <select id="singleSelect" data-ng-model="input.driverId">
+                            <option data-ng-repeat="driver in drivers track by $index" value="{{driver.id}}" data-ng-selected="driver.id === input.driverId" required>{{driver.name}}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" data-ng-repeat="(key, value) in input.driver.config track by key">
+                        <label for="{{key}}">{{value.name}}</label>
+                        <input data-ng-model="input.config[key]" data-ng-init="valType = value.type.toLowerCase()" id="{{key}}"
+                               type="{{(valType === 'boolean') ? 'checkbox' : ((valType === 'number') || value.pin) ? 'number' : (valType === 'string') ? 'text' : ''}}"
+                               data-ng-required="value.required || false" class="form-control"></input>
+                    </div>
 
                     <div class="form-group">
-                        <div data-ng-click="update(input)" class="btn btn-primary">Update</div>
+                        <div data-ng-click="update()" class="btn btn-primary">Update</div>
                     </div>
                 </div>
             </div>

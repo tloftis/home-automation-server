@@ -4,21 +4,37 @@ angular.module('node').controller('nodeInputUpdateController', ['$scope', '$stat
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
         $scope.authentication = Authentication;
         $scope.input = {};
+        $scope.drivers = [];
 
         $scope.init = function () {
             nodeService.getInput($stateParams.inputId).then(function(input){
                 $scope.input = input;
-                $scope.input.pin = +$scope.input.pin;
+            });
+
+            nodeService.getInputDrivers().then(function(drivers){
+                $scope.drivers = drivers;
             });
         };
 
-        $scope.update = function(input){
-            nodeService.inputUpdate(input, input).then(function(newNode){
-                $scope.input = newNode;
-                $scope.input.pin = +$scope.input.pin;
-
+        $scope.update = function(){
+            nodeService.inputUpdate($scope.input, $scope.input).then(function(){
                 $state.go('node.inputs');
             });
         };
+
+        $scope.$watch('input.driverId', function(newVal, oldVal){
+            if(newVal){
+                for(var i = 0; i < $scope.drivers.length; i++){
+                    if($scope.drivers[i].id === newVal){
+                        $scope.input.driver = $scope.drivers[i];
+                        return;
+                    }
+                }
+            }
+
+            if(oldVal){
+                $scope.output.driverId = oldVal;
+            }
+        });
     }
 ]);
