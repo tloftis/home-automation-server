@@ -23,5 +23,20 @@ angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$sta
                 $state.go('node.outputs');
             });
         };
+
+        $scope.$watch('output.driverId', function(newVal, oldVal){
+            if(newVal){
+                for(var i = 0; i < $scope.drivers.length; i++){
+                    if($scope.drivers[i].id === newVal){
+                        $scope.output.driver = $scope.drivers[i];
+                        return;
+                    }
+                }
+            }
+
+            if(oldVal){
+                $scope.output.driverId = oldVal;
+            }
+        }, true)
     }
 ]);

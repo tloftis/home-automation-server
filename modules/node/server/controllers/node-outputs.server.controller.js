@@ -73,10 +73,10 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
 
     //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
-    if(!_.isUndefined(node.config)){
+    if(!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for(var key in outputDriverHash[output.driverId].config){
+        for(var key in outputDriverHash[node.driverId].config){
             if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
