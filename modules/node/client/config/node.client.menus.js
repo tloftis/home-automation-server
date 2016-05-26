@@ -24,7 +24,7 @@ angular.module('node').run(['Menus',
 
         Menus.addSubMenuItem('topbar', 'node', {
             title: 'Node List',
-            state: 'node.list',
+            state: 'node.nodes',
             roles: ['user', 'admin']
         });
     }

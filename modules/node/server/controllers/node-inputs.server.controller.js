@@ -87,7 +87,9 @@ exports.remove = function (req, res){
         index = inputs.indexOf(input);
 
         if(index !== -1){
-            return inputs.splice(index, 1)[0];
+            delete inputHash[input.id];
+            inputs.splice(index, 1)[0];
+            return res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         }
 
         return res.status(400).send('Error attempting to remove input from server memory');

@@ -12,11 +12,11 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
         };
 
         $scope.addOutput = function(node){
-            $state.go('node.add.output', { nodeId: node.id });
+            $state.go('node.nodes.edit.output', { nodeId: node.id });
         };
 
         $scope.addInput = function(node){
-            $state.go('node.add.input', { nodeId: node.id });
+            $state.go('node.nodes.edit.input', { nodeId: node.id });
         };
 
         $scope.edit = function(node){

@@ -5,7 +5,6 @@ angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$sta
         $scope.authentication = Authentication;
         $scope.output = {};
         $scope.drivers = [];
-        $scope.options = [];
 
         $scope.init = function () {
             nodeService.getOutput($stateParams.outputId).then(function(output){
@@ -37,6 +36,6 @@ angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$sta
             if(oldVal){
                 $scope.output.driverId = oldVal;
             }
-        }, true)
+        })
     }
 ]);

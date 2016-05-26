@@ -122,7 +122,8 @@ exports.remove = function (req, res){
 
         if(index !== -1){
             outputs.splice(index, 1);
-            res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
+            delete outputHash[output.id];
+            return res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         }
 
         return res.status(400).send('Error attempting to remove output from server memory');
@@ -132,13 +133,23 @@ exports.remove = function (req, res){
 exports.add = function (req, res){
     var newOutput = {},
         node = req.node,
-        output = req.body.output;
+        newNode = req.body.output;
 
-    if(!_.isUndefined(output.name)) newOutput.name = output.name;
-    if(!_.isUndefined(output.location)) newOutput.location = output.location;
-    if(!_.isUndefined(output.description)) newOutput.description = output.description;
-    if(!_.isUndefined(output.driverId)) newOutput.driverId = output.driverId;
-    if(!_.isUndefined(output.config)) newOutput.config = output.config;
+    if(!_.isUndefined(newNode.name)) newOutput.name = newNode.name;
+    if(!_.isUndefined(newNode.location)) newOutput.location = newNode.location;
+    if(!_.isUndefined(newNode.description)) newOutput.description = newNode.description;
+
+    //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
+    if(!_.isUndefined(newNode.config) && !_.isUndefined(newNode.driverId)){
+        newOutput.driverId = newNode.driverId;
+        newOutput.config = {};
+
+        for(var key in outputDriverHash[newNode.driverId].config){
+            if(!_.isUndefined(newNode.config[key])){
+                newOutput.config[key] = newNode.config[key];
+            }
+        }
+    }
 
     if(newOutput.driverId) {
         var info = {
@@ -148,23 +159,21 @@ exports.add = function (req, res){
 
         request.post(info, function (err, resq, body) {
             if (err) return res.status(400).send('Error attempting to add output');
+            var newOutput, output = {};
 
             try{
                 newOutput = JSON.parse(body);
             }catch(err){
-                return res.status(400).send(body || 'Unable to get new output config');
+                return res.status(400).send(body || 'Unable to get updated output config');
             }
 
-            output = {
-                name: newOutput.name,
-                location: newOutput.location,
-                description: newOutput.description,
-                driverId: newOutput.driverId,
-                config: newOutput.config,
-                id: newOutput.id,
-                node: node
-            };
-
+            output.name = newOutput.name;
+            output.location = newOutput.location;
+            output.description = newOutput.description;
+            output.id = newOutput.id;
+            output.config = newOutput.config;
+            output.driverId = newOutput.driverId;
+            output.node = node;
             masterNode.registerOutput(output);
             res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         });
