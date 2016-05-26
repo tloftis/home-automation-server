@@ -47,15 +47,15 @@
                             <pre class="text-left" data-ng-show="showConfig">{{ output.config | json }}</pre>
                         </td>
 
-                        <td class="text-center">
+                        <td class="text-center" data-ng-init="boolValue = false; numValue = 0; strValue = ''">
                             <div class="row">
                                 <button class="btn btn-default row prepend-top-10" ng-click="set(output, (numValue || strValue || boolValue))">Set</button>
                             </div>
 
                             <div class="row">
                                 <input data-ng-model="boolValue" data-ng-show="output.driver.type.toLowerCase() === 'boolean'"  type="checkbox"></input>
-                                <input data-ng-model="strValue" data-ng-show="output.driver.type.toLowerCase() === 'number'" type="number"></input>
-                                <input data-ng-model="numValue" data-ng-show="output.driver.type.toLowerCase() === 'string'" type="text"></input>
+                                <input data-ng-model="numValue" data-ng-show="output.driver.type.toLowerCase() === 'number'" type="number"></input>
+                                <input data-ng-model="strValue" data-ng-show="output.driver.type.toLowerCase() === 'string'" type="text"></input>
                             </div>
                         </td>
 

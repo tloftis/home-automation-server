@@ -63,10 +63,11 @@ angular.module('node').service('nodeService', ['Utility',
             var id = node,
                 value = {};
 
-            if(node && node.id) id = node.id;
+            if(node && node.id){ id = node.id; }
 
             if(!_.isUndefined(val)){
                 value.value = val;
+                value.type = typeof val;
             }
 
             return Utility.http.post('output/' + id + '/set', value);

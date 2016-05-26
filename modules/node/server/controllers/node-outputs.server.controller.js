@@ -18,10 +18,11 @@ exports.list = function(req, res){
 exports.set = function (req, res){
     var output = req.output;
     var value = req.body ? req.body.value : undefined;
+    var type = req.body ? req.body.type : undefined;
 
     var info = {
         url: 'http://' + output.node.ip + '/api/output/' + output.id + '/set',
-        form: { value: value }
+        form: { value: value, type: type }
     };
 
     request.post(info, function (err, reqs, body){
