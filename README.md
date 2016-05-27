@@ -60,6 +60,7 @@ Server:
 10. if you have a Home Node already running, then after login you should be able to see it in the "Node List" that you can see from the dropdown Nodes list at the top of the screen.
 
 Home Node:
+
 	Note: the software is ment to run on a raspberry pi, but technically if you make the driver for a diffrent system it should run just fine. You will most likely have to remove the wiring-pi library from the package.json, but I have heard that it is ported to some systems other than the PI now.
 
 1. Install Node on the system you plan on being the Home Node
