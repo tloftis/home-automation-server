@@ -36,6 +36,6 @@ angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$sta
             if(oldVal){
                 $scope.output.driverId = oldVal;
             }
-        })
+        });
     }
 ]);

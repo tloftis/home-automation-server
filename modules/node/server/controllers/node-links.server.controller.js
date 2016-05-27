@@ -32,7 +32,7 @@ exports.remove = function (req, res){
     link.remove(function (err) {
         if (err) {
             return res.status(400).send({
-                message: errorHandler.getErrorMessage(err)
+                message: err.message
             });
         }
 
@@ -55,7 +55,7 @@ exports.update = function (req, res){
     return link.save(function(err){
         if (err) {
             return res.status(400).send({
-                message: errorHandler.getErrorMessage(err)
+                message: err.message
             });
         }
 
@@ -81,7 +81,7 @@ exports.add = function (req, res){
         return link.save(function(err){
             if (err) {
                 return res.status(400).send({
-                    message: errorHandler.getErrorMessage(err)
+                    message: err.message
                 });
             }
 

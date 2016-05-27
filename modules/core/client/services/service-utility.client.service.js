@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('core').factory('Utility', ['$http', 'toastr',
-    function ($http, toastr) {
+angular.module('core').factory('Utility', ['$http', 'toastr', '$q',
+    function ($http, toastr, $q) {
         var servUtil = {};
         var errorParser = function (error) {
             if (typeof error  === 'undefined') {
@@ -54,7 +54,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
                 var query = {};
                 query.params = params || {};
 
-                return new Promise(function(resolve, reject){
+                return $q(function(resolve, reject){
                     $http.get('/api/' + rt, query)
                         .success(function (data) {
                             servUtil.log.debug('GET ' + rt + ': success');
@@ -70,7 +70,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
             },
 
             post: function (rt, payload) {
-                return new Promise(function(resolve, reject){
+                return $q(function(resolve, reject){
                     $http.post('/api/' + rt, payload)
                         .success(function (data) {
                             servUtil.log.debug('POST ' + rt + ': success');
@@ -85,7 +85,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
             },
 
             put: function (rt, payload) {
-                return new Promise(function(resolve, reject){
+                return $q(function(resolve, reject){
                     $http.put('/api/' + rt, payload)
                         .success(function (data) {
                             servUtil.log.debug('PUT ' + rt + ': success');
@@ -100,7 +100,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr',
             },
 
             delete: function (rt, payload) {
-                return new Promise(function(resolve, reject){
+                return $q(function(resolve, reject){
                     $http.delete('/api/' + rt, payload)
                         .success(function (data) {
                             servUtil.log.debug('DELETE ' + rt + ': success');

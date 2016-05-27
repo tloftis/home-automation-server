@@ -125,7 +125,7 @@ function updateInputs(callback){
                 return nextMain();
             }else{
                 async.each(newInputs, function (input, next){
-                    var input = {
+                    var newInput = {
                         name: input.name,
                         location: input.location,
                         description: input.description,
@@ -135,9 +135,9 @@ function updateInputs(callback){
                         node: node
                     };
 
-                    inputs.push(input);
-                    inputHash[input.id] = input;
-                    next()
+                    inputs.push(newInput);
+                    inputHash[newInput.id] = newInput;
+                    next();
                 },function(){
                     nextMain();
                 });
@@ -163,7 +163,7 @@ function updateOutputs(callback){
                 return nextMain();
             }else{
                 async.each(newOutputs, function (output, next){
-                    var output = {
+                    var newOutput = {
                         name: output.name,
                         location: output.location,
                         description: output.description,
@@ -173,9 +173,9 @@ function updateOutputs(callback){
                         node: node
                     };
 
-                    outputs.push(output);
-                    outputHash[output.id] = output;
-                    next()
+                    outputs.push(newOutput);
+                    outputHash[newOutput.id] = newOutput;
+                    next();
                 },function(){
                     nextMain();
                 });
@@ -202,7 +202,7 @@ function updateDrivers(callback){
                     return nextMid();
                 }else{
                     async.each(newDrivers, function (driver, next){
-                        var driver = {
+                        var newDriver = {
                             name: driver.name,
                             location: driver.location,
                             description: driver.description,
@@ -212,8 +212,8 @@ function updateDrivers(callback){
                             node: node
                         };
 
-                        outputDrivers.push(driver);
-                        outputDriverHash[driver.id] = driver;
+                        outputDrivers.push(newDriver);
+                        outputDriverHash[newDriver.id] = newDriver;
                         next();
                     },function(){
                         nextMid();
@@ -234,7 +234,7 @@ function updateDrivers(callback){
                     return nextMid();
                 }else{
                     async.each(newDrivers, function (driver, next){
-                        var driver = {
+                        var newDriver = {
                             name: driver.name,
                             type: driver.location,
                             description: driver.description,
@@ -243,8 +243,8 @@ function updateDrivers(callback){
                             node: node
                         };
 
-                        inputDrivers.push(driver);
-                        inputDriverHash[driver.id] = driver;
+                        inputDrivers.push(newDriver);
+                        inputDriverHash[newDriver.id] = newDriver;
                         next();
                     },function(){
                         nextMid();
@@ -286,7 +286,7 @@ function updateAll(){
                     });
                 });
             });
-        })
+        });
     });
 }
 
@@ -342,7 +342,8 @@ exports.update = function (req, res){
 };
 
 exports.nodeById = function (req, res, next, id){
-    if(req.node = nodeHash[id]){ return next(); }
+    req.node = nodeHash[id];
+    if(req.node){ return next(); }
 
     return res.status(400).send({
         message: 'Node could not be found'

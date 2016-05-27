@@ -43,11 +43,11 @@ exports.set = function (req, res){
             return res.status(400).send(body || 'Unable to get new output config');
         }
 
-        if(newOutput.name) output.name = newOutput.name;
-        if(newOutput.location) output.location = newOutput.location;
-        if(newOutput.description) output.description = newOutput.description;
-        if(newOutput.config) output.config = newOutput.config;
-        if(newOutput.driverId) output.driverId = newOutput.driverId;
+        if(newOutput.name){ output.name = newOutput.name; }
+        if(newOutput.location){ output.location = newOutput.location; }
+        if(newOutput.description){ output.description = newOutput.description; }
+        if(newOutput.config){ output.config = newOutput.config; }
+        if(newOutput.driverId){ output.driverId = newOutput.driverId; }
 
         res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
     });
@@ -60,7 +60,6 @@ exports.get = function (req, res){
 exports.getDriver = function (req, res){
     res.json(req.driver);
 };
-
 
 exports.update = function (req, res){
     var output = req.output,

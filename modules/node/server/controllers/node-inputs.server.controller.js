@@ -93,7 +93,7 @@ exports.remove = function (req, res){
 
         if(index !== -1){
             delete inputHash[input.id];
-            inputs.splice(index, 1)[0];
+            inputs.splice(index, 1);
             return res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         }
 
@@ -226,7 +226,7 @@ exports.change = function(req, res){
                     value: value,
                     type:type
                 }
-            }, fakeRes)
+            }, fakeRes);
         }, function(err){
             res.send('Updated Successfully!');
         });
