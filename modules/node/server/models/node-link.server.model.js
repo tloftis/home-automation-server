@@ -8,19 +8,20 @@ var mongoose = require('mongoose'),
 
 // NodeLink Schema
 var NodeLinkSchema = new Schema({
-    input: {
-        nodeId: {
-            type: String,
-            trim: false,
-            required: true
-        }
+    description: {
+        type: String,
+        trim: true,
+        required: false
     },
-    output: {
-        nodeId: {
-            type: String,
-            trim: false,
-            required: true
-        }
+    inputId: {
+        type: String,
+        trim: false,
+        required: true
+    },
+    outputId: {
+        type: String,
+        trim: false,
+        required: true
     },
     pipes: [
         {

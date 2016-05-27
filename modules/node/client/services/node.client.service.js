@@ -31,6 +31,38 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.get('node/' + id);
         };
 
+        service.getLinks = function (){
+            return Utility.http.get('link');
+        };
+
+        service.getLink = function (node){
+            var id = node;
+            if(node && node._id) id = node._id;
+
+            return Utility.http.get('link/' + id);
+        };
+
+        service.removeLink = function (node){
+            var id = node;
+            if(node && node._id) id = node._id;
+
+            return Utility.http.delete('link/' + id);
+        };
+
+        service.updateLink = function (node, link){
+            var id = node;
+            if(node && node._id) id = node._id;
+
+            return Utility.http.put('link/' + id, {link:link});
+        };
+
+        service.addLink = function (node, link){
+            var id = node;
+            if(node && node._id) id = node._id;
+
+            return Utility.http.post('link/' + id, {link:link});
+        };
+
         service.updateNode = function (node, config){
             var id = node;
             if(node && node.id) id = node.id;

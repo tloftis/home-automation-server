@@ -1,7 +1,6 @@
 'use strict';
 
-var async = require('async'),
-	_ = require('lodash'),
+var _ = require('lodash'),
     request = require('request'),
     mongoose = require('mongoose'),
     NodeLink = mongoose.model('NodeLink'),
@@ -9,7 +8,6 @@ var async = require('async'),
 
 var inputs = masterNode.inputs,
     inputDrivers = masterNode.inputDrivers,
-    outputHash = masterNode.outputHash,
     inputDriverHash = masterNode.inputDriverHash,
     inputHash = masterNode.inputHash;
 
