@@ -20,10 +20,20 @@ exports.list = function(req, res){
 };
 
 exports.get = function (req, res){
+    var link = req.link._doc;
+
+    link.pipeObjs = link.pipes.map(function(pipeId){
+        return masterNode.pipeHash[pipeId];
+    });
+
     res.json(_.extend({
         input: masterNode.inputHash[req.link.inputId],
         output: masterNode.outputHash[req.link.outputId]
-    }, req.link._doc));
+    }, link));
+};
+
+exports.getPipes = function (req, res){
+    res.json(masterNode.pipes);
 };
 
 exports.remove = function (req, res){
@@ -105,7 +115,7 @@ exports.linkById = function (req, res, next, id){
         if(err){
             return next(err);
         }else if(!link) {
-            return next(new Error('Failed to load user', id));
+            return next(new Error('Failed to load link', id));
         }
 
         req.link = link;

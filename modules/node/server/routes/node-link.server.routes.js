@@ -15,5 +15,8 @@ module.exports = function (app) {
         put(links.update).
         delete(links.remove);
 
+    app.route('/api/pipe').
+        get(links.getPipes);
+
     app.param('linkId', links.linkById);
 };

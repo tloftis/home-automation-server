@@ -24,12 +24,17 @@ var NodeLinkSchema = new Schema({
         trim: false,
         required: true
     },
-    pipes: [
-        {
+    pipes: [{
+        data: {
+            trim: false,
+            required: false
+        },
+        pipeId:{
             type: String,
-            trim: false
+            trim: false,
+            required: true
         }
-    ],
+    }],
     created: {
         type: Date,
         default: Date.now

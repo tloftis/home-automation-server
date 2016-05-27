@@ -24,6 +24,46 @@
             </div>
 
             <div class="form-group">
+                <label for="inputLink">Pipes</label>
+
+                <table class="table table-striped table-bordered table-hover prepend-bottom-10">
+                    <tr>
+                        <td class="text-center">
+                            <strong>Name</strong>
+                        </td>
+
+                        <td class="text-center">
+                            <strong>Description</strong>
+                        </td>
+
+                        <td class="text-center"></td>
+                    </tr>
+
+                    <tr data-ng-repeat="pipe in link.pipeObjs track by $index">
+                        <td>{{pipe.name}}</td>
+                        <td>{{pipe.description}}</td>
+
+                        <td>
+                            <button class="btn btn-danger" ng-click="removePipe(pipe.id)">Remove</button>
+                        </td>
+                    </tr>
+
+                    <tr data-ng-if="!link.pipeObjs.length">
+                        <td colspan="3">No pipes for this link</td>
+                    </tr>
+                </table>
+
+                <select id="inputLink" data-ng-model="selectedPipe" class="prepend-bottom-10">
+                    <option data-ng-repeat="pipe in pipes track by $index" value="{{pipe.id}}" required>{{pipe.name}}</option>
+                </select>
+
+                <div class="row prepend-top-10">
+                    <button class="btn btn-info"
+                            ng-click="addPipe(selectedPipe)">Add Pipe</button>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <div data-ng-click="update(link)" class="btn btn-primary">Update</div>
             </div>
         </div>

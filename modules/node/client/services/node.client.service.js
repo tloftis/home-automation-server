@@ -12,6 +12,10 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.get('input');
         };
 
+        service.getPipes = function (){
+            return Utility.http.get('pipe');
+        };
+
         service.getNodes = function (){
             return Utility.http.get('node');
         };

@@ -6,6 +6,7 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
         $scope.link = {};
         $scope.outputs = [];
         $scope.inputs = [];
+        $scope.pipes = [];
 
         $scope.init = function () {
             nodeService.getOutputs().then(function(outputs){
@@ -14,6 +15,10 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
 
             nodeService.getInputs().then(function(inputs){
                 $scope.inputs = inputs;
+            });
+
+            nodeService.getPipes().then(function(pipes){
+                $scope.pipes = pipes;
             });
         };
 

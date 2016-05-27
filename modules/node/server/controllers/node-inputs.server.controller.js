@@ -12,6 +12,7 @@ var inputs = masterNode.inputs,
     inputDrivers = masterNode.inputDrivers,
     inputDriverHash = masterNode.inputDriverHash,
     inputHash = masterNode.inputHash,
+    pipeHash = masterNode.pipeHash,
     outputHash = masterNode.outputHash;
 
 exports.list = function(req, res){
@@ -180,7 +181,6 @@ exports.change = function(req, res){
     var query = {
             inputId: input.id
         };
-    //return res.send('ehh');
 
     NodeLink.find(query).exec(function(err, links){
         if(err){
@@ -188,28 +188,38 @@ exports.change = function(req, res){
         }
 
         async.each(links, function(link, next){
-            link.pipes.forEach(function(pipe){
-                //value = pipeFunctionHash[pipe](value);
+            var currentPipe,
+                pipe,
+                output = outputHash[link.outputId];
 
-                //if(typeof value === 'undefined'){
-                //    return; //If no return, then end
-                //}
-            });
+            if(!output){ return next(); }
 
-            if(typeof value === 'undefined'){
-                return next(); //If no return, then end
+            for(var i = 0, len = link.pipes.length; i < len; i++){
+                pipe = link.pipes[i];
+                currentPipe = pipeHash[pipe.pipeId];
+
+                //Type check
+                if(currentPipe.inType){
+                    if(currentPipe.inType instanceof Array){
+                        if(!currentPipe.inType.indexOf(typeof value)){
+                            return next(); //not one of the right types, end
+                        }
+                    }else{
+                        if(currentPipe.inType !== typeof value){
+                            return next(); //If types don't match, end
+                        }
+                    }
+                }
+
+                if(currentPipe){
+                    value = currentPipe.funct(value, pipe.data);
+                    if(typeof value === 'undefined'){ return next(); }
+                }else{
+                    return next(); //If no pipe, end
+                }
             }
 
-            var output = outputHash[link.outputId];
-
-            if(!output){
-                return next();
-            }
-
-            var callNext = function(){
-                //Finished with this particular bit
-                return next();
-            };
+            var callNext = function(){ return next(); };
 
             //This seems the best route, but the set function should be separated into it's own function
             //That would be called by the Express middleware set function and this
@@ -227,7 +237,7 @@ exports.change = function(req, res){
                     type:type
                 }
             }, fakeRes);
-        }, function(err){
+        }, function(){
             res.send('Updated Successfully!');
         });
     });

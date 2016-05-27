@@ -1,21 +1,21 @@
 'use strict';
 
 //Only can find address in a subnet mask of 255.255.255.0
-var async = require('async'),
+var _ = require('lodash'),
+    async = require('async'),
 	request = require('request'),
+    fs = require('fs'),
     os = require('os'),
+    crypto = require('crypto'),
     testAddresses = [];
 
 var nodes = [],
     outputs = [],
     inputs = [],
-
     outputDrivers = [],
     inputDrivers = [],
-
     inputDriverHash = {},
     outputDriverHash = {},
-
     nodeHash = {},
     outputHash = {},
     inputHash = {};
@@ -50,6 +50,59 @@ if(localIp){
 for(i = end; i <= 255; i++){
     testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
 }
+
+//Gets the absolute location of the folder contained by a require file selector
+function rationalizePaths(array){
+    for(var i = 0, len = array.length; i < len; i++){
+        //I know, this is very unneeded, but I like having it because of it's over bearing round-a-bout-ness
+        array[i] = require.resolve(array[i]).split('\\').filter(function(o,i,a){ return (a.length-1) !== i; }).join('\\');
+    }
+
+    return array;
+}
+
+function genId(){
+    return crypto.randomBytes(25).toString('hex');
+}
+
+function writeConfig(fileLoc, obj, callback){
+    if(!callback) callback = function(){};
+    var objStr = JSON.stringify(obj, null, 4);
+
+    fs.writeFile(fileLoc, objStr, function(err) {
+        callback(err);
+    });
+}
+
+var glob = require('glob'),
+    pipLocations = rationalizePaths(glob.sync('../pipes/*/index.js', { cwd: __dirname })),
+    pipeHash = {},
+    pipes = [];
+
+function findPipes(callback){
+    var pipe,
+        config;
+
+    pipeHash = {};
+    pipes = [];
+
+    for(var i = 0; i < pipLocations.length; i++){
+        pipe = require(pipLocations[i]);
+        config = require(pipLocations[i] + '/config.json');
+
+        if(!config.id){
+            config.id = genId();
+            writeConfig(pipLocations[i] + '/config.json', config);
+        }
+
+        _.extend(pipe, config);
+        pipes.push(pipe);
+        pipeHash[pipe.id] = pipe;
+    }
+
+    if(callback){ callback(); }
+}
+
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
 function searchForNodes(callback){
@@ -258,31 +311,24 @@ function updateDrivers(callback){
 }
 
 function updateAll(){
-    searchForNodes(function(){
-        console.log('Updated Nodes');
+    findPipes(function(){
+        console.log('Pipes Found');
 
-        registerWithNodes(function(){
-            console.log('Registered Nodes');
+        searchForNodes(function(){
+            console.log('Updated Nodes');
 
-            updateInputs(function(){
-                console.log('Updated Inputs');
+            registerWithNodes(function(){
+                console.log('Registered Nodes');
 
-                updateOutputs(function(){
-                    console.log('Updated Outputs');
+                updateInputs(function(){
+                    console.log('Updated Inputs');
 
-                    updateDrivers(function(){
-                        console.log('Updated Drivers');
-                        /*
-                        var i, len;
+                    updateOutputs(function(){
+                        console.log('Updated Outputs');
 
-                        for(i = 0, len = inputs.length; i < len; i++){
-                            inputs[i].driver = inputDriverHash[inputs[i].driverId];
-                        }
-
-                        for(i = 0, len = outputs.length; i < len; i++){
-                            outputs[i].driver = outputDriverHash[outputs[i].driverId];
-                        }
-                        */
+                        updateDrivers(function(){
+                            console.log('Updated Drivers');
+                        });
                     });
                 });
             });
@@ -294,6 +340,7 @@ updateAll();
 exports.nodes = nodes;
 exports.outputs = outputs;
 exports.inputs = inputs;
+exports.pipes = pipes;
 exports.outputDrivers = outputDrivers;
 exports.inputDrivers = inputDrivers;
 exports.outputDriverHash = outputDriverHash;
@@ -301,6 +348,7 @@ exports.inputDriverHash = inputDriverHash;
 exports.nodeHash = nodeHash;
 exports.inputHash = inputHash;
 exports.outputHash = outputHash;
+exports.pipeHash = pipeHash;
 
 exports.list = function(req, res){
     res.json(nodes);
