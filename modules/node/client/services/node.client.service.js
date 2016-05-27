@@ -56,11 +56,8 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('link/' + id, {link:link});
         };
 
-        service.addLink = function (node, link){
-            var id = node;
-            if(node && node._id) id = node._id;
-
-            return Utility.http.post('link/' + id, {link:link});
+        service.addLink = function (link){
+            return Utility.http.post('link', {link:link});
         };
 
         service.updateNode = function (node, config){

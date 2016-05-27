@@ -1,0 +1,31 @@
+<div class="wrapper wrapper-content animated fadeInRight" data-ng-init="init()">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" class="form-control" ng-model="link.description"
+                       placeholder="Description of Output" required/>
+            </div>
+
+            <div class="form-group">
+                <label for="outputLink">Output</label>
+
+                <select id="outputLink" data-ng-model="link.outputId">
+                    <option data-ng-repeat="output in outputs track by $index" value="{{output.id}}" data-ng-selected="output.id === link.outputId" required>{{output.name}}</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="inputLink">Input</label>
+
+                <select id="inputLink" data-ng-model="link.inputId">
+                    <option data-ng-repeat="input in inputs track by $index" value="{{input.id}}" data-ng-selected="input.id === link.inputId" required>{{input.name}}</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div data-ng-click="update(link)" class="btn btn-primary">Update</div>
+            </div>
+        </div>
+    </div>
+</div>

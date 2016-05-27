@@ -11,7 +11,8 @@ var NodeLinkSchema = new Schema({
     description: {
         type: String,
         trim: true,
-        required: false
+        required: false,
+        default: ''
     },
     inputId: {
         type: String,

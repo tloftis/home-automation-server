@@ -12,8 +12,8 @@ exports.list = function(req, res){
     NodeLink.find({}).lean().exec(function(err, links){
         res.json(links.map(function(link){
             return _.extend({
-                output: masterNode.inputHash[link.inputId],
-                input: masterNode.inputDriverHash[link.outputId]
+                input: masterNode.inputHash[link.inputId],
+                output: masterNode.outputHash[link.outputId]
             }, link);
         }));
     });
@@ -21,9 +21,9 @@ exports.list = function(req, res){
 
 exports.get = function (req, res){
     res.json(_.extend({
-        output: masterNode.inputHash[req.link.inputId],
-        input: masterNode.inputDriverHash[req.link.outputId]
-    }, req.link));
+        input: masterNode.inputHash[req.link.inputId],
+        output: masterNode.outputHash[req.link.outputId]
+    }, req.link._doc));
 };
 
 exports.remove = function (req, res){

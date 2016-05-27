@@ -196,6 +196,26 @@ angular.module('node').config(['$stateProvider',
                 }
             }
         }).
+        state('node.links.add', {
+            url: '/create',
+            bcName: 'Add Link',
+            bcInclude: true,
+            views: {
+                '@node': {
+                    templateUrl: 'modules/node/client/views/node-link-edit.client.view.html',
+                    controller: 'nodeLinkCreateController'
+                },
+                'headerView@node': {
+                    controller: function($scope) {
+                        $scope.header = {
+                            label: 'Add Link',
+                            desc: '',
+                            faIcon: 'fa-circle fa-fw'
+                        };
+                    }
+                }
+            }
+        }).
         state('node.links.edit', {
             url: '/:linkId',
             bcName: 'Edit Link',
