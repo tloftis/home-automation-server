@@ -1,15 +1,18 @@
 'use strict';
 
-var _ = require('lodash'),
+var async = require('async'),
+    _ = require('lodash'),
     request = require('request'),
     mongoose = require('mongoose'),
+    outputController = require('../controllers/node-outputs.server.controller.js'),
     NodeLink = mongoose.model('NodeLink'),
     masterNode = require('./node.server.controller');
 
 var inputs = masterNode.inputs,
     inputDrivers = masterNode.inputDrivers,
     inputDriverHash = masterNode.inputDriverHash,
-    inputHash = masterNode.inputHash;
+    inputHash = masterNode.inputHash,
+    outputHash = masterNode.outputHash;
 
 exports.list = function(req, res){
     res.json(inputs.map(function(input){
@@ -152,61 +155,64 @@ exports.add = function (req, res){
 
 exports.change = function(req, res){
     var input = req.input,
-        node = input.node,
-        config = req.body;
+        value = req.body.value,
+        type = req.body.type;
+
+    if(type === 'boolean'){
+        if(value === 'true'){ value = true; }
+        if(value === 'false'){ value = false; }
+
+        value = value ? true : false;
+    }
+
+    if(type === 'number'){
+        value = +value;
+    }
+
+    if(type === 'string'){
+        value += '';
+    }
 
     if(!input){
         return res.status(400).send("Unknown Input posted to server");
     }
 
-    /* Going to need a lot of work to properly function and do so in a very configurable manner with pipes
     var query = {
-            input: {
-                nodeId: node.id
-            }
+            inputId: input.id
         };
+    //return res.send('ehh');
 
     NodeLink.find(query).exec(function(err, links){
-        var output;
-
         if(err){
             return res.send("Error getting input to output links");
         }
 
-        links = [
-            {
-                pipes:[
-                    'asdfasdf', //Id linking to some pipe object
-                    'asdfasdf' //Order Matters quite a bit, allowed to repeat
-                ],
-                output:{
-                    id: "00:13:ef:86:05:29"
-                }
-            },
-            {
-                pipes: [], //Pipes aren't needed
-                output:{
-                    id: "00:13:ef:86:05:29"
-                }
-            }
-        ];
-
         async.each(links, function(link, next){
-
             link.pipes.forEach(function(pipe){
-                //config.value = getPipe(pipe)(config.value);
+                //value = pipeFunctionHash[pipe](value);
+
+                //if(typeof value === 'undefined'){
+                //    return; //If no return, then end
+                //}
             });
 
-            output = outputHash[link.output.id] || false;
+            if(typeof value === 'undefined'){
+                return next(); //If no return, then end
+            }
+
+            var output = outputHash[link.outputId];
 
             if(!output){
                 return next();
             }
 
             var callNext = function(){
-                next();
+                //Finished with this particular bit
+                return next();
             };
 
+            //This seems the best route, but the set function should be separated into it's own function
+            //That would be called by the Express middleware set function and this
             var fakeRes = {
                 send: callNext,
                 json: callNext,
@@ -215,10 +221,16 @@ exports.change = function(req, res){
                 }
             };
 
-            exports.setOutput({ output: output, body: {} }, fakeRes)
+            outputController.set({ output: output,
+                body: {
+                    value: value,
+                    type:type
+                }
+            }, fakeRes)
+        }, function(err){
+            res.send('Updated Successfully!');
         });
     });
-    */
 };
 
 exports.inputById = function (req, res, next, id){
