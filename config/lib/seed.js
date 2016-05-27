@@ -12,10 +12,12 @@ var seedOptions = {};
 function removeUser(user) {
     return new Promise(function (resolve, reject) {
         var User = mongoose.model('User');
+
         User.find({ username: user.username }).remove(function (err) {
             if (err) {
                 reject(new Error('Failed to remove local ' + user.username));
             }
+
             resolve();
         });
     });
@@ -59,6 +61,7 @@ function reportSuccess(password) {
             if (seedOptions.logResults) {
                 console.log(chalk.bold.red('Database Seeding:\t\t\tLocal ' + user.username + ' added with password set to ' + password));
             }
+
             resolve();
         });
     };
@@ -106,6 +109,7 @@ function reportError(reject) {
             console.log('Database Seeding:\t\t\t' + err);
             console.log();
         }
+
         reject(err);
     };
 }
@@ -115,7 +119,6 @@ module.exports.start = function start(options) {
     seedOptions = _.clone(config.seedDB.options, true);
 
     // Check for provided options
-
     if (_.has(options, 'logResults')) {
         seedOptions.logResults = options.logResults;
     }
@@ -129,8 +132,8 @@ module.exports.start = function start(options) {
     }
 
     var User = mongoose.model('User');
-    return new Promise(function (resolve, reject) {
 
+    return new Promise(function (resolve, reject) {
         var adminAccount = new User(seedOptions.seedAdmin);
         var userAccount = new User(seedOptions.seedUser);
 
@@ -144,7 +147,6 @@ module.exports.start = function start(options) {
                 .catch(reportError(reject));
         } else {
             // Add both Admin and User account
-
             User.generateRandomPassphrase()
                 .then(seedTheUser(userAccount))
                 .then(User.generateRandomPassphrase)
