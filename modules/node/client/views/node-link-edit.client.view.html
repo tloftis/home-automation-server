@@ -39,7 +39,7 @@
                         <td class="text-center"></td>
                     </tr>
 
-                    <tr data-ng-repeat="pipe in link.pipeObjs track by $index">
+                    <tr data-ng-repeat="pipe in link.pipes track by $index">
                         <td>{{pipe.name}}</td>
                         <td>{{pipe.description}}</td>
 
@@ -48,7 +48,7 @@
                         </td>
                     </tr>
 
-                    <tr data-ng-if="!link.pipeObjs.length">
+                    <tr data-ng-if="!link.pipes.length">
                         <td colspan="3">No pipes for this link</td>
                     </tr>
                 </table>

@@ -22,10 +22,6 @@ exports.list = function(req, res){
 exports.get = function (req, res){
     var link = req.link._doc;
 
-    link.pipeObjs = link.pipes.map(function(pipeId){
-        return masterNode.pipeHash[pipeId];
-    });
-
     res.json(_.extend({
         input: masterNode.inputHash[req.link.inputId],
         output: masterNode.outputHash[req.link.outputId]
@@ -59,7 +55,11 @@ exports.update = function (req, res){
     if(addLink.description){ link.description = addLink.description; }
 
     if(addLink.pipes && addLink.pipes instanceof Array){
-        link.pipes = addLink.pipes;
+        link.pipes = addLink.pipes.map(function(pipe){
+            return { pipeId: pipe.id, data: pipe.data }
+        });
+
+        link.markModified('pipes');
     }
 
     return link.save(function(err){

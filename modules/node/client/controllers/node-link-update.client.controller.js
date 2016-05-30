@@ -2,11 +2,11 @@
 
 angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
+        var pipeHash = {};
         $scope.authentication = Authentication;
         $scope.link = {};
         $scope.outputs = [];
         $scope.inputs = [];
-        $scope.inpipesputs = [];
 
         $scope.init = function () {
             nodeService.getOutputs().then(function(outputs){
@@ -17,12 +17,23 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
                 $scope.inputs = inputs;
             });
 
-            nodeService.getLink($stateParams.linkId).then(function(link){
-                $scope.link = link;
-            });
-
             nodeService.getPipes().then(function(pipes){
                 $scope.pipes = pipes;
+
+                for(var i = 0; i < pipes.length; i++){
+                    pipeHash[pipes[i].id] = pipes[i];
+                }
+
+                return nodeService.getLink($stateParams.linkId);
+            }).then(function(link){
+                var pipe;
+                $scope.link = link;
+
+                for(var i = 0; i < link.pipes.length; i++){
+                    pipe = pipeHash[link.pipes[i].id];
+                    link.pipes[i].name = pipe.name;
+                    link.pipes[i].description = pipe.description;
+                }
             });
         };
 
@@ -33,12 +44,6 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
         };
 
         $scope.removePipe = function(pipeId){
-            var index = $scope.link.pipes.indexOf(pipeId);
-
-            if(index !== -1){
-                $scope.link.pipes.splice(index, 1);
-            }
-
             for(var i = 0; i < $scope.link.pipes.length; i++){
                 if($scope.link.pipes[i].id === pipeId){
                     $scope.link.pipes.splice(i, 1);
@@ -48,14 +53,12 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
         };
 
         $scope.addPipe = function(pipeId){
-            $scope.link.pipes.push(pipeId);
+            var index = $scope.link.pipes.push({ id: pipeId }),
+                pipe = pipeHash[pipeId];
+            index--;
 
-            for(var i = 0; i < $scope.pipes.length; i++){
-                if($scope.pipes[i].id === pipeId){
-                    $scope.pipeObjs.push($scope.pipes[i]);
-                    return;
-                }
-            }
+            $scope.link.pipes[index].name = pipe.name;
+            $scope.link.pipes[index].description = pipe.description;
         };
 
         $scope.$watch('link.outputId', function(newVal, oldVal){

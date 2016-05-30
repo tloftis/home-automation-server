@@ -32,6 +32,9 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
             $state.go('node.links.add');
         };
 
+        $scope.addPipe = function(pipe){
+        };
+
         $scope.$watch('link.outputId', function(newVal, oldVal){
             if(newVal){
                 for(var i = 0; i < $scope.outputs.length; i++){

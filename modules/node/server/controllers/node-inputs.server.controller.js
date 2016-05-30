@@ -179,8 +179,8 @@ exports.change = function(req, res){
     }
 
     var query = {
-            inputId: input.id
-        };
+        inputId: input.id
+    };
 
     NodeLink.find(query).exec(function(err, links){
         if(err){

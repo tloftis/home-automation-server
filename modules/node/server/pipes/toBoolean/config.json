@@ -1,0 +1,6 @@
+{
+    "name": "toBoolean",
+    "outType": "boolean",
+    "description": "Converts any value to a boolean",
+    "id": "7041b17b98b23d4f65e53d7b2f23899ff543f647294e6ba229"
+}
