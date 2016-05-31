@@ -57,7 +57,8 @@ function rationalizePaths(array){
 
     for(var i = 0, len = array.length; i < len; i++){
         //I know, this is very unneeded, but I like having it because of it's over bearing round-a-bout-ness
-        array[i] = require.resolve(array[i]).replace(/\//g, '\\').split('\\').filter(function(o,i,a){ return (a.length-1) !== i; }).join('\\');
+        path = require.resolve(array[i]);
+        array[i] = { index: path, config: path.replace(/index\.js/, 'config.json')};
     }
 
     return array;
@@ -89,12 +90,12 @@ function findPipes(callback){
     pipes = [];
 
     for(var i = 0; i < pipLocations.length; i++){
-        pipe = require(pipLocations[i] + '/index.js');
-        config = require(pipLocations[i] + '/config.json');
+        pipe = require(pipLocations[i].index);
+        config = require(pipLocations[i].config);
 
         if(!config.id){
             config.id = genId();
-            writeConfig(pipLocations[i] + '/config.json', config);
+            writeConfig(pipLocations[i].config, config);
         }
 
         _.extend(pipe, config);
