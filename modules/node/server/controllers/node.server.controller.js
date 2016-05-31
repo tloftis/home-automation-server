@@ -53,9 +53,11 @@ for(i = end; i <= 255; i++){
 
 //Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
+    var path;
+
     for(var i = 0, len = array.length; i < len; i++){
         //I know, this is very unneeded, but I like having it because of it's over bearing round-a-bout-ness
-        array[i] = require.resolve(array[i]).split('\\').filter(function(o,i,a){ return (a.length-1) !== i; }).join('\\');
+        array[i] = require.resolve(array[i]).replace(/\//g, '\\').split('\\').filter(function(o,i,a){ return (a.length-1) !== i; }).join('\\');
     }
 
     return array;
