@@ -89,7 +89,7 @@ function findPipes(callback){
     pipes = [];
 
     for(var i = 0; i < pipLocations.length; i++){
-        pipe = require(pipLocations[i]);
+        pipe = require(pipLocations[i] + '/index.js');
         config = require(pipLocations[i] + '/config.json');
 
         if(!config.id){
