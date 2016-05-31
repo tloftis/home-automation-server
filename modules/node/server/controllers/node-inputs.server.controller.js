@@ -198,10 +198,9 @@ exports.change = function(req, res){
                 pipe = link.pipes[i];
                 currentPipe = pipeHash[pipe.pipeId];
 
-                //Type check
                 if(currentPipe.inType){
                     if(currentPipe.inType instanceof Array){
-                        if(!currentPipe.inType.indexOf(typeof value)){
+                        if(currentPipe.inType.indexOf(typeof value) === -1){
                             return next(); //not one of the right types, end
                         }
                     }else{

@@ -30,7 +30,7 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
                 $scope.link = link;
 
                 for(var i = 0; i < link.pipes.length; i++){
-                    pipe = pipeHash[link.pipes[i].id];
+                    pipe = pipeHash[link.pipes[i].pipeId];
                     link.pipes[i].name = pipe.name;
                     link.pipes[i].description = pipe.description;
                 }
@@ -45,7 +45,7 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
 
         $scope.removePipe = function(pipeId){
             for(var i = 0; i < $scope.link.pipes.length; i++){
-                if($scope.link.pipes[i].id === pipeId){
+                if($scope.link.pipes[i].pipeId === pipeId){
                     $scope.link.pipes.splice(i, 1);
                     return;
                 }
@@ -53,7 +53,7 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
         };
 
         $scope.addPipe = function(pipeId){
-            var index = $scope.link.pipes.push({ id: pipeId }),
+            var index = $scope.link.pipes.push({ pipeId: pipeId }),
                 pipe = pipeHash[pipeId];
             index--;
 

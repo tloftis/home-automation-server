@@ -56,7 +56,7 @@ exports.update = function (req, res){
 
     if(addLink.pipes && addLink.pipes instanceof Array){
         link.pipes = addLink.pipes.map(function(pipe){
-            return { pipeId: pipe.id, data: pipe.data }
+            return { pipeId: pipe.pipeId, data: pipe.data }
         });
 
         link.markModified('pipes');
