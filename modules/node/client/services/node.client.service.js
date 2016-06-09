@@ -4,6 +4,10 @@ angular.module('node').service('nodeService', ['Utility',
     function (Utility) {
         var service = {};
 
+        service.updateNodes = function (){
+            return Utility.http.put('node');
+        };
+
         service.getOutputs = function (){
             return Utility.http.get('output');
         };

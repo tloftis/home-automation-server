@@ -11,6 +11,14 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
             });
         };
 
+        $scope.updateNodes = function(){
+            nodeService.updateNodes().then(function(){
+                return nodeService.getNodes();
+            }).then(function(nodes){
+                $scope.nodes = nodes;
+            });
+        };
+
         $scope.addOutput = function(node){
             $state.go('node.nodes.edit.output', { nodeId: node.id });
         };

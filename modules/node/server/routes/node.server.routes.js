@@ -11,7 +11,8 @@ var adminPolicy = require('../policies/node.server.policy'),
 module.exports = function (app) {
     // Users collection routes
     app.route('/api/node').
-        get(node.list);
+        get(node.list).
+        put(node.updateNodes);
 
     app.route('/api/node/:nodeId').
         get(node.get).

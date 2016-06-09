@@ -313,7 +313,20 @@ function updateDrivers(callback){
     }, callback);
 }
 
-function updateAll(){
+function updateAll(callback){
+    nodes = [];
+    outputs = [];
+    inputs = [];
+    outputDrivers = [];
+    inputDrivers = [];
+    pipes = [];
+    pipeHash = {};
+    inputDriverHash = {};
+    outputDriverHash = {};
+    nodeHash = {};
+    outputHash = {};
+    inputHash = {};
+
     findPipes(function(){
         console.log('Pipes Found');
 
@@ -331,6 +344,7 @@ function updateAll(){
 
                         updateDrivers(function(){
                             console.log('Updated Drivers');
+                            if(callback){ callback(); }
                         });
                     });
                 });
@@ -352,6 +366,12 @@ exports.nodeHash = nodeHash;
 exports.inputHash = inputHash;
 exports.outputHash = outputHash;
 exports.pipeHash = pipeHash;
+
+exports.updateNodes = function(req, res){
+    updateAll(function(){
+        res.send('Pipes Updated!');
+    });
+};
 
 exports.list = function(req, res){
     res.json(nodes);
