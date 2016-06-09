@@ -16,9 +16,6 @@ module.exports = function (app) {
         post(inputs.change).
         delete(inputs.remove);
 
-    app.route('/api/input/drivers').
-        get(inputs.listDrivers);
-
     app.route('/api/input/drivers/:inputDriverId').
         get(inputs.getDriver);
 

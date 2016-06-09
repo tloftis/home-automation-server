@@ -17,10 +17,6 @@ module.exports = function (app) {
         put(outputs.update).
         delete(outputs.remove);
 
-    // Users collection routes
-    app.route('/api/output/drivers').
-        get(outputs.listDrivers);
-
     app.route('/api/output/drivers/:outputDriverId').
         get(outputs.getDriver);
 

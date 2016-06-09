@@ -24,14 +24,6 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.get('node');
         };
 
-        service.getInputDrivers = function (){
-            return Utility.http.get('input/drivers');
-        };
-
-        service.getOutputDrivers = function (){
-            return Utility.http.get('output/drivers');
-        };
-
         service.getNode = function (node){
             var id = node;
             if(node && node.id) id = node.id;

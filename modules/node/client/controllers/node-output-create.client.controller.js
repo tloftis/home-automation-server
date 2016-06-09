@@ -9,10 +9,7 @@ angular.module('node').controller('nodeOutputCreateController', ['$scope', '$sta
         $scope.init = function () {
             nodeService.getNode($stateParams.nodeId).then(function(node){
                 $scope.node = node;
-            });
-
-            nodeService.getOutputDrivers().then(function(drivers){
-                $scope.drivers = drivers;
+                $scope.drivers = node.outputDrivers;
             });
         };
 

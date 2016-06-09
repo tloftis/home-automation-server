@@ -12,8 +12,6 @@ var _ = require('lodash'),
 var nodes = [],
     outputs = [],
     inputs = [],
-    outputDrivers = [],
-    inputDrivers = [],
     inputDriverHash = {},
     outputDriverHash = {},
     nodeHash = {},
@@ -134,7 +132,9 @@ function searchForNodes(callback){
                         ip: address,
                         name: node.name || '',
                         description: node.description || '',
-                        location: node.location || ''
+                        location: node.location || '',
+                        inputDrivers : [],
+                        outputDrivers : []
                     };
 
                     nodes.push(newNode);
@@ -264,11 +264,10 @@ function updateDrivers(callback){
                             description: driver.description,
                             type: driver.type,
                             config: driver.config,
-                            id: driver.id,
-                            node: node
+                            id: driver.id
                         };
 
-                        outputDrivers.push(newDriver);
+                        node.outputDrivers.push(newDriver);
                         outputDriverHash[newDriver.id] = newDriver;
                         next();
                     },function(){
@@ -295,11 +294,10 @@ function updateDrivers(callback){
                             type: driver.location,
                             description: driver.description,
                             config: driver.config,
-                            id: driver.id,
-                            node: node
+                            id: driver.id
                         };
 
-                        inputDrivers.push(newDriver);
+                        node.inputDrivers.push(newDriver);
                         inputDriverHash[newDriver.id] = newDriver;
                         next();
                     },function(){
@@ -317,8 +315,6 @@ function updateAll(callback){
     nodes = [];
     outputs = [];
     inputs = [];
-    outputDrivers = [];
-    inputDrivers = [];
     pipes = [];
     pipeHash = {};
     inputDriverHash = {};
@@ -358,8 +354,6 @@ exports.nodes = nodes;
 exports.outputs = outputs;
 exports.inputs = inputs;
 exports.pipes = pipes;
-exports.outputDrivers = outputDrivers;
-exports.inputDrivers = inputDrivers;
 exports.outputDriverHash = outputDriverHash;
 exports.inputDriverHash = inputDriverHash;
 exports.nodeHash = nodeHash;
