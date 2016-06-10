@@ -28,7 +28,7 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
         };
 
         $scope.edit = function(node){
-            $state.go('node.edit', { nodeId: node.id });
+            $state.go('node.nodes.edit', { nodeId: node.id });
         };
     }
 ]);

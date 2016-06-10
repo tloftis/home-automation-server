@@ -14,7 +14,7 @@ angular.module('node').controller('nodeUpdateController', ['$scope', '$state', '
         $scope.update = function(node){
             nodeService.updateNode(node, node).then(function(newNode){
                 $scope.node = newNode;
-                $state.go('node.list');
+                $state.go('node.nodes');
             });
         };
     }
