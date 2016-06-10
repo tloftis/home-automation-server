@@ -33,6 +33,7 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
                     pipe = pipeHash[link.pipes[i].pipeId];
                     link.pipes[i].name = pipe.name;
                     link.pipes[i].description = pipe.description;
+                    link.pipes[i].userInType = pipe.userInType;
                 }
             });
         };
@@ -53,12 +54,32 @@ angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state
         };
 
         $scope.addPipe = function(pipeId){
+            if(!pipeHash[pipeId]){ return; }
             var index = $scope.link.pipes.push({ pipeId: pipeId }),
                 pipe = pipeHash[pipeId];
             index--;
 
             $scope.link.pipes[index].name = pipe.name;
             $scope.link.pipes[index].description = pipe.description;
+            $scope.link.pipes[index].userInType = pipe.userInType;
+        };
+
+        $scope.pipeDown = function(index){
+            if(index+1 >= $scope.link.pipes.length){
+                return;
+            }
+
+            var item = $scope.link.pipes.splice(index, 1);
+            $scope.link.pipes.splice(index+1, 0, item[0]);
+        };
+
+        $scope.pipeUp = function(index){
+            if(!index){
+                return;
+            }
+
+            var item = $scope.link.pipes.splice(index, 1);
+            $scope.link.pipes.splice(index-1, 0, item[0]);
         };
 
         $scope.$watch('link.outputId', function(newVal, oldVal){

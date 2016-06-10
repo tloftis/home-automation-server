@@ -4,6 +4,7 @@
     "inType": [
         "boolean"
     ],
+    "userInType": "",
     "description": "Inverses any boolean",
     "id": "b46457532c6ecd28aa6de3e3b4e23d78f55c2a0a3924ab1768"
 }

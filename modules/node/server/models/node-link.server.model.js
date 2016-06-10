@@ -27,6 +27,7 @@ var NodeLinkSchema = new Schema({
     pipes: [{
         data: {
             trim: false,
+            type: mongoose.Schema.Types.Mixed,
             required: false
         },
         pipeId:{

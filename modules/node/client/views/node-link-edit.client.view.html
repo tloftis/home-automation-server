@@ -10,7 +10,7 @@
             <div class="form-group">
                 <label for="outputLink">Output</label>
 
-                <select id="outputLink" data-ng-model="link.outputId">
+                <select id="outputLink" data-ng-model="link.outputId"  class="form-control">
                     <option data-ng-repeat="output in outputs track by $index" value="{{output.id}}" data-ng-selected="output.id === link.outputId" required>{{output.name}}</option>
                 </select>
             </div>
@@ -18,7 +18,7 @@
             <div class="form-group">
                 <label for="inputLink">Input</label>
 
-                <select id="inputLink" data-ng-model="link.inputId">
+                <select id="inputLink" data-ng-model="link.inputId" class="form-control">
                     <option data-ng-repeat="input in inputs track by $index" value="{{input.id}}" data-ng-selected="input.id === link.inputId" required>{{input.name}}</option>
                 </select>
             </div>
@@ -36,6 +36,10 @@
                             <strong>Description</strong>
                         </td>
 
+                        <td class="text-center">
+                            <strong>User Input</strong>
+                        </td>
+
                         <td class="text-center"></td>
                     </tr>
 
@@ -43,8 +47,34 @@
                         <td>{{pipe.name}}</td>
                         <td>{{pipe.description}}</td>
 
+                        <td class="text-center"  data-ng-if="pipe.userInType"
+                            data-ng-init="valType = pipe.userInType.toLowerCase(); setVal = (valType === 'boolean') ? false : (valType === 'number') ? 0 : (valType === 'string') ? '' : undefined">
+                            <div class="row form-group text-center" style="margin-left: 1%; margin-right: 1%">
+                                <input data-ng-model="pipe.data" class="form-control"
+                                       type="{{(valType === 'boolean') ? 'checkbox' : (valType === 'number') ? 'number' : (valType === 'string') ? 'text' : ''}}"></input>
+                            </div>
+                        </td>
+
+                        <td class="text-center"  data-ng-if="!pipe.userInType">
+                            No Input Needed
+                        </td>
+
                         <td>
-                            <button class="btn btn-danger" ng-click="removePipe(pipe.pipeId)">Remove</button>
+                            <button class="btn btn-danger" ng-click="removePipe(pipe.pipeId)">
+                                <i class="fa fa-trash-o"></i>
+                            </button>
+                        </td>
+
+                        <td>
+                            <div class="input-group-btn-vertical">
+                                <button class="btn btn-default" type="button" ng-click="pipeUp($index)">
+                                    <i class="fa fa-caret-up"></i>
+                                </button>
+
+                                <button class="btn btn-default" type="button" ng-click="pipeDown($index)">
+                                    <i class="fa fa-caret-down"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
 
@@ -53,11 +83,11 @@
                     </tr>
                 </table>
 
-                <select id="inputLink" data-ng-model="selectedPipe" class="prepend-bottom-10">
-                    <option data-ng-repeat="pipe in pipes track by $index" value="{{pipe.id}}" required>{{pipe.name}}</option>
+                <select id="inputLink" data-ng-model="selectedPipe" class="prepend-bottom-10 form-control">
+                    <option data-ng-repeat="pipe in pipes track by $index" value="{{pipe.id}}" required>{{pipe.name}} - {{pipe.description}}</option>
                 </select>
 
-                <div class="row prepend-top-10">
+                <div class="row" style="margin-top: 10px;">
                     <button class="btn btn-info"
                             ng-click="addPipe(selectedPipe)">Add Pipe</button>
                 </div>

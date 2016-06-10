@@ -32,7 +32,33 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
             $state.go('node.links.add');
         };
 
-        $scope.addPipe = function(pipe){
+        $scope.addPipe = function(pipeId){
+            if(!pipeHash[pipeId]){ return; }
+            var index = $scope.link.pipes.push({ pipeId: pipeId }),
+                pipe = pipeHash[pipeId];
+            index--;
+
+            $scope.link.pipes[index].name = pipe.name;
+            $scope.link.pipes[index].description = pipe.description;
+            $scope.link.pipes[index].userInType = pipe.userInType;
+        };
+
+        $scope.pipeDown = function(index){
+            if(index+1 >= $scope.link.pipes.length){
+                return;
+            }
+
+            var item = $scope.link.pipes.splice(index, 1);
+            $scope.link.pipes.splice(index+1, 0, item[0]);
+        };
+
+        $scope.pipeUp = function(index){
+            if(!index){
+                return;
+            }
+
+            var item = $scope.link.pipes.splice(index, 1);
+            $scope.link.pipes.splice(index-1, 0, item[0]);
         };
 
         $scope.$watch('link.outputId', function(newVal, oldVal){

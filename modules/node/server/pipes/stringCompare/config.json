@@ -1,0 +1,10 @@
+{
+    "name": "stringCompare",
+    "outType": "string",
+    "inType": [
+        "string"
+    ],
+    "userInType": "string",
+    "description": "Compares in string to user string, if it matches returns string",
+    "id": "40a53a192ac1307b51b5f8852b2293cfda1b5bc3a31ed09b25"
+}

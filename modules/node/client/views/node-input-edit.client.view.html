@@ -24,7 +24,7 @@
                     <div class="form-group">
                         <label for="description">Driver</label>
 
-                        <select id="singleSelect" data-ng-model="input.driverId">
+                        <select id="singleSelect" data-ng-model="input.driverId" class="form-control">
                             <option data-ng-repeat="driver in drivers track by $index" value="{{driver.id}}" data-ng-selected="driver.id === input.driverId" required>{{driver.name}}</option>
                         </select>
                     </div>
