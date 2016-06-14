@@ -200,6 +200,8 @@ exports.change = function(req, res){
                 var userInput = pipe.data,
                     currentPipe = pipeHash[pipe.pipeId];
 
+                if(!currentPipe){ return; }
+
                 var index = pipeLine.push(function(val){
                     currentPipe.funct(val, userInput, function(val){
                         if(typeof val !== 'undefined'){
@@ -209,6 +211,10 @@ exports.change = function(req, res){
                 });
             });
 
+            if(pipeLine.length !== link.pipes.length){ return; }
+
+            //This is hacky, the set function needs to be stripped out of the express middleware
+            //and exposed to call directly, the express middleware will call this new function as well
             var fakeRes = {
                 send: function(){ },
                 json: function(){ },
@@ -221,7 +227,7 @@ exports.change = function(req, res){
                 outputController.set({ output: output,
                     body: {
                         value: val,
-                        type:type
+                        type: typeof val
                     }
                 }, fakeRes);
             });
@@ -229,7 +235,7 @@ exports.change = function(req, res){
             pipeLine[0](value);
         });
 
-        res.send('Updated Successfully!');
+        res.send('Updated Successfully');
     });
 };
 
