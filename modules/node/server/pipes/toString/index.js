@@ -1,3 +1,3 @@
-exports.funct = function(value, userInput){
-    return (value + '');
+exports.funct = function(value, userInput, callback){
+    return callback(value + '');
 };

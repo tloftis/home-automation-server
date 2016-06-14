@@ -1,5 +1,7 @@
-exports.funct = function(value, userInput){
+exports.funct = function(value, userInput, callback){
     if(value === userInput){
-        return value;
+        return callback(value);
     }
+
+    callback(undefined);
 };

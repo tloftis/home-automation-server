@@ -1,9 +1,9 @@
-exports.funct = function(value, userInput){
+exports.funct = function(value, userInput, callback){
     var out = +value;
 
     if(isNaN(out)){
         out = 0;
     }
 
-    return out;
+    return callback(out);
 };

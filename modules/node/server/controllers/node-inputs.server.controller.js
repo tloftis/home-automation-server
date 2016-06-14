@@ -190,59 +190,46 @@ exports.change = function(req, res){
             return res.send("Error getting input to output links");
         }
 
-        async.each(links, function(link, next){
-            var currentPipe,
-                pipe,
-                cloneValue = value,
+        links.forEach(function(link){
+            var pipeLine = [],
                 output = outputHash[link.outputId];
 
             if(!output){ return next(); }
 
-            for(var i = 0, len = link.pipes.length; i < len; i++){
-                pipe = link.pipes[i];
-                currentPipe = pipeHash[pipe.pipeId];
+            link.pipes.forEach(function(pipe){
+                var userInput = pipe.data,
+                    currentPipe = pipeHash[pipe.pipeId];
 
-                if(currentPipe.inType){
-                    if(currentPipe.inType instanceof Array){
-                        if(currentPipe.inType.indexOf(typeof cloneValue) === -1){
-                            return next(); //not one of the right types, end
+                var index = pipeLine.push(function(val){
+                    currentPipe.funct(val, userInput, function(val){
+                        if(typeof val !== 'undefined'){
+                            pipeLine[index](val);
                         }
-                    }else{
-                        if(currentPipe.inType !== typeof cloneValue){
-                            return next(); //If types don't match, end
-                        }
-                    }
-                }
+                    });
+                });
+            });
 
-                if(currentPipe){
-                    cloneValue = currentPipe.funct(cloneValue, pipe.data);
-                    if(typeof cloneValue === 'undefined'){ return next(); }
-                }else{
-                    return next(); //If no pipe, end
-                }
-            }
-
-            var callNext = function(){ return next(); };
-
-            //This seems the best route, but the set function should be separated into it's own function
-            //That would be called by the Express middleware set function and this
             var fakeRes = {
-                send: callNext,
-                json: callNext,
+                send: function(){ },
+                json: function(){ },
                 status: function(){
                     return fakeRes;
                 }
             };
 
-            outputController.set({ output: output,
-                body: {
-                    value: cloneValue,
-                    type:type
-                }
-            }, fakeRes);
-        }, function(){
-            res.send('Updated Successfully!');
+            pipeLine.push(function(val){
+                outputController.set({ output: output,
+                    body: {
+                        value: val,
+                        type:type
+                    }
+                }, fakeRes);
+            });
+
+            pipeLine[0](value);
         });
+
+        res.send('Updated Successfully!');
     });
 };
 
