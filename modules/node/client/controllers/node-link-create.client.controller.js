@@ -2,6 +2,7 @@
 
 angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
+        var pipeHash = {};
         $scope.authentication = Authentication;
         $scope.link = {};
         $scope.outputs = [];
@@ -19,6 +20,10 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
 
             nodeService.getPipes().then(function(pipes){
                 $scope.pipes = pipes;
+
+                for(var i = 0; i < pipes.length; i++){
+                    pipeHash[pipes[i].id] = pipes[i];
+                }
             });
         };
 
