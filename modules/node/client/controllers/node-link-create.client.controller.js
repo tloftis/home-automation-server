@@ -5,6 +5,7 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
         var pipeHash = {};
         $scope.authentication = Authentication;
         $scope.link = {};
+        $scope.link.pipes = [];
         $scope.outputs = [];
         $scope.inputs = [];
         $scope.pipes = [];
@@ -46,6 +47,15 @@ angular.module('node').controller('nodeLinkCreateController', ['$scope', '$state
             $scope.link.pipes[index].name = pipe.name;
             $scope.link.pipes[index].description = pipe.description;
             $scope.link.pipes[index].userInType = pipe.userInType;
+        };
+
+        $scope.removePipe = function(pipeId){
+            for(var i = 0; i < $scope.link.pipes.length; i++){
+                if($scope.link.pipes[i].pipeId === pipeId){
+                    $scope.link.pipes.splice(i, 1);
+                    return;
+                }
+            }
         };
 
         $scope.pipeDown = function(index){
