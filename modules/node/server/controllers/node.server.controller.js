@@ -291,8 +291,9 @@ function updateDrivers(callback){
                     async.each(newDrivers, function (driver, next){
                         var newDriver = {
                             name: driver.name,
-                            type: driver.location,
+                            location: driver.location,
                             description: driver.description,
+                            type: driver.type,
                             config: driver.config,
                             id: driver.id
                         };

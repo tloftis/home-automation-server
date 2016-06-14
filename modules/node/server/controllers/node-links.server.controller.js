@@ -6,7 +6,59 @@ var _ = require('lodash'),
     masterNode = require('./node.server.controller');
 
 var outputHash = masterNode.outputHash,
-    inputHash = masterNode.inputHash;
+    inputHash = masterNode.inputHash,
+    inputDriverHash = masterNode.inputDriverHash,
+    outputDriverHash = masterNode.outputDriverHash,
+    pipeHash = masterNode.pipeHash;
+
+function verifyPipe(inType, outType, pipes){
+    var currentType, finalType, pipe;
+
+    if(inType){
+        if(inType instanceof Array){
+            currentType = inType;
+        }else if(typeof inType === 'string'){
+            currentType = [inType];
+        }
+    }
+
+    if(!currentType){ return false; }
+
+    if(outType){
+        if(outType instanceof Array){
+            finalType = outType;
+        }else if(typeof outType === 'string'){
+            finalType = [outType];
+        }
+    }
+
+    if(!finalType){ return false; }
+
+    var typeTester = (inType, outType)=>{
+        for(var i = 0; i < inType.length; i++){
+            if(outType.indexOf(inType[i]) !== -1){
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    if(pipes){
+        for(var j = 0; j < pipes.length; j++){
+            pipe = pipeHash[pipes[j].pipeId];
+            pipe.inType = (pipe.inType instanceof Array)  ? pipe.inType : [pipe.inType];
+
+            if(!typeTester(pipe, currentType)){
+                return false;
+            }else{
+                currentType = pipe.inType;
+            }
+        }
+    }
+
+    return typeTester(finalType, currentType);
+}
 
 exports.list = function(req, res){
     NodeLink.find({}).lean().exec(function(err, links){
@@ -48,10 +100,12 @@ exports.remove = function (req, res){
 
 exports.update = function (req, res){
     var link = req.link,
-        addLink = req.body.link;
+        addLink = req.body.link,
+        input = inputHash[addLink.inputId],
+        output = outputHash[addLink.outputId];
 
-    if(addLink.inputId && inputHash[addLink.inputId]){ link.inputId = addLink.inputId; }
-    if(addLink.outputId && outputHash[addLink.outputId]){ link.outputId = addLink.outputId; }
+    if(addLink.inputId && input){ link.inputId = addLink.inputId; }
+    if(addLink.outputId && output){ link.outputId = addLink.outputId; }
     if(addLink.description){ link.description = addLink.description; }
 
     if(addLink.pipes && addLink.pipes instanceof Array){
@@ -61,6 +115,14 @@ exports.update = function (req, res){
 
         link.markModified('pipes');
     }
+
+    /*
+    if(!verifyPipe((inputDriverHash[input.driverId] || {}).type, (outputDriverHash[output.driverId] || {}).type, link.pipes)){
+        return res.status(400).send({
+            message: 'Type mismatch somewhere in path from input to output!'
+        });
+    }
+    */
 
     return link.save(function(err){
         if (err) {
