@@ -112,8 +112,11 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.description)) newInput.description = newNode.description;
 
     //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
-    if(!_.isUndefined(newNode.config) && !_.isUndefined(newNode.driverId)){
+    if(!_.isUndefined(newNode.driverId)){
         newInput.driverId = newNode.driverId;
+    }
+
+    if(!_.isUndefined(newNode.config)){
         newInput.config = {};
 
         for(var key in inputDriverHash[newNode.driverId].config){
@@ -190,6 +193,7 @@ exports.change = function(req, res){
         async.each(links, function(link, next){
             var currentPipe,
                 pipe,
+                cloneValue = value,
                 output = outputHash[link.outputId];
 
             if(!output){ return next(); }
@@ -200,19 +204,19 @@ exports.change = function(req, res){
 
                 if(currentPipe.inType){
                     if(currentPipe.inType instanceof Array){
-                        if(currentPipe.inType.indexOf(typeof value) === -1){
+                        if(currentPipe.inType.indexOf(typeof cloneValue) === -1){
                             return next(); //not one of the right types, end
                         }
                     }else{
-                        if(currentPipe.inType !== typeof value){
+                        if(currentPipe.inType !== typeof cloneValue){
                             return next(); //If types don't match, end
                         }
                     }
                 }
 
                 if(currentPipe){
-                    value = currentPipe.funct(value, pipe.data);
-                    if(typeof value === 'undefined'){ return next(); }
+                    cloneValue = currentPipe.funct(cloneValue, pipe.data);
+                    if(typeof cloneValue === 'undefined'){ return next(); }
                 }else{
                     return next(); //If no pipe, end
                 }
@@ -232,7 +236,7 @@ exports.change = function(req, res){
 
             outputController.set({ output: output,
                 body: {
-                    value: value,
+                    value: cloneValue,
                     type:type
                 }
             }, fakeRes);
