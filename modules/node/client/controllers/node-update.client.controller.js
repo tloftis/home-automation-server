@@ -9,6 +9,10 @@ angular.module('node').controller('nodeUpdateController', ['$scope', '$state', '
             nodeService.getNode($stateParams.nodeId).then(function(node){
                 $scope.node = node;
             });
+
+            nodeService.getDrivers().then(function(drivers){
+                $scope.drivers = drivers;
+            });
         };
 
         $scope.update = function(node){
@@ -17,5 +21,11 @@ angular.module('node').controller('nodeUpdateController', ['$scope', '$state', '
                 $state.go('node.nodes');
             });
         };
+
+        $scope.addDriver = function(driverId){
+            nodeService.addDriver($scope.node, driverId).then(function(node){
+                $scope.node = node
+            });
+        }
     }
 ]);

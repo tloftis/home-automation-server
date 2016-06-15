@@ -31,4 +31,98 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-xs-6" style="">
+            <label for="description">Node Drivers</label>
+
+            <table class="table table-striped table-bordered table-hover prepend-bottom-10">
+                <tr>
+                    <td class="text-center">
+                        <strong>Name</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <strong>Type</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <strong>Description</strong>
+                    </td>
+
+                    <td class="text-center"></td>
+                </tr>
+
+                <tr data-ng-repeat="driver in node.outputDrivers track by $index">
+                    <td>{{driver.name}}</td>
+                    <td>Output</td>
+                    <td>{{driver.description}}</td>
+
+                    <td>
+                        <button class="btn btn-danger" ng-click="removeDriver(driver.id)">
+                            <i class="fa fa-trash-o"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr data-ng-repeat="driver in node.inputDrivers track by $index">
+                    <td>{{driver.name}}</td>
+                    <td>Input</td>
+                    <td>{{driver.description}}</td>
+
+                    <td>
+                        <button class="btn btn-danger" ng-click="removeDriver(driver.id)">
+                            <i class="fa fa-trash-o"></i>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-xs-6">
+            <label for="description">Server Drivers</label>
+
+            <table class="table table-striped table-bordered table-hover prepend-bottom-10">
+                <tr>
+                    <td class="text-center">
+                        <strong>Name</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <strong>Type</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <strong>Description</strong>
+                    </td>
+
+                    <td class="text-center"></td>
+                </tr>
+
+                <tr data-ng-repeat="driver in drivers.outputDriver track by $index">
+                    <td>{{driver.config.name}}</td>
+                    <td>Output</td>
+                    <td>{{driver.config.description}}</td>
+
+                    <td>
+                        <button class="btn btn-success" ng-click="addDriver(driver.id)">
+                            <i class="fa fa-plus-square"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr data-ng-repeat="driver in drivers.inputDriver track by $index">
+                    <td>{{driver.config.name}}</td>
+                    <td>Input</td>
+                    <td>{{driver.config.description}}</td>
+
+                    <td>
+                        <button class="btn btn-success" ng-click="addDriver(driver.id)">
+                            <i class="fa fa-plus-square"></i>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>

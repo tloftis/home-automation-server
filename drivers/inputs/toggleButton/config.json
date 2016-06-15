@@ -1,0 +1,5 @@
+{
+    "name": "Toggle Button",
+    "type": "boolean",
+    "description": "Outputs a value every second true value"
+}

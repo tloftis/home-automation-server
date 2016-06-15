@@ -1,0 +1,5 @@
+{
+    "name": "toggleRelay",
+    "type": "boolean",
+    "description": "This relay will change state every value, regardless of value"
+}

@@ -6,6 +6,7 @@
 var adminPolicy = require('../policies/node.server.policy'),
     node = require('../controllers/node.server.controller.js'),
     outputs = require('../controllers/node-outputs.server.controller.js'),
+    drivers = require('../controllers/node-drivers.server.controller.js'),
     inputs = require('../controllers/node-inputs.server.controller.js');
 
 module.exports = function (app) {
@@ -23,6 +24,9 @@ module.exports = function (app) {
 
     app.route('/api/node/:nodeId/input').
         post(inputs.add);
+
+    app.route('/api/node/:nodeId/driver').
+        post(drivers.add);
 
     app.param('nodeId', node.nodeById);
 };

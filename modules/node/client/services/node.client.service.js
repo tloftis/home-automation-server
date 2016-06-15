@@ -8,6 +8,22 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('node');
         };
 
+        service.getDrivers = function (){
+            return Utility.http.get('driver');
+        };
+
+        service.addDriver = function (node, driver){
+            var id = node, driveId = driver;
+            if(node && node.id) id = node.id;
+            if(driver && driver.id) driveId = driver.id;
+
+            return Utility.http.post('node/' + id + '/driver', { driverId: driveId });
+        };
+
+        service.uploadDriver = function (){
+            return Utility.http.get('driver');
+        };
+
         service.getOutputs = function (){
             return Utility.http.get('output');
         };

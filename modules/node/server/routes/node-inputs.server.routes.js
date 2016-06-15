@@ -19,12 +19,6 @@ module.exports = function (app) {
     app.route('/api/input/drivers/:inputDriverId').
         get(inputs.getDriver);
 
-    /*
-    app.route('/api/input/:inputId/link/:linkId').
-        put(inputs.updateInputLinks).
-        post(inputs.addInputLink);
-    */
-
     app.param('inputId', inputs.inputById);
     app.param('inputDriverId', inputs.driverById);
 };

@@ -1,6 +1,11 @@
 'use strict';
 
 require('dotenv').load();
+global.rootDir = __dirname;
+
+global.rootRequire = function(){
+    return require;
+};
 
 require('./config/lib/app').start(function(app, db, config){
     if(config.secure.ssl && (config.port !== 80)){
