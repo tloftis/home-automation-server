@@ -17,16 +17,6 @@ function rationalizePaths(array){
     return array;
 }
 
-function bufferToArray(buffer) {
-    var arr = [];
-
-    for (var i = 0; i < buffer.length; ++i) {
-        arr[i] = buffer[i];
-    }
-
-    return arr;
-}
-
 var async = require('async'),
     _ = require('lodash'),
     request = require('request'),
@@ -101,8 +91,7 @@ exports.add = function (req, res){
     }
 
     var packer = tar.Pack({ noProprietary: true })
-        .on('error', onError),
-        buffArray = [];
+        .on('error', onError);
 
     fstream
         .Reader({ path: driver.dir, type: 'Directory' })
@@ -113,49 +102,40 @@ exports.add = function (req, res){
 
         .pipe(zlib.createGzip())
         .on('error', onError)
-        .on('data', function(data){
-            buffArray.push(data);
-        })
-        .on('finish', function(){
-            var info = {
-                url: url,
-                form: { driver: bufferToArray(Buffer.concat(buffArray)) }
-            };
+        .pipe(request.post(url, function (err, resq, body){
+            var newDrivers;
 
-            request.post(info, function (err, resq, body){
-                var newDrivers;
+            try {
+                newDrivers = JSON.parse(body);
+            } catch (err){
+                return res.status(400).send({
+                    message: 'Failure to upload driver!'
+                });
+            }
 
-                try {
-                    newDrivers = JSON.parse(body);
-                } catch (err){
-                    return res.status(400).send({
-                        message: 'Failure to upload driver!'
-                    });
-                }
+            if(newDrivers.message){
+                return res.status(400).send({
+                    message: newDrivers.message
+                });
+            }
 
-                if(newDrivers.message){
-                    return res.status(400).send({
-                        message: newDrivers.message
-                    });
-                }
+            if(inputDriverLocHash[driverId]){
+                node.inputDrivers = newDrivers;
 
-                if(inputDriverLocHash[driverId]){
-                    node.inputDrivers = newDrivers;
+                newDrivers.forEach(function(driver){
+                    inputDriverHash[driver.id] = driver;
+                });
+            }else{
+                node.outputDrivers = newDrivers;
 
-                    newDrivers.forEach(function(driver){
-                        inputDriverHash[driver.id] = driver;
-                    });
-                }else{
-                    node.outputDrivers = newDrivers;
+                newDrivers.forEach(function(driver){
+                    outputDriverHash[driver.id] = driver;
+                });
+            }
 
-                    newDrivers.forEach(function(driver){
-                        outputDriverHash[driver.id] = driver;
-                    });
-                }
-
-                return res.send(node);
-            });
-        });
+            return res.send(node);
+        }))
+        .on('error', onError);
 };
 
 exports.driverById = function (req, res, next, id){
