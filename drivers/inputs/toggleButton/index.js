@@ -14,6 +14,10 @@ var inputInterval = setInterval(function(){
     }
 }, 10);
 
+function isDefined(val){
+    return ((typeof val !== 'undefined') && (val !== null));
+}
+
 //Specify the pin the input is on, and specify a callback that fires every time the input pin state changes, giving the current value as an arg
 function digChange(pinConfig, funct){
     var pin = +pinConfig.pin; //this is here to make sure nothing gets changed out of scope, although that should only happen if it is an obj

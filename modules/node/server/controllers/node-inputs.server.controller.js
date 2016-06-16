@@ -139,7 +139,7 @@ exports.add = function (req, res){
             try{
                 newInput = JSON.parse(body);
             }catch(err){
-                return res.status(400).send(body || 'Unable to get updated input config');
+                return res.status(400).send('Unable to get updated input config');
             }
 
             input.name = newInput.name;
