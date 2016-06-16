@@ -2,7 +2,9 @@
 
 var monitoredPins = {};//Holds callbacks for when pins change state
 var master = require('../../../config.js'),
-    async = require('async');
+    gpio = require('wiring-pi');
+
+gpio.setup('gpio');
 
 //This monitores the pins held by the monitoredPins array checking them every 10 ms
 var inputInterval = setInterval(function(){
@@ -10,7 +12,7 @@ var inputInterval = setInterval(function(){
 
     //The key is the pin number
     for(key in monitoredPins){
-        monitoredPins[key].inter(master.gpio.digitalRead(+key));
+        monitoredPins[key].inter(gpio.digitalRead(+key));
     }
 }, 10);
 
@@ -24,7 +26,7 @@ function digChange(pinConfig, funct){
     }else{
         //a interval will come by and call inter giving the current state of the pin as input, that is compared with the past value
         //If they don't match, then the state must have changed, call all calbacks, then update the past var to the new val
-        pinConfig.val = master.gpio.digitalRead(pin);
+        pinConfig.val = gpio.digitalRead(pin);
         monitoredPins[pin] = {};
 
         //just feed this function with the pins current state and it will fire and update if it had changed
@@ -68,14 +70,6 @@ function isBoolean(val){
     return typeof val === 'boolean';
 }
 
-exports.config = {
-    pin: {
-        name: 'Pin',
-        required: true,
-        pin: true
-    }
-};
-
 var setup = function(config, listener) {
     var _this = this;
 
@@ -89,7 +83,7 @@ var setup = function(config, listener) {
         return new Error('Unable to register on specified pin');
     }
 
-    master.gpio.pinMode(config.pin, master.gpio.INPUT);
+    gpio.pinMode(config.pin, gpio.INPUT);
 
     _this.config = {};
     _this.config.pin = config.pin;

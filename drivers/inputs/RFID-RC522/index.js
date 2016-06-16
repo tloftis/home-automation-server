@@ -1,7 +1,6 @@
 'use strict';
 
 var master = require('../../../config.js');
-exports.config = {};
 
 var setup = function(config, listener) {
     var _this = this, pin;

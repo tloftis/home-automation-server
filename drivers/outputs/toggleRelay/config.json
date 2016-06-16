@@ -1,5 +1,20 @@
 {
     "name": "toggleRelay",
     "type": "boolean",
+    "packages": [
+        "wiring-pi"
+    ],
+    "config":{
+        "pin": {
+            "name": "Pin",
+            "required": true,
+            "pin": true
+        },
+        "val": {
+            "name": "Current Value",
+            "type": "boolean",
+            "required": false
+        }
+    },
     "description": "This relay will change state every value, regardless of value"
 }

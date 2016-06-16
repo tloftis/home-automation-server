@@ -1,5 +1,20 @@
 {
     "name": "Toggle Button",
     "type": "boolean",
+    "packages": [
+        "wiring-pi"
+    ],
+    "config":{
+        "pin": {
+            "name": "Pin",
+            "required": true,
+            "pin": true
+        },
+        "onRise": {
+            "name": "On Rise",
+            "required": false,
+            "type": "boolean"
+        }
+    },
     "description": "Outputs a value every second true value"
 }
