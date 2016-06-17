@@ -31,6 +31,7 @@ var async = require('async'),
     outputDriverLocHash = {},
     inputDriverLocHash = {},
     masterNode = require('./node.server.controller'),
+    nodes = masterNode.nodes,
     inputDriverHash = masterNode.inputDriverHash,
     outputDriverHash = masterNode.outputDriverHash;
 
@@ -138,10 +139,44 @@ exports.add = function (req, res){
         .on('error', onError);
 };
 
+exports.removeDriver = function (req, res){
+    var driver = req.driver;
+    var node, isInput = false;
+
+    if(!nodes.some(function(curNode){
+            if(curNode.inputDrivers.indexOf(driver) !== -1){
+                node = curNode;
+                isInput = true;
+                return true;
+            }
+
+            if(curNode.outputDrivers.indexOf(driver) !== -1){
+                node = curNode;
+                return true;
+            }
+    })){
+        return res.status(400).send('Node to remove driver from was not found');
+    }
+
+    request.del('http://' + node.ip + '/api/drivers/' + driver.id, function (err, resq, body) {
+        if (err){ return res.status(400).send('Error attempting to add input'); }
+
+        if(isInput){
+            node.inputDrivers.splice(node.inputDrivers.indexOf(driver), 1);
+            delete inputDriverHash[driver.id];
+        }else{
+            node.outputDrivers.splice(node.outputDrivers.indexOf(driver), 1);
+            delete outputDriverHash[driver.id];
+        }
+
+        res.json(driver);
+    });
+};
+
 exports.driverById = function (req, res, next, id){
-    if(!(req.driver = outputDriverHash[id])){
+    if(!(req.driver = (outputDriverHash[id] || inputDriverHash[id]))){
         return res.status(400).send({
-            message: 'Output driver id not found'
+            message: 'Driver id not found'
         });
     }
 

@@ -20,6 +20,13 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.post('node/' + id + '/driver', { driverId: driveId });
         };
 
+        service.removeDriver = function (driver){
+            var driveId = driver;
+            if(driver && driver.id) driveId = driver.id;
+
+            return Utility.http.delete('driver/' + driveId, { driverId: driveId });
+        };
+
         service.uploadDriver = function (){
             return Utility.http.get('driver');
         };

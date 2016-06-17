@@ -10,5 +10,8 @@ module.exports = function (app) {
     app.route('/api/driver').
         get(drivers.list);
 
-    //app.param('driversId', drivers.inputById);
+    app.route('/api/driver/:anyDriversId').
+        delete(drivers.removeDriver);
+
+    app.param('anyDriversId', drivers.driverById);
 };
