@@ -51,17 +51,17 @@
                             <pre class="text-left" data-ng-show="showConfig">{{ output.config | json }}</pre>
                         </td>
 
-                        <td class="text-center"
+                        <td class="text-center form-group"
                             data-ng-init="valType = output.driver.type.toLowerCase(); setVal = (valType === 'boolean') ? false : (valType === 'number') ? 0 : (valType === 'string') ? '' : undefined">
-                            <div class="row">
-                                <input data-ng-model="setVal" type="{{(valType === 'boolean') ? 'checkbox' : (valType === 'number') ? 'number' : (valType === 'string') ? 'text' : ''}}"></input>
+                            <div class="text-center">
+                                <input data-ng-model="setVal"  class="form-control" style="margin-left: 1%; margin-right: 1%"
+                                       type="{{(valType === 'boolean') ? 'checkbox' : (valType === 'number') ? 'number' : (valType === 'string') ? 'text' : ''}}"></input>
                             </div>
                         </td>
 
                         <td class="text-center">
-                            <div class="row">
-                                <button class="btn btn-default row prepend-top-10" ng-click="set(output, (setVal))">Set</button>
-                            </div>
+                            <button class="btn btn-default"
+                                    ng-click="set(output, (setVal))" style="margin-left: 5%; margin-right: 5%;">Set</button>
                         </td>
 
                         <td class="text-center">

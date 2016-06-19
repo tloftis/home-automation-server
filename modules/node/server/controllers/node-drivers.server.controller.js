@@ -36,7 +36,6 @@ var async = require('async'),
     outputDriverHash = masterNode.outputDriverHash;
 
 function updateDriverLocations(){
-    //These have to stay in this order for this to work
     driverId = 0;
 
     outputDriverLocs = rationalizePaths(glob.sync('./drivers/outputs/*/index.js', { cwd: rootDir }));
@@ -85,10 +84,15 @@ exports.add = function (req, res){
         });
     }
 
+    var called = false;
     function onError(err) {
-        return res.status(400).send({
-            message: err.message
-        });
+        if(!called){
+            res.status(400).send({
+                message: (err || {}).message || 'An unknown error has occurred'
+            });
+        }
+
+        called = true;
     }
 
     var packer = tar.Pack({ noProprietary: true })

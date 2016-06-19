@@ -1,0 +1,14 @@
+{
+    "name": "invRepeat",
+    "outType": [
+        "boolean",
+        "string",
+        "number"
+    ],
+    "inType": [
+        "boolean"
+    ],
+    "userInType": "number",
+    "description": "Outputs received boolean, waits user specified MS, outputs inversed value of original boolean",
+    "id": "696273551064148effd636caf82f2925f2d68b046e2714037c"
+}

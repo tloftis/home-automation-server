@@ -1,0 +1,10 @@
+{
+    "name": "typeString",
+    "type": "string",
+    "packages": [
+        "robotjs"
+    ],
+    "config":{
+    },
+    "description": "This will type the given string as if the keyboard was used"
+}

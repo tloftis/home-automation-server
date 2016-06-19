@@ -139,8 +139,12 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.description)) newOutput.description = newNode.description;
 
     //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
-    if(!_.isUndefined(newNode.config) && !_.isUndefined(newNode.driverId)){
+    if(!_.isUndefined(newNode.driverId)){
         newOutput.driverId = newNode.driverId;
+    }
+
+    //Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
+    if(!_.isUndefined(newNode.config)){
         newOutput.config = {};
 
         for(var key in outputDriverHash[newNode.driverId].config){

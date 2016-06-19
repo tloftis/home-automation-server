@@ -1,0 +1,10 @@
+{
+    "name": "Press Key",
+    "type": "string",
+    "packages": [
+        "robotjs"
+    ],
+    "config":{
+    },
+    "description": "Every key pressed on the machine will be given as a string"
+}

@@ -194,7 +194,7 @@ exports.change = function(req, res){
             var pipeLine = [],
                 output = outputHash[link.outputId];
 
-            if(!output){ return next(); }
+            if(!output){ return; }
 
             link.pipes.forEach(function(pipe){
                 var userInput = pipe.data,
