@@ -12,7 +12,7 @@ angular.module('core').factory('Utility', ['$http', 'toastr', '$q',
                 return error.message;
             }else if (error.error && typeof error.error === 'string') {
                 return error.error;
-            }else if (error.data && error.data.message &&  typeof error.data.message === 'string') {
+            }else if( typeof (error.data || {}).message === 'string') {
                 return error.data.message;
             }else{
                 return 'Missing or strangely formatted error message received';

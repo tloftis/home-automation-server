@@ -42,4 +42,14 @@ var NodeLinkSchema = new Schema({
     }
 });
 
+NodeLinkSchema.pre('save', function (next) {
+    var now = new Date();
+
+    if (!this.created) {
+        this.created = now;
+    }
+
+    next();
+});
+
 mongoose.model('NodeLink', NodeLinkSchema);
