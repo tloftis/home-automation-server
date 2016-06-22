@@ -76,18 +76,18 @@ angular.module('node').service('nodeService', ['Utility',
             var id = node;
             if(node && node._id) id = node._id;
 
-            return Utility.http.put('link/' + id, {link:link});
+            return Utility.http.put('link/' + id, { link:link });
         };
 
         service.addLink = function (link){
-            return Utility.http.post('link', {link:link});
+            return Utility.http.post('link', { link:link });
         };
 
         service.updateNode = function (node, config){
             var id = node;
             if(node && node.id) id = node.id;
 
-            return Utility.http.put('node/' + id, {node: config});
+            return Utility.http.put('node/' + id, { node: config });
         };
 
         service.getOutput = function (node){
@@ -136,25 +136,25 @@ angular.module('node').service('nodeService', ['Utility',
         service.outputUpdate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.put('output/edit/' + id, { node: newNode});
+            return Utility.http.put('output/edit/' + id, { node: newNode });
         };
 
         service.inputUpdate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.put('input/edit/' + id, { node: newNode});
+            return Utility.http.put('input/edit/' + id, { node: newNode });
         };
 
         service.outputCreate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.post('node/' + id + '/output', { output: newNode});
+            return Utility.http.post('node/' + id + '/output', { output: newNode });
         };
 
         service.inputCreate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.post('node/' + id + '/input', { input: newNode});
+            return Utility.http.post('node/' + id + '/input', { input: newNode });
         };
 
         return service;

@@ -1,17 +1,17 @@
 (function () {
-  'use strict';
+    'use strict';
 
-  angular
+    angular
     .module('chat')
     .run(menuConfig);
 
-  menuConfig.$inject = ['Menus'];
+    menuConfig.$inject = ['Menus'];
 
-  function menuConfig(Menus) {
+    function menuConfig(Menus) {
     // Set top bar menu items
-    Menus.addMenuItem('topbar', {
-      title: 'Chat',
-      state: 'chat'
-    });
-  }
+        Menus.addMenuItem('topbar', {
+            title: 'Chat',
+            state: 'chat'
+        });
+    }
 })();

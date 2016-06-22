@@ -77,17 +77,6 @@ module.exports = function (grunt) {
                 logConcurrentOutput: true
             }
         },
-        jshint: {
-            all: {
-                src: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e),
-                options: {
-                    jshintrc: true,
-                    node: true,
-                    mocha: true,
-                    jasmine: true
-                }
-            }
-        },
         eslint: {
             options: {},
             target: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e)
@@ -279,5 +268,5 @@ module.exports = function (grunt) {
     grunt.registerTask('debug', ['env:dev', 'lint', 'mkdir:upload', 'copy:localConfig', 'concurrent:debug']);
 
     // Run the project in production mode
-    grunt.registerTask('prod', ['lint', 'build', 'env:prod', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);
+    grunt.registerTask('prod', ['build', 'env:prod', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);
 };

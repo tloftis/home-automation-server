@@ -3,7 +3,7 @@
 //Only can find address in a subnet mask of 255.255.255.0
 var _ = require('lodash'),
     async = require('async'),
-	request = require('request'),
+	    request = require('request'),
     fs = require('fs'),
     os = require('os'),
     crypto = require('crypto'),
@@ -56,7 +56,7 @@ function rationalizePaths(array){
     for(var i = 0, len = array.length; i < len; i++){
         //I know, this is very unneeded, but I like having it because of it's over bearing round-a-bout-ness
         path = require.resolve(array[i]);
-        array[i] = { index: path, config: path.replace(/index\.js/, 'config.json')};
+        array[i] = { index: path, config: path.replace(/index\.js/, 'config.json') };
     }
 
     return array;

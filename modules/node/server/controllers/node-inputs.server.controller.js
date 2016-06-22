@@ -178,7 +178,7 @@ exports.change = function(req, res){
     }
 
     if(!input){
-        return res.status(400).send("Unknown Input posted to server");
+        return res.status(400).send('Unknown Input posted to server');
     }
 
     var query = {
@@ -187,7 +187,7 @@ exports.change = function(req, res){
 
     NodeLink.find(query).exec(function(err, links){
         if(err){
-            return res.send("Error getting input to output links");
+            return res.send('Error getting input to output links');
         }
 
         links.forEach(function(link){

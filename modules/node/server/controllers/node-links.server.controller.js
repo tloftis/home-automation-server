@@ -34,22 +34,18 @@ function verifyPipe(inType, outType, pipes){
 
     if(!finalType){ return false; }
 
-    var typeTester = (inType, outType)=>{
-        for(var i = 0; i < inType.length; i++){
-            if(outType.indexOf(inType[i]) !== -1){
-                return true;
-            }
-        }
-
-        return false;
+    var typeTester = function(inType, outType) {
+        return (inType || []).some(function(item){
+            return (outType || []).indexOf(item) !== -1;
+        })
     };
 
     if(pipes){
         for(var j = 0; j < pipes.length; j++){
             pipe = pipeHash[pipes[j].pipeId];
-            pipe.inType = (pipe.inType instanceof Array)  ? pipe.inType : [pipe.inType];
+            pipe.inType = (pipe.inType instanceof Array) ? pipe.inType : [pipe.inType];
 
-            if(!typeTester(pipe, currentType)){
+            if(!typeTester(pipe.inType, currentType)){
                 return false;
             }else{
                 currentType = pipe.inType;
@@ -71,7 +67,7 @@ exports.list = function(req, res){
     });
 };
 
-exports.get = function (req, res){
+exports.get = function(req, res){
     var link = req.link._doc;
 
     res.json(_.extend({

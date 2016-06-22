@@ -4,15 +4,15 @@ angular.module('core').factory('Utility', ['$http', 'toastr', '$q',
     function ($http, toastr, $q) {
         var servUtil = {};
         var errorParser = function (error) {
-            if (typeof error  === 'undefined') {
+            if (typeof error === 'undefined') {
                 return 'blank error message received';
-            }else if (typeof error  === 'string') {
+            }else if (typeof error === 'string') {
                 return error;
             }else if (error.message && typeof error.message === 'string') {
                 return error.message;
             }else if (error.error && typeof error.error === 'string') {
                 return error.error;
-            }else if( typeof (error.data || {}).message === 'string') {
+            }else if(typeof (error.data || {}).message === 'string') {
                 return error.data.message;
             }else{
                 return 'Missing or strangely formatted error message received';

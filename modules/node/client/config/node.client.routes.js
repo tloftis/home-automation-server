@@ -8,9 +8,9 @@ angular.module('node').config(['$stateProvider',
             url: '/node',
             abstract: true,
             templateUrl: 'modules/node/client/views/node.client.view.html',
-			data: {
-			  roles: ['user', 'admin']
-			}
+            data: {
+                roles: ['user', 'admin']
+            }
         }).
         state('node.nodes', {
             url: '/nodes',
@@ -111,9 +111,9 @@ angular.module('node').config(['$stateProvider',
                     }
                 }
             },
-			data: {
-			  roles: ['user', 'admin']
-			}
+            data: {
+                roles: ['user', 'admin']
+            }
         }).
         state('node.inputs', {
             url: '/inputs',

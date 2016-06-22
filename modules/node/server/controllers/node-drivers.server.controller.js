@@ -1,5 +1,23 @@
 'use strict';
 
+var async = require('async'),
+    _ = require('lodash'),
+    request = require('request'),
+    zlib = require('zlib'),
+    tar = require('tar'),
+    fstream = require('fstream'),
+    fs = require('fs'),
+    glob = require('glob'),
+    driverId = 0,
+    outputDriverLocs = [],
+    inputDriverLocs = [],
+    outputDriverLocHash = {},
+    inputDriverLocHash = {},
+    masterNode = require('./node.server.controller'),
+    nodes = masterNode.nodes,
+    inputDriverHash = masterNode.inputDriverHash,
+    outputDriverHash = masterNode.outputDriverHash;
+
 //Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
     var path, config;
@@ -16,24 +34,6 @@ function rationalizePaths(array){
 
     return array;
 }
-
-var async = require('async'),
-    _ = require('lodash'),
-    request = require('request'),
-    zlib = require('zlib'),
-    tar = require('tar'),
-    fstream = require("fstream"),
-    fs = require('fs'),
-    glob = require('glob'),
-    driverId = 0,
-    outputDriverLocs = [],
-    inputDriverLocs = [],
-    outputDriverLocHash = {},
-    inputDriverLocHash = {},
-    masterNode = require('./node.server.controller'),
-    nodes = masterNode.nodes,
-    inputDriverHash = masterNode.inputDriverHash,
-    outputDriverHash = masterNode.outputDriverHash;
 
 function updateDriverLocations(){
     driverId = 0;
@@ -59,7 +59,7 @@ exports.update = function (req, res){
     updateDriverLocations();
 
     return res.send({
-        message: "Driver List updated!"
+        message: 'Driver List updated!'
     });
 };
 
@@ -148,16 +148,16 @@ exports.removeDriver = function (req, res){
     var node, isInput = false;
 
     if(!nodes.some(function(curNode){
-            if(curNode.inputDrivers.indexOf(driver) !== -1){
-                node = curNode;
-                isInput = true;
-                return true;
-            }
+        if(curNode.inputDrivers.indexOf(driver) !== -1){
+            node = curNode;
+            isInput = true;
+            return true;
+        }
 
-            if(curNode.outputDrivers.indexOf(driver) !== -1){
-                node = curNode;
-                return true;
-            }
+        if(curNode.outputDrivers.indexOf(driver) !== -1){
+            node = curNode;
+            return true;
+        }
     })){
         return res.status(400).send('Node to remove driver from was not found');
     }
