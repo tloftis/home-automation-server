@@ -3,7 +3,7 @@
 //Only can find address in a subnet mask of 255.255.255.0
 var _ = require('lodash'),
     async = require('async'),
-	    request = require('request'),
+    request = require('request'),
     fs = require('fs'),
     os = require('os'),
     crypto = require('crypto'),
@@ -23,7 +23,7 @@ var interfaces = os.networkInterfaces();
 
 for (var j in interfaces){
     for (var i in interfaces[j]){
-        var address = interfaces[j][i];
+        var address = (interfaces[j] || {})[i] || {};
 
         if (address.family === 'IPv4' && !address.internal){
             netMask = address.netmask;

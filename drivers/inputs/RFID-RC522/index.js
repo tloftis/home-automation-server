@@ -18,12 +18,12 @@ var setup = function(config, listener) {
         }
     }
       
-    require("rc522")(function(rfidSerialNumber){
+    require('rc522')(function(rfidSerialNumber){
         listener(rfidSerialNumber);
     });
 };
 
-setup.prototype.updateConfig = function(config){
+setup.prototype.updateConfig = function(){
     var _this = this;
     return _this.config;
 };

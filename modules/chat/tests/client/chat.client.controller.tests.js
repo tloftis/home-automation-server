@@ -25,70 +25,71 @@
         }));
 
         describe('when user logged out', function () {
-            beforeEach(inject(function ($controller, $rootScope, _Socket_, _Authentication_, _$timeout_, _$state_) {
-              Authentication.user = undefined;
-              spyOn($state, 'go');
-              ChatController = $controller('ChatController as vm', {
-                $scope: $scope
-            });
-          }));
+            beforeEach(inject(function ($controller){
+                Authentication.user = undefined;
+                spyOn($state, 'go');
+
+                ChatController = $controller('ChatController as vm', {
+                    $scope: $scope
+                });
+            }));
 
             it('should redirect logged out user to /', function () {
-              expect($state.go).toHaveBeenCalledWith('home');
-          });
+                expect($state.go).toHaveBeenCalledWith('home');
+            });
         });
 
         describe('when user logged in', function () {
-            beforeEach(inject(function ($controller, $rootScope, _Socket_, _Authentication_, _$timeout_, _$state_) {
-              Authentication.user = {
-                name: 'user',
-                roles: ['user']
-            };
+            beforeEach(inject(function ($controller) {
+                Authentication.user = {
+                    name: 'user',
+                    roles: ['user']
+                };
 
-              ChatController = $controller('ChatController as vm', {
-                $scope: $scope
-            });
-          }));
+                ChatController = $controller('ChatController as vm', {
+                    $scope: $scope
+                });
+            }));
 
             it('should make sure socket is connected', function () {
-              expect(Socket.socket).toBeTruthy();
-          });
+                expect(Socket.socket).toBeTruthy();
+            });
 
             it('should define messages array', function () {
-              expect($scope.vm.messages).toBeDefined();
-              expect($scope.vm.messages.length).toBe(0);
-          });
+                expect($scope.vm.messages).toBeDefined();
+                expect($scope.vm.messages.length).toBe(0);
+            });
 
             describe('sendMessage', function () {
-              var text = 'hello world!';
-              beforeEach(function () {
-                $scope.vm.messageText = text;
-                $scope.vm.sendMessage();
-                $timeout.flush();
-            });
+                var text = 'hello world!';
+                beforeEach(function () {
+                    $scope.vm.messageText = text;
+                    $scope.vm.sendMessage();
+                    $timeout.flush();
+                });
 
-              it('should add message to messages', function () {
-                expect($scope.vm.messages.length).toBe(1);
-            });
+                it('should add message to messages', function () {
+                    expect($scope.vm.messages.length).toBe(1);
+                });
 
-              it('should add message with proper text attribute set', function () {
-                expect($scope.vm.messages[0].text).toBe(text);
-            });
+                it('should add message with proper text attribute set', function () {
+                    expect($scope.vm.messages[0].text).toBe(text);
+                });
 
-              it('should clear messageText', function () {
-                expect($scope.vm.messageText).toBe('');
+                it('should clear messageText', function () {
+                    expect($scope.vm.messageText).toBe('');
+                });
             });
-          });
 
             describe('$destroy()', function () {
-              beforeEach(function () {
-                $scope.$destroy();
-            });
+                beforeEach(function () {
+                    $scope.$destroy();
+                });
 
-              it('should remove chatMessage listener', function () {
-                expect(Socket.socket.cbs.chatMessage).toBeUndefined();
+                it('should remove chatMessage listener', function () {
+                    expect(Socket.socket.cbs.chatMessage).toBeUndefined();
+                });
             });
-          });
         });
     });
 })();
