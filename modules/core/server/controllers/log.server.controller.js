@@ -5,6 +5,37 @@ var async = require('async'),
     mongoose = require('mongoose'),
     log = mongoose.model('log');
 
+function addLog(typ, msg, data, source, callback){
+    var log = new NodeLink({
+        message: msg,
+        type: typ,
+        source: source,
+        data: data
+    });
+
+    return log.save(function(err, newLog){
+        if(callback){
+            callback(err, newLog);
+        }
+    });
+}
+
+exports.error = function(msg, data){
+    return addLog('error', msg, data, null);
+};
+
+exports.success = function(msg, data){
+    return addLog('success', msg, data, null);
+};
+
+exports.info = function(msg, data){
+    return addLog('info', msg, data, null);
+};
+
+exports.info = function(msg, data){
+    return addLog('info', msg, data, null);
+};
+
 exports.list = function(req, res){
     log.find({}).lean().exec(function(err, links){
         if(err){
@@ -22,25 +53,12 @@ exports.get = function (req, res){
 };
 
 exports.add = function (req, res){
-    var newLog = {},
-        reqLog = (req.body || {}).log;
+    var reqLog = req.body || {};
 
     if(reqLog){
-        if(reqLog.message){
-            newLog.message = reqLog.message;
-        }
+        var ip = (req.headers || {})['x-forwarded-for'] || (req.connection || {}).remoteAddress;
 
-        if(reqLog.error){
-            newLog.error = new Error(reqLog.error);
-        }
-
-        if(reqLog.data){
-            newLog.data = reqLog.data;
-        }
-
-        var log = new NodeLink(newLink);
-
-        return log.save(function(err){
+        return addLog(reqLog.type, reqLog.message, reqLog.data, ip, function(err, log){
             if (err) {
                 return res.status(400).send({
                     message: err.message

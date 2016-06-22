@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
@@ -14,11 +11,15 @@ var logSchema = new Schema({
         required: false,
         default: ''
     },
-    error: {
-        type: Error,
+    type: {
+        type: String,
         required: false
     },
     data: {},
+    source: {
+        type: String,
+        required: false
+    },
     created: {
         type: Date,
         default: Date.now

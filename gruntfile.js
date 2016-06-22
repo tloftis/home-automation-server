@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Module dependencies.
@@ -259,7 +259,7 @@ module.exports = function (grunt) {
     });
 
     // Lint CSS and JavaScript files.
-    grunt.registerTask('lint', ['jshint', 'csslint']);
+    grunt.registerTask('lint', ['eslint', 'csslint']);
 
     // Lint project files and minify them into two production files.
     grunt.registerTask('build', ['env:dev', 'lint', 'ngAnnotate', 'uglify', 'cssmin']);
