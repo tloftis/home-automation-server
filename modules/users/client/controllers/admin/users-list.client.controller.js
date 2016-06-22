@@ -2,11 +2,9 @@
 
 /* globals swal: true */
 
-angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'Admin',
-    function ($scope, $filter, Admin) {
+angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'Admin', 'Utility',
+    function ($scope, $filter, Admin, Utility) {
         $scope.sortBy = 'username';
-
-        //Utility.log.debug('Loaded the User List Controller');
 
         Admin.updateUser.query(function (data) {
             $scope.users = data;
@@ -25,13 +23,13 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
             }, function(){
                 if (user) {
                     user.$remove(function(){
-                        //Utility.log.success('User Removed!');
+                        Utility.log.success('User Removed!');
                         $scope.users.splice($scope.users.indexOf(user), 1);
                         $scope.figureOutItemsToDisplay();
                     });
                 } else {
                     $scope.user.$remove(function () {
-                        //Utility.log.success('User Removed!');
+                        Utility.log.success('User Removed!');
                     });
                 }
             });

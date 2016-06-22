@@ -23,11 +23,11 @@ function rationalizePaths(array){
     var path, config;
 
     for(var i = 0, len = array.length; i < len; i++){
-        path = rootRequire().resolve(array[i]);
+        path = rootRequire.resolve(array[i]);
 
         array[i] = {
             dir: path.replace(/index\.js/, ''),
-            config: (rootRequire()(path.replace(/index\.js/, 'config.json')) || {}),
+            config: (rootRequire(path.replace(/index\.js/, 'config.json')) || {}),
             id: ++driverId
         };
     }

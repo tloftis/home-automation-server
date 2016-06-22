@@ -2,7 +2,10 @@
 
 angular.module('node').controller('nodeLinkListController', ['$scope', '$state', 'nodeService', '$location', '$window', 'Authentication',
     function ($scope, $state, nodeService, $location, $window, Authentication) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.links = [];
 
         $scope.init = function () {

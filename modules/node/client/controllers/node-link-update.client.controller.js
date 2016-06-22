@@ -2,6 +2,10 @@
 
 angular.module('node').controller('nodeLinkUpdateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         var pipeHash = {};
         $scope.authentication = Authentication;
         $scope.link = {};

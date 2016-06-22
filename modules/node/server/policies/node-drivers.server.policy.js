@@ -15,28 +15,16 @@ exports.invokeRolesPolicies = function (){
     acl.allow([{
         roles: ['admin'],
         allows: [{
-            resources: '/api/node',
+            resources: '/api/driver',
             permissions: '*'
         }, {
-            resources: '/api/node/:nodeId',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/output',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/input',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/driver',
+            resources: '/api/driver/:driversId',
             permissions: '*'
         }]
     }, {
         roles: ['user'],
         allows: [{
-            resources: '/api/node',
-            permissions: ['get']
-        }, {
-            resources: '/api/node/:nodeId',
+            resources: '/api/driver',
             permissions: ['get']
         }]
     }]);
@@ -44,7 +32,7 @@ exports.invokeRolesPolicies = function (){
 
 exports.isAllowed = function (req, res, next){
     var roles = (req.user) ? req.user.roles : ['guest'];
-    var enabled = (req.user || {}).enabled;
+    var enabled = roles.indexOf('guest') === -1 ? (req.user || {}).enabled : true;
 
     //Confirm user is enabled
     if(enabled === false){

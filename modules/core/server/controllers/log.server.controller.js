@@ -37,14 +37,16 @@ exports.info = function(msg, data){
 };
 
 exports.list = function(req, res){
-    log.find({}).lean().exec(function(err, links){
+    var limit = +(req.query || {}).limit || 100;
+
+    log.find({}).sort({ created: -1 }).limit(limit).lean().exec(function(err, logs){
         if(err){
             return res.status(400).send({
                 message: err.message
             });
         }
 
-        res.json(links);
+        res.json(logs);
     });
 };
 

@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('users.admin').controller('UserCreateController', ['$scope', '$state', 'Authentication', 'userPasswordService', 'usersService',
-    function ($scope, $state, Authentication, userPasswordService, usersService){
+angular.module('users.admin').controller('UserCreateController', ['$scope', '$state', 'Authentication', 'userPasswordService', 'usersService', 'Utility',
+    function ($scope, $state, Authentication, userPasswordService, usersService, Utility){
         $scope.authentication = Authentication;
         $scope.popoverMsg = userPasswordService.getPopoverMsg();
         $scope.requirementsColor = '';
@@ -16,7 +16,7 @@ angular.module('users.admin').controller('UserCreateController', ['$scope', '$st
             }
 
             usersService.createUser($scope.credentials).then(function (user) {
-                //Utility.log.success('User Created!');
+                Utility.log.success('User Created!');
 
                 $state.go('admin.users.user.view', {
                     userId: user._id

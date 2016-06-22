@@ -2,7 +2,10 @@
 
 angular.module('node').controller('nodeInputListController', ['$scope', '$state', 'nodeService', '$location', '$window', 'Authentication',
     function ($scope, $state, nodeService, $location, $window, Authentication) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.inputs = [];
 
         $scope.init = function () {

@@ -194,13 +194,3 @@ exports.outputById = function (req, res, next, id){
 
     return next();
 };
-
-exports.driverById = function (req, res, next, id){
-    if(!(req.driver = outputDriverHash[id])){
-        return res.status(400).send({
-            message: 'Output driver id not found'
-        });
-    }
-
-    return next();
-};

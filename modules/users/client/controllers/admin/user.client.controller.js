@@ -3,7 +3,7 @@
 /* globals swal: true */
 
 angular.module('users.admin').controller('UserController', ['$scope', '$state', 'Authentication', 'userResolve', 'Utility',
-    function ($scope, $state, Authentication, userResolve){
+    function ($scope, $state, Authentication, userResolve, Utility){
         $scope.authentication = Authentication;
         $scope.user = userResolve;
         $scope.requirementsColor = '';
@@ -38,12 +38,12 @@ angular.module('users.admin').controller('UserController', ['$scope', '$state', 
             }, function(){
                 if (user){
                     user.$remove(function(){
-                        //Utility.log.success('User Removed!');
+                        Utility.log.success('User Removed!');
                         $scope.users.splice($scope.users.indexOf(user), 1);
                     });
                 }else{
                     $scope.user.$remove(function (){
-                        //Utility.log.success('User Removed!');
+                        Utility.log.success('User Removed!');
                         $state.go('admin.users.list');
                     });
                 }

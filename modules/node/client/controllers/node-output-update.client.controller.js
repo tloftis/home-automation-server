@@ -2,7 +2,10 @@
 
 angular.module('node').controller('nodeOutputUpdateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.output = {};
         $scope.drivers = [];
 

@@ -1,17 +1,14 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
-var adminPolicy = require('../policies/node.server.policy'),
+var nodeDriverPolicy = require('../policies/node-drivers.server.policy'),
     drivers = require('../controllers/node-drivers.server.controller.js');
 
 module.exports = function (app) {
-    app.route('/api/driver').
+    app.route('/api/driver').all(nodeDriverPolicy.isAllowed).
         get(drivers.list);
 
-    app.route('/api/driver/:anyDriversId').
+    app.route('/api/driver/:driversId').all(nodeDriverPolicy.isAllowed).
         delete(drivers.removeDriver);
 
-    app.param('anyDriversId', drivers.driverById);
+    app.param('driversId', drivers.driverById);
 };

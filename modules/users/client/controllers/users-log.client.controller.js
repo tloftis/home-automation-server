@@ -2,11 +2,13 @@
 
 angular.module('users').controller('UsersLogController', ['$scope', '$state', 'usersService', '$location', '$window', 'Authentication', '$filter',
     function ($scope, $state, usersService, $location, $window, Authentication, $filter) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.moment = moment;
         $scope.currentMeta ={};
         $scope.showMeta = false;
-
 
         $scope.init = function () {
             usersService.getLogs(true).then(function (logs) {

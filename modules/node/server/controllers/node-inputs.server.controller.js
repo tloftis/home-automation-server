@@ -6,7 +6,8 @@ var async = require('async'),
     mongoose = require('mongoose'),
     outputController = require('../controllers/node-outputs.server.controller.js'),
     NodeLink = mongoose.model('NodeLink'),
-    masterNode = require('./node.server.controller');
+    masterNode = require('./node.server.controller'),
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 var inputs = masterNode.inputs,
     inputDrivers = masterNode.inputDrivers,
@@ -185,6 +186,8 @@ exports.change = function(req, res){
         inputId: input.id
     };
 
+    log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, { inputId: input.id });
+
     NodeLink.find(query).exec(function(err, links){
         if(err){
             return res.send('Error getting input to output links');
@@ -243,16 +246,6 @@ exports.inputById = function (req, res, next, id){
     if(!(req.input = inputHash[id])){
         return res.status(400).send({
             message: 'Input id not found'
-        });
-    }
-
-    return next();
-};
-
-exports.driverById = function (req, res, next, id){
-    if(!(req.driver = inputDriverHash[id])){
-        return res.status(400).send({
-            message: 'Input driver id not found'
         });
     }
 

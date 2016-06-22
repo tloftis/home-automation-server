@@ -2,7 +2,10 @@
 
 angular.module('node').controller('nodeInputCreateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.input = {};
         $scope.drivers = [];
 

@@ -3,28 +3,21 @@
 /**
  * Module dependencies.
  */
-var adminPolicy = require('../policies/node.server.policy'),
+var nodeOutputPolicy = require('../policies/node-output.server.policy'),
     outputs = require('../controllers/node-outputs.server.controller.js');
 
 module.exports = function (app) {
     // Users collection routes
-    app.route('/api/output').
+    app.route('/api/output').all(nodeOutputPolicy.isAllowed).
         get(outputs.list);
 
     // Users collection routes
-    app.route('/api/output/edit/:outputId').
+    app.route('/api/output/:outputId').all(nodeOutputPolicy.isAllowed).
         get(outputs.get).
         put(outputs.update).
+        post(outputs.set).
         delete(outputs.remove);
-
-    app.route('/api/output/drivers/:outputDriverId').
-        get(outputs.getDriver);
-
-    // Users collection routes
-    app.route('/api/output/edit/:outputId/set').
-        post(outputs.set);
 
     // Finish by binding the user middleware
     app.param('outputId', outputs.outputById);
-    app.param('outputDriverId', outputs.driverById);
 };

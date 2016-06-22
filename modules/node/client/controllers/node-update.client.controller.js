@@ -2,7 +2,10 @@
 
 angular.module('node').controller('nodeUpdateController', ['$scope', '$state', 'nodeService', '$location', '$stateParams', 'Authentication',
     function ($scope, $state, nodeService, $location, $stateParams, Authentication) {
-        $scope.authentication = Authentication;
+        if (!Authentication.user) {
+            $location.path('/');
+        }
+
         $scope.node = {};
 
         $scope.init = function () {

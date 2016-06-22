@@ -9,7 +9,9 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
         $scope.error = $location.search().err;
 
         // If user is signed in then redirect back home
-        //if ($scope.authentication.user) $location.path('/');
+        if ($scope.authentication.user){
+            $location.path('/');
+        }
 
         $scope.signin = function (isValid) {
             $scope.error = null;

@@ -239,9 +239,9 @@ module.exports = function (grunt) {
     grunt.task.registerTask('server', 'Starting the server', function () {
         // Get the callback
         var done = this.async();
-
         var path = require('path');
         var app = require(path.resolve('./config/lib/app'));
+
         var server = app.start(function () {
             done();
         });

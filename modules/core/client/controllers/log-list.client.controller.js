@@ -1,16 +1,16 @@
 'use strict';
 
-angular.module('node').controller('nodeListController', ['$scope', '$state', 'nodeService', '$location', '$window', 'Authentication',
-    function ($scope, $state, nodeService, $location, $window, Authentication) {
+angular.module('node').controller('nodeListController', ['$scope', '$state', 'logger', '$location', '$window', 'Authentication',
+    function ($scope, $state, logger, $location, $window, Authentication) {
         if (!Authentication.user) {
             $location.path('/');
         }
 
-        $scope.nodes = [];
+        $scope.logs = [];
 
         $scope.init = function () {
-            nodeService.getNodes().then(function(nodes){
-                $scope.nodes = nodes;
+            logger.getLogs().then(function(logs){
+                $scope.logs = logs;
             });
         };
 

@@ -29,12 +29,15 @@ exports.invokeRolesPolicies = function (){
  */
 exports.isAllowed = function (req, res, next){
     var roles = (req.user) ? req.user.roles : ['guest'];
-    var enabled = (req.user) ? req.user.enabled || false : false;
+    var enabled = (req.user || {}).enabled;
 
     //Confirm user is enabled
-    if(!enabled){
+    if(enabled === false){
         req.logout();
         return res.status(401).send('User Account Is Disabled!');
+    }else if(typeof enabled === 'undefined'){
+        req.logout();
+        return res.status(401).send('User Information Is Incorrect!');
     }
 
     // Check for user roles

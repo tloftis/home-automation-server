@@ -94,14 +94,14 @@ angular.module('node').service('nodeService', ['Utility',
             var id = node;
             if(node && node.id) id = node.id;
 
-            return Utility.http.get('output/edit/' + id);
+            return Utility.http.get('output/' + id);
         };
 
         service.getInput = function (node){
             var id = node;
             if(node && node.id) id = node.id;
 
-            return Utility.http.get('input/edit/' + id);
+            return Utility.http.get('input/' + id);
         };
 
 
@@ -109,14 +109,14 @@ angular.module('node').service('nodeService', ['Utility',
             var id = node;
             if(node && node.id) id = node.id;
 
-            return Utility.http.delete('output/edit/' + id, {});
+            return Utility.http.delete('output/' + id, {});
         };
 
         service.removeInput = function (node){
             var id = node;
             if(node && node.id) id = node.id;
 
-            return Utility.http.delete('input/edit/' + id, {});
+            return Utility.http.delete('input/' + id, {});
         };
 
         service.outputSet = function(node, val){
@@ -130,19 +130,19 @@ angular.module('node').service('nodeService', ['Utility',
                 value.type = typeof val;
             }
 
-            return Utility.http.post('output/edit/' + id + '/set', value);
+            return Utility.http.post('output/' + id, value);
         };
 
         service.outputUpdate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.put('output/edit/' + id, { node: newNode });
+            return Utility.http.put('output/' + id, { node: newNode });
         };
 
         service.inputUpdate = function(node, newNode){
             var id = node;
             if(node && node.id) id = node.id;
-            return Utility.http.put('input/edit/' + id, { node: newNode });
+            return Utility.http.put('input/' + id, { node: newNode });
         };
 
         service.outputCreate = function(node, newNode){

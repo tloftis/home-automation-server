@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
 var _ = require('lodash'),
     chalk = require('chalk'),
     glob = require('glob'),
@@ -51,9 +48,6 @@ var getGlobbedPaths = function (globPatterns, excludes) {
     return output;
 };
 
-/**
- * Validate NODE_ENV existence
- */
 var validateEnvironmentVariable = function () {
     var environmentFiles = glob.sync('./config/env/' + process.env.NODE_ENV + '.js');
     console.log();
@@ -70,10 +64,6 @@ var validateEnvironmentVariable = function () {
     console.log(chalk.white(''));
 };
 
-/**
- * Validate Secure=true parameter can actually be turned on
- * because it requires certs and key files to be available
- */
 var validateSecureMode = function (config) {
 
     if (!config.secure || config.secure.ssl !== true) {
@@ -91,9 +81,6 @@ var validateSecureMode = function (config) {
     }
 };
 
-/**
- * Validate Session Secret parameter is not set to default in production
- */
 var validateSessionSecret = function (config, testing) {
 
     if (process.env.NODE_ENV !== 'production') {
@@ -113,9 +100,6 @@ var validateSessionSecret = function (config, testing) {
     }
 };
 
-/**
- * Initialize global configuration files
- */
 var initGlobalConfigFolders = function (config, assets) {
     // Appending files
     config.folders = {
@@ -127,9 +111,6 @@ var initGlobalConfigFolders = function (config, assets) {
     config.folders.client = getGlobbedPaths(path.join(process.cwd(), 'modules/*/client/'), process.cwd().replace(new RegExp(/\\/g), '/'));
 };
 
-/**
- * Initialize global configuration files
- */
 var initGlobalConfigFiles = function (config, assets) {
     // Appending files
     config.files = {
@@ -162,9 +143,6 @@ var initGlobalConfigFiles = function (config, assets) {
     config.files.client.tests = getGlobbedPaths(assets.client.tests);
 };
 
-/**
- * Initialize global configuration
- */
 var initGlobalConfig = function () {
     // Validate NODE_ENV existence
     validateEnvironmentVariable();
@@ -188,8 +166,7 @@ var initGlobalConfig = function () {
     var config = _.merge(defaultConfig, environmentConfig);
 
     // read package.json for MEAN.JS project information
-    var pkg = require(path.resolve('./package.json'));
-    config.meanjs = pkg;
+    config.meanjs = require(path.resolve('./package.json'));
 
     // Extend the config object with the local-NODE_ENV.js custom/local environment. This will override any settings present in the local configuration.
     config = _.merge(config, (fs.existsSync(path.join(process.cwd(), 'config/env/local-' + process.env.NODE_ENV + '.js')) && require(path.join(process.cwd(), 'config/env/local-' + process.env.NODE_ENV + '.js'))) || {});

@@ -3,8 +3,12 @@
 require('dotenv').load();
 global.rootDir = __dirname;
 
-global.rootRequire = function(){
-    return require;
+global.rootRequire = function(str){
+    return require(str);
+};
+
+global.rootRequire.resolve = function(str){
+    return require.resolve(str);
 };
 
 require('./config/lib/app').start(function(app, db, config){
