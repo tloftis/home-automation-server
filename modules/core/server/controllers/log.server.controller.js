@@ -3,10 +3,10 @@
 var async = require('async'),
     _ = require('lodash'),
     mongoose = require('mongoose'),
-    log = mongoose.model('log');
+    logs = mongoose.model('Logs');
 
 function addLog(typ, msg, data, source, callback){
-    var log = new NodeLink({
+    var log = new logs({
         message: msg,
         type: typ,
         source: source,

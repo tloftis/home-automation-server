@@ -36,4 +36,4 @@ logSchema.pre('save', function (next) {
     next();
 });
 
-mongoose.model('log', logSchema);
+mongoose.model('Logs', logSchema);
