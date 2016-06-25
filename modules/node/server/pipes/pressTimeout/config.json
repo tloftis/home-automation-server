@@ -1,0 +1,16 @@
+{
+    "name": "pressTimeout",
+    "outType": [
+        "boolean",
+        "string",
+        "number"
+    ],
+    "inType": [
+        "boolean",
+        "string",
+        "number"
+    ],
+    "userInType": "number",
+    "description": "Blocks information until the input waits a user given time before sending again",
+    "id": "cc5eefce769181708f408d6f8b2d247bf2fa011f88022a5b21"
+}

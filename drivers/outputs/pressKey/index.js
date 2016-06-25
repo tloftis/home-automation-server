@@ -12,7 +12,13 @@ setup.prototype.set = function(val){
     try{
         robo.keyTap(val);
     }catch(err){
-        //ToDo: add ability for some form of error handling for drivers
+        if(val === 'right_click'){
+            robo.mouseClick('right');
+        }else if(val === 'left_click'){
+            robo.mouseClick('left');
+        }else if(val === 'middle_click'){
+            robo.mouseClick('middle');
+        }
     }
 };
 

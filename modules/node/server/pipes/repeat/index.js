@@ -1,4 +1,4 @@
-exports.funct = function(value, userInput, callback){
+exports.funct = function(value, userInput, data, callback){
     setTimeout(function(){
         callback(value);
     }, userInput || 0);

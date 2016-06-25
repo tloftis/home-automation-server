@@ -158,6 +158,8 @@ exports.add = function (req, res){
     }
 };
 
+var pipeData = {};
+
 exports.change = function(req, res){
     var input = req.input,
         value = req.body.value,
@@ -195,7 +197,8 @@ exports.change = function(req, res){
 
         links.forEach(function(link){
             var pipeLine = [],
-                output = outputHash[link.outputId];
+                output = outputHash[link.outputId],
+                data = pipeData[link._id] = pipeData[link._id] || {};
 
             if(!output){ return; }
 
@@ -206,7 +209,7 @@ exports.change = function(req, res){
                 if(!currentPipe){ return; }
 
                 var index = pipeLine.push(function(val){
-                    currentPipe.funct(val, userInput, function(val){
+                    currentPipe.funct(val, userInput, data, function(val){
                         if(typeof val !== 'undefined'){
                             pipeLine[index](val);
                         }

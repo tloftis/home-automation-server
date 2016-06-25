@@ -1,0 +1,16 @@
+{
+    "name": "timerBlock",
+    "outType": [
+        "boolean",
+        "string",
+        "number"
+    ],
+    "inType": [
+        "boolean",
+        "string",
+        "number"
+    ],
+    "userInType": "number",
+    "description": "Blocks all communication for a user specified amount of time",
+    "id": "ae94e3a26fe9feaa7fb2a680971d529a91a85c77481d9000d6"
+}

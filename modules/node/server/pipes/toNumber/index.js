@@ -1,4 +1,4 @@
-exports.funct = function(value, userInput, callback){
+exports.funct = function(value, userInput, data, callback){
     var out = +value;
 
     if(isNaN(out)){
