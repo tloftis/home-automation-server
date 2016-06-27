@@ -7,7 +7,7 @@ var lirc = require('lirc_node');
 
 lirc.init();
 
-var setup = function(config, listener) {
+var setup = function(config) {
     var _this = this, vars, pin;
     _this.config = {};
     _this.config.remote = config.remote;
@@ -19,7 +19,7 @@ var setup = function(config, listener) {
     }
 
     if(!vars.some(function(e){
-        if(e.indexOf('gpio_in_pin') !== -1){
+        if(e.indexOf('gpio_out_pin') !== -1){
             pin = +e.split('=').filter((e)=>+e)[0];
             return true;
         }
@@ -30,26 +30,19 @@ var setup = function(config, listener) {
     if(isNaN(pin)){
         return new Error('Error parsing LIRC /etc/modules file, unable to start driver');
     }
+};
 
-    _this.lircId = lirc.addListener(function(d){
-        if(_this.remote === d.remote){
-            listener(d.key);
-        }
-    });
+setup.prototype.set = function(val){
+    var _this = this;
+    lirc.irsend.send_once(_this.config.remote, val);
+    return _this.config;
 };
 
 setup.prototype.updateConfig = function(config){
     var _this = this;
 
-    if(config.remote !== _this.config.remote){
+    if(config.remote){
         _this.config.remote = config.remote;
-        lirc.removeListener(_this.lircId);
-
-        _this.lircId = lirc.addListener(function(d){
-            if(_this.remote === d.remote){
-                listener(d.key);
-            }
-        });
     }
 
     return _this.config;
@@ -57,7 +50,6 @@ setup.prototype.updateConfig = function(config){
 
 setup.prototype.destroy = function(){
     var _this = this;
-    lirc.removeListener(_this.lircId);
 };
 
 setup.prototype.getConfig = function(){

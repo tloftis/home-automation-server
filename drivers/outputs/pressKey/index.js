@@ -3,7 +3,7 @@
 var master = require('../../../config.js'),
     robo = require('robotjs');
 
-var setup = function(config, listener) {
+var setup = function(config) {
     var _this = this;
     _this.config = config;
 };
