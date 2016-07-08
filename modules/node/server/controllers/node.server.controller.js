@@ -149,166 +149,227 @@ function searchForNodes(callback){
     });
 }
 
+function registerWithNode(node, callback){
+    if(!callback) callback = function(){};
+
+    var info = {
+        url: 'http://' + node.ip + '/api/register',
+        form: {}
+    };
+
+    request.post(info, function (){
+        callback();
+    });
+}
+
 function registerWithNodes(callback){
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, next){
-        var info = {
-            url: 'http://' + node.ip + '/api/register',
-            form: {}
-        };
-
-        request.post(info, function (){
-            next();
-        });
+        registerWithNode(node, next);
     }, callback);
+}
+
+function updateNodeInputs(node, callback){
+    if(!callback) callback = function(){};
+
+    request.get('http://' + node.ip + '/api/input', function (err, res, body){
+        var newInputs;
+
+        try {
+            newInputs = JSON.parse(body);
+        } catch (err){
+            return callback();
+        }
+
+        if(err){
+            return callback();
+        }else{
+            inputs = inputs.filter((input)=>{
+                if(input.node.id === node.id){
+                    delete inputHash[input.id];
+                    return false;
+                }
+
+                return true;
+            });
+
+            async.each(newInputs, function (input, next){
+                var newInput = {
+                    name: input.name,
+                    location: input.location,
+                    description: input.description,
+                    driverId: input.driverId,
+                    config: input.config,
+                    id: input.id,
+                    node: node
+                };
+
+                inputs.push(newInput);
+                inputHash[newInput.id] = newInput;
+
+                next();
+            },function(){
+                callback();
+            });
+        }
+    });
 }
 
 function updateInputs(callback){
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
-        request.get('http://' + node.ip + '/api/input', function (err, res, body){
-            var newInputs;
-
-            try {
-                newInputs = JSON.parse(body);
-            } catch (err){
-                return nextMain();
-            }
-
-            if(err){
-                return nextMain();
-            }else{
-                async.each(newInputs, function (input, next){
-                    var newInput = {
-                        name: input.name,
-                        location: input.location,
-                        description: input.description,
-                        driverId: input.driverId,
-                        config: input.config,
-                        id: input.id,
-                        node: node
-                    };
-
-                    inputs.push(newInput);
-                    inputHash[newInput.id] = newInput;
-                    next();
-                },function(){
-                    nextMain();
-                });
-            }
-        });
+        updateNodeInputs(node, nextMain);
     }, callback);
+}
+
+function updateNodeOutputs(node, callback){
+    if(!callback) callback = function(){};
+
+    request.get('http://' + node.ip + '/api/output', function (err, res, body){
+        var newOutputs;
+
+        try {
+            newOutputs = JSON.parse(body);
+        } catch (err){
+            return callback();
+        }
+
+        if(err){
+            return callback();
+        }else{
+            outputs = outputs.filter((output)=>{
+                if(output.node.id === node.id){
+                    delete outputHash[output.id];
+                    return false;
+                }
+
+                return true;
+            });
+
+            async.each(newOutputs, function (output, next){
+                var newOutput = {
+                    name: output.name,
+                    location: output.location,
+                    description: output.description,
+                    driverId: output.driverId,
+                    config: output.config,
+                    id: output.id,
+                    node: node
+                };
+
+                outputs.push(newOutput);
+                outputHash[newOutput.id] = newOutput;
+                next();
+            },function(){
+                callback();
+            });
+        }
+    });
 }
 
 function updateOutputs(callback){
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
-        request.get('http://' + node.ip + '/api/output', function (err, res, body){
-            var newOutputs;
+        updateNodeOutputs(node, nextMain)
+    }, callback);
+}
+
+function updateNodeDrivers(node, callback){
+    if(!callback) callback = function(){};
+
+    async.parallel([function(nextMid){
+        request.get('http://' + node.ip + '/api/output/drivers', function (err, res, body){
+            var newDrivers;
 
             try {
-                newOutputs = JSON.parse(body);
+                newDrivers = JSON.parse(body);
             } catch (err){
-                return nextMain();
+                return nextMid();
             }
 
             if(err){
-                return nextMain();
+                return nextMid();
             }else{
-                async.each(newOutputs, function (output, next){
-                    var newOutput = {
-                        name: output.name,
-                        location: output.location,
-                        description: output.description,
-                        driverId: output.driverId,
-                        config: output.config,
-                        id: output.id,
-                        node: node
+                node.outputDrivers = (node.outputDrivers || []).filter((outputDriver)=>{
+                    if(node.outputDrivers.indexOf(outputDriver) !== -1){
+                        delete outputDriverHash[outputDriver.id];
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                async.each(newDrivers, function (driver, next){
+                    var newDriver = {
+                        name: driver.name,
+                        location: driver.location,
+                        description: driver.description,
+                        type: driver.type,
+                        config: driver.config,
+                        id: driver.id
                     };
 
-                    outputs.push(newOutput);
-                    outputHash[newOutput.id] = newOutput;
+                    node.outputDrivers.push(newDriver);
+                    outputDriverHash[newDriver.id] = newDriver;
                     next();
                 },function(){
-                    nextMain();
+                    nextMid();
                 });
             }
         });
-    }, callback);
+    }, function(nextMid){
+        request.get('http://' + node.ip + '/api/input/drivers', function (err, res, body){
+            var newDrivers;
+
+            try {
+                newDrivers = JSON.parse(body);
+            } catch (err){
+                return nextMid();
+            }
+
+            if(err){
+                return nextMid();
+            }else{
+                node.inputDrivers = (node.inputDrivers || []).filter((inputDriver)=>{
+                    if(node.inputDrivers.indexOf(inputDriver) !== -1){
+                        delete inputDriverHash[inputDriver.id];
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                async.each(newDrivers, function (driver, next){
+                    var newDriver = {
+                        name: driver.name,
+                        location: driver.location,
+                        description: driver.description,
+                        type: driver.type,
+                        config: driver.config,
+                        id: driver.id
+                    };
+
+                    node.inputDrivers.push(newDriver);
+                    inputDriverHash[newDriver.id] = newDriver;
+                    next();
+                },function(){
+                    nextMid();
+                });
+            }
+        });
+    }], function(){
+        callback();
+    });
 }
 
 function updateDrivers(callback){
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
-        async.parallel([function(nextMid){
-            request.get('http://' + node.ip + '/api/output/drivers', function (err, res, body){
-                var newDrivers;
-
-                try {
-                    newDrivers = JSON.parse(body);
-                } catch (err){
-                    return nextMid();
-                }
-
-                if(err){
-                    return nextMid();
-                }else{
-                    async.each(newDrivers, function (driver, next){
-                        var newDriver = {
-                            name: driver.name,
-                            location: driver.location,
-                            description: driver.description,
-                            type: driver.type,
-                            config: driver.config,
-                            id: driver.id
-                        };
-
-                        node.outputDrivers.push(newDriver);
-                        outputDriverHash[newDriver.id] = newDriver;
-                        next();
-                    },function(){
-                        nextMid();
-                    });
-                }
-            });
-        }, function(nextMid){
-            request.get('http://' + node.ip + '/api/input/drivers', function (err, res, body){
-                var newDrivers;
-
-                try {
-                    newDrivers = JSON.parse(body);
-                } catch (err){
-                    return nextMid();
-                }
-
-                if(err){
-                    return nextMid();
-                }else{
-                    async.each(newDrivers, function (driver, next){
-                        var newDriver = {
-                            name: driver.name,
-                            location: driver.location,
-                            description: driver.description,
-                            type: driver.type,
-                            config: driver.config,
-                            id: driver.id
-                        };
-
-                        node.inputDrivers.push(newDriver);
-                        inputDriverHash[newDriver.id] = newDriver;
-                        next();
-                    },function(){
-                        nextMid();
-                    });
-                }
-            });
-        }], function(){
-            nextMain();
-        });
+        updateNodeDrivers(node, nextMain);
     }, callback);
 }
 
@@ -325,47 +386,65 @@ function updateAll(callback){
     inputHash = {};
 
     findPipes(function(){
-        console.log('Pipes Found');
-
         searchForNodes(function(){
-            console.log('Updated Nodes');
-
             registerWithNodes(function(){
-                console.log('Registered Nodes');
-
-                updateInputs(function(){
-                    console.log('Updated Inputs');
-
-                    updateOutputs(function(){
-                        console.log('Updated Outputs');
-
-                        updateDrivers(function(){
-                            console.log('Updated Drivers');
-                            if(callback){ callback(); }
-                        });
-                    });
-                });
+                async.parallel([
+                    updateInputs,
+                    updateOutputs,
+                    updateDrivers
+                ], function(){
+                    refreshLink();
+                    if(callback){ callback(); }
+                })
             });
         });
     });
 }
 
 updateAll();
-exports.nodes = nodes;
-exports.outputs = outputs;
-exports.inputs = inputs;
-exports.pipes = pipes;
-exports.outputDriverHash = outputDriverHash;
-exports.inputDriverHash = inputDriverHash;
-exports.nodeHash = nodeHash;
-exports.inputHash = inputHash;
-exports.outputHash = outputHash;
-exports.pipeHash = pipeHash;
+
+function refreshLink(){
+    module.exports.nodes = nodes;
+    module.exports.outputs = outputs;
+    module.exports.inputs = inputs;
+    module.exports.pipes = pipes;
+    module.exports.outputDriverHash = outputDriverHash;
+    module.exports.inputDriverHash = inputDriverHash;
+    module.exports.nodeHash = nodeHash;
+    module.exports.inputHash = inputHash;
+    module.exports.outputHash = outputHash;
+    module.exports.pipeHash = pipeHash;
+}
+
+refreshLink();
 
 exports.updateNodes = function(req, res){
     updateAll(function(){
         res.send('Pipes Updated!');
     });
+};
+
+exports.updateNode = function(req, res){
+    var node = req.node;
+
+    if(!node){
+        return res.status(400).send('Error attempting to update node!');
+    }
+
+    async.parallel([
+        function(done){
+            updateNodeDrivers(node, done);
+        },
+        function(done){
+            updateNodeOutputs(node, done);
+        },
+        function(done){
+            updateNodeInputs(node, done);
+        }
+    ], function(){
+        refreshLink();
+        res.send('Node Updated!');
+    })
 };
 
 exports.list = function(req, res){

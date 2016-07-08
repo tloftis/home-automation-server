@@ -37,14 +37,20 @@ exports.invokeRolesPolicies = function (){
             permissions: ['get']
         }, {
             resources: '/api/node/:nodeId',
-            permissions: ['get']
+            permissions: ['get', 'post']
+        }]
+    },{
+        roles: ['guest'],
+        allows: [{
+            resources: '/api/node/:nodeId',
+            permissions: ['post']
         }]
     }]);
 };
 
 exports.isAllowed = function (req, res, next){
     var roles = (req.user) ? req.user.roles : ['guest'];
-    var enabled = (req.user || {}).enabled;
+    var enabled = roles.indexOf('guest') === -1 ? (req.user || {}).enabled : true;
 
     //Confirm user is enabled
     if(enabled === false){

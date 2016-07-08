@@ -5,12 +5,6 @@ var _ = require('lodash'),
     NodeLink = mongoose.model('NodeLink'),
     masterNode = require('./node.server.controller');
 
-var outputHash = masterNode.outputHash,
-    inputHash = masterNode.inputHash,
-    inputDriverHash = masterNode.inputDriverHash,
-    outputDriverHash = masterNode.outputDriverHash,
-    pipeHash = masterNode.pipeHash;
-
 function verifyPipe(inType, outType, pipes){
     var currentType, finalType, pipe;
 
@@ -42,7 +36,7 @@ function verifyPipe(inType, outType, pipes){
 
     if(pipes){
         for(var j = 0; j < pipes.length; j++){
-            pipe = pipeHash[pipes[j].pipeId];
+            pipe = masterNode.pipeHash[pipes[j].pipeId];
             pipe.inType = (pipe.inType instanceof Array) ? pipe.inType : [pipe.inType];
 
             if(!typeTester(pipe.inType, currentType)){
@@ -97,8 +91,8 @@ exports.remove = function (req, res){
 exports.update = function (req, res){
     var link = req.link,
         addLink = req.body.link,
-        input = inputHash[addLink.inputId],
-        output = outputHash[addLink.outputId];
+        input = masterNode.inputHash[addLink.inputId],
+        output = masterNode.outputHash[addLink.outputId];
 
     if(addLink.inputId && input){ link.inputId = addLink.inputId; }
     if(addLink.outputId && output){ link.outputId = addLink.outputId; }
@@ -135,7 +129,7 @@ exports.add = function (req, res){
     var newLink = {},
         addLink = req.body.link;
 
-    if(addLink.inputId && addLink.outputId && inputHash[addLink.inputId] && outputHash[addLink.outputId]){
+    if(addLink.inputId && addLink.outputId && masterNode.inputHash[addLink.inputId] && masterNode.outputHash[addLink.outputId]){
         newLink.inputId = addLink.inputId;
         newLink.outputId = addLink.outputId;
         newLink.description = (addLink.description+'' || '');

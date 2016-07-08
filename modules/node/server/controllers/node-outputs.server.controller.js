@@ -5,19 +5,14 @@ var async = require('async'),
     request = require('request'),
     masterNode = require('./node.server.controller');
 
-var outputs = masterNode.outputs,
-    outputDrivers = masterNode.outputDrivers,
-    outputDriverHash = masterNode.outputDriverHash,
-    outputHash = masterNode.outputHash;
-
 exports.list = function(req, res){
-    res.json(outputs.map(function(output){
+    res.json(masterNode.outputs.map(function(output){
         return _.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output); //Gives the driver as well as the output info
     }));
 };
 
 exports.listDrivers = function(req, res){
-    res.json(outputDrivers);
+    res.json(masterNode.outputDrivers);
 };
 
 exports.set = function (req, res){
@@ -75,7 +70,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for(var key in outputDriverHash[node.driverId].config){
+        for(var key in masterNode.outputDriverHash[node.driverId].config){
             if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
@@ -117,11 +112,11 @@ exports.remove = function (req, res){
 
     request.del(info, function (err){
         if(err){ return res.status(400).send('Error attempting to remove output'); }
-        var index = outputs.indexOf(output);
+        var index = masterNode.outputs.indexOf(output);
 
         if(index !== -1){
-            outputs.splice(index, 1);
-            delete outputHash[output.id];
+            masterNode.outputs.splice(index, 1);
+            delete masterNode.outputHash[output.id];
             return res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         }
 
@@ -147,7 +142,7 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.config)){
         newOutput.config = {};
 
-        for(var key in outputDriverHash[newNode.driverId].config){
+        for(var key in masterNode.outputDriverHash[newNode.driverId].config){
             if(!_.isUndefined(newNode.config[key])){
                 newOutput.config[key] = newNode.config[key];
             }
@@ -186,7 +181,7 @@ exports.add = function (req, res){
 };
 
 exports.outputById = function (req, res, next, id){
-    if(!(req.output = outputHash[id])){
+    if(!(req.output = masterNode.outputHash[id])){
         return res.status(400).send({
             message: 'Output id not found'
         });

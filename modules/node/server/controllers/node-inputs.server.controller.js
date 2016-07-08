@@ -9,29 +9,14 @@ var async = require('async'),
     masterNode = require('./node.server.controller'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
-var inputs = masterNode.inputs,
-    inputDrivers = masterNode.inputDrivers,
-    inputDriverHash = masterNode.inputDriverHash,
-    inputHash = masterNode.inputHash,
-    pipeHash = masterNode.pipeHash,
-    outputHash = masterNode.outputHash;
-
 exports.list = function(req, res){
-    res.json(inputs.map(function(input){
+    res.json(masterNode.inputs.map(function(input){
         return _.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
     }));
 };
 
-exports.listDrivers = function(req, res){
-    res.json(inputDrivers);
-};
-
 exports.get = function (req, res){
     res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
-};
-
-exports.getDriver = function (req, res){
-    res.json(req.driver); //Gives the driver as well as the input info
 };
 
 exports.update = function (req, res){
@@ -48,7 +33,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for(var key in inputDriverHash[node.driverId].config){
+        for(var key in masterNode.inputDriverHash[node.driverId].config){
             if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
@@ -91,11 +76,11 @@ exports.remove = function (req, res){
     request.del(info, function (err){
         if(err) return res.status(400).send('Error attempting to remove input');
 
-        index = inputs.indexOf(input);
+        index = masterNode.inputs.indexOf(input);
 
         if(index !== -1){
-            delete inputHash[input.id];
-            inputs.splice(index, 1);
+            delete masterNode.inputHash[input.id];
+            masterNode.inputs.splice(index, 1);
             return res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         }
 
@@ -120,7 +105,7 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.config)){
         newInput.config = {};
 
-        for(var key in inputDriverHash[newNode.driverId].config){
+        for(var key in masterNode.inputDriverHash[newNode.driverId].config){
             if(!_.isUndefined(newNode.config[key])){
                 newInput.config[key] = newNode.config[key];
             }
@@ -197,14 +182,14 @@ exports.change = function(req, res){
 
         links.forEach(function(link){
             var pipeLine = [],
-                output = outputHash[link.outputId],
+                output = masterNode.outputHash[link.outputId],
                 data = pipeData[link._id] = pipeData[link._id] || {};
 
             if(!output){ return; }
 
             link.pipes.forEach(function(pipe){
                 var userInput = pipe.data,
-                    currentPipe = pipeHash[pipe.pipeId];
+                    currentPipe = masterNode.pipeHash[pipe.pipeId];
 
                 if(!currentPipe){ return; }
 
@@ -246,7 +231,7 @@ exports.change = function(req, res){
 };
 
 exports.inputById = function (req, res, next, id){
-    if(!(req.input = inputHash[id])){
+    if(!(req.input = masterNode.inputHash[id])){
         return res.status(400).send({
             message: 'Input id not found'
         });

@@ -13,10 +13,7 @@ var async = require('async'),
     inputDriverLocs = [],
     outputDriverLocHash = {},
     inputDriverLocHash = {},
-    masterNode = require('./node.server.controller'),
-    nodes = masterNode.nodes,
-    inputDriverHash = masterNode.inputDriverHash,
-    outputDriverHash = masterNode.outputDriverHash;
+    masterNode = require('./node.server.controller');
 
 //Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
@@ -128,13 +125,13 @@ exports.add = function (req, res){
                 node.inputDrivers = newDrivers;
 
                 newDrivers.forEach(function(driver){
-                    inputDriverHash[driver.id] = driver;
+                    masterNode.inputDriverHash[driver.id] = driver;
                 });
             }else{
                 node.outputDrivers = newDrivers;
 
                 newDrivers.forEach(function(driver){
-                    outputDriverHash[driver.id] = driver;
+                    masterNode.outputDriverHash[driver.id] = driver;
                 });
             }
 
@@ -147,7 +144,7 @@ exports.removeDriver = function (req, res){
     var driver = req.driver;
     var node, isInput = false;
 
-    if(!nodes.some(function(curNode){
+    if(!masterNode.nodes.some(function(curNode){
         if(curNode.inputDrivers.indexOf(driver) !== -1){
             node = curNode;
             isInput = true;
@@ -167,10 +164,10 @@ exports.removeDriver = function (req, res){
 
         if(isInput){
             node.inputDrivers.splice(node.inputDrivers.indexOf(driver), 1);
-            delete inputDriverHash[driver.id];
+            delete masterNode.inputDriverHash[driver.id];
         }else{
             node.outputDrivers.splice(node.outputDrivers.indexOf(driver), 1);
-            delete outputDriverHash[driver.id];
+            delete masterNode.outputDriverHash[driver.id];
         }
 
         res.json(driver);
@@ -178,7 +175,7 @@ exports.removeDriver = function (req, res){
 };
 
 exports.driverById = function (req, res, next, id){
-    if(!(req.driver = (outputDriverHash[id] || inputDriverHash[id]))){
+    if(!(req.driver = (masterNode.outputDriverHash[id] || masterNode.inputDriverHash[id]))){
         return res.status(400).send({
             message: 'Driver id not found'
         });

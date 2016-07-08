@@ -17,7 +17,8 @@ module.exports = function (app) {
 
     app.route('/api/node/:nodeId').all(nodePolicy.isAllowed).
         get(node.get).
-        put(node.update);
+        put(node.update).
+        post(node.updateNode); //this will have the server call down to the node to make it update
 
     app.route('/api/node/:nodeId/output').all(nodePolicy.isAllowed).
         post(outputs.add);
