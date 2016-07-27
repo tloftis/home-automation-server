@@ -1,0 +1,10 @@
+{
+    "name": "DoorBell",
+    "type": "boolean",
+    "packages": [
+        "mplayer"
+    ],
+    "config":{
+    },
+    "description": "Plays a doorbell sound"
+}
