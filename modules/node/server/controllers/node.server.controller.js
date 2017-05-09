@@ -68,11 +68,19 @@ function genId(){
 
 function writeConfig(fileLoc, obj, callback){
     if(!callback) callback = function(){};
-    var objStr = JSON.stringify(obj, null, 4);
+    var objStr;
 
-    fs.writeFile(fileLoc, objStr, function(err) {
-        callback(err);
-    });
+    try {
+        objStr = JSON.stringify(obj, null, 4);
+    } finally {
+        objStr = undefined;
+    }
+
+    if(objStr) {
+        fs.writeFile(fileLoc, objStr, function (err) {
+            callback(err);
+        });
+    }
 }
 
 var glob = require('glob'),
