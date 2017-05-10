@@ -27,12 +27,6 @@ angular.module('node').run(['Menus',
             state: 'node.nodes',
             roles: ['user', 'admin']
         });
-
-        Menus.addSubMenuItem('topbar', 'node', {
-            title: 'Link List',
-            state: 'node.links',
-            roles: ['user', 'admin']
-        });
     }
 ]);
 

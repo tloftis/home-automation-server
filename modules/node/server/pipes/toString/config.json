@@ -1,7 +1,0 @@
-{
-    "name": "toString",
-    "outType": "string",
-    "inType": ["boolean", "number", "string"],
-    "description": "Converts any value to a string",
-    "id": "76fa1cf709e12fb7e9595f045b63612bd08c8774c23d40a13c"
-}

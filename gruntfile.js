@@ -113,47 +113,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-        'node-inspector': {
-            custom: {
-                options: {
-                    'web-port': 1337,
-                    'web-host': 'localhost',
-                    'debug-port': 5858,
-                    'save-live-edit': true,
-                    'no-preload': true,
-                    'stack-trace-limit': 50,
-                    'hidden': []
-                }
-            }
-        },
-        mochaTest: {
-            src: testAssets.tests.server,
-            options: {
-                reporter: 'spec',
-                timeout: 10000
-            }
-        },
-        mocha_istanbul: {
-            coverage: {
-                src: testAssets.tests.server,
-                options: {
-                    print: 'detail',
-                    coverage: true,
-                    require: 'test.js',
-                    coverageFolder: 'coverage/server',
-                    reportFormats: ['cobertura','lcovonly'],
-                    check: {
-                        lines: 40,
-                        statements: 40
-                    }
-                }
-            }
-        },
-        karma: {
-            unit: {
-                configFile: 'karma.conf.js'
-            }
-        },
         protractor: {
             options: {
                 configFile: 'protractor.conf.js',
@@ -190,7 +149,6 @@ module.exports = function (grunt) {
 
     // Load NPM tasks
     require('load-grunt-tasks')(grunt);
-    grunt.loadNpmTasks('grunt-protractor-coverage');
 
     // Make sure upload directory exists
     grunt.task.registerTask('mkdir:upload', 'Task that makes sure upload directory exists.', function () {
@@ -252,14 +210,6 @@ module.exports = function (grunt) {
 
     // Lint project files and minify them into two production files.
     grunt.registerTask('build', ['env:dev', 'lint', 'ngAnnotate', 'uglify', 'cssmin']);
-
-    // Run the project tests
-    grunt.registerTask('test', ['env:test', 'lint', 'mkdir:upload', 'copy:localConfig', 'server', 'mochaTest', 'karma:unit', 'protractor']);
-    grunt.registerTask('test:server', ['env:test', 'lint', 'server', 'mochaTest']);
-    grunt.registerTask('test:client', ['env:test', 'lint', 'karma:unit']);
-    grunt.registerTask('test:e2e', ['env:test', 'lint', 'dropdb', 'server', 'protractor']);
-    // Run project coverage
-    grunt.registerTask('coverage', ['env:test', 'lint', 'mocha_istanbul:coverage', 'karma:unit']);
 
     // Run the project in development mode
     grunt.registerTask('default', ['env:dev', 'lint', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);

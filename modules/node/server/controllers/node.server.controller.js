@@ -6,7 +6,6 @@ var _ = require('lodash'),
     request = require('request'),
     fs = require('fs'),
     os = require('os'),
-    crypto = require('crypto'),
     testAddresses = [];
 
 var nodes = [],
@@ -48,70 +47,6 @@ if(localIp){
 for(i = end; i <= 255; i++){
     testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
 }
-
-//Gets the absolute location of the folder contained by a require file selector
-function rationalizePaths(array){
-    var path;
-
-    for(var i = 0, len = array.length; i < len; i++){
-        //I know, this is very unneeded, but I like having it because of it's over bearing round-a-bout-ness
-        path = require.resolve(array[i]);
-        array[i] = { index: path, config: path.replace(/index\.js/, 'config.json') };
-    }
-
-    return array;
-}
-
-function genId(){
-    return crypto.randomBytes(25).toString('hex');
-}
-
-function writeConfig(fileLoc, obj, callback){
-    if(!callback) callback = function(){};
-    var objStr;
-
-    try {
-        objStr = JSON.stringify(obj, null, 4);
-    } finally {
-        objStr = undefined;
-    }
-
-    if(objStr) {
-        fs.writeFile(fileLoc, objStr, function (err) {
-            callback(err);
-        });
-    }
-}
-
-var glob = require('glob'),
-    pipLocations = rationalizePaths(glob.sync('../pipes/*/index.js', { cwd: __dirname })),
-    pipeHash = {},
-    pipes = [];
-
-function findPipes(callback){
-    var pipe,
-        config;
-
-    pipeHash = {};
-    pipes = [];
-
-    for(var i = 0; i < pipLocations.length; i++){
-        pipe = require(pipLocations[i].index);
-        config = require(pipLocations[i].config);
-
-        if(!config.id){
-            config.id = genId();
-            writeConfig(pipLocations[i].config, config);
-        }
-
-        _.extend(pipe, config);
-        pipes.push(pipe);
-        pipeHash[pipe.id] = pipe;
-    }
-
-    if(callback){ callback(); }
-}
-
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
 function searchForNodes(callback){
@@ -381,54 +316,47 @@ function updateDrivers(callback){
     }, callback);
 }
 
+function refreshLink(){
+    module.exports.nodes = nodes;
+    module.exports.outputs = outputs;
+    module.exports.inputs = inputs;
+    module.exports.outputDriverHash = outputDriverHash;
+    module.exports.inputDriverHash = inputDriverHash;
+    module.exports.nodeHash = nodeHash;
+    module.exports.inputHash = inputHash;
+    module.exports.outputHash = outputHash;
+}
+
 function updateAll(callback){
     nodes = [];
     outputs = [];
     inputs = [];
-    pipes = [];
-    pipeHash = {};
     inputDriverHash = {};
     outputDriverHash = {};
     nodeHash = {};
     outputHash = {};
     inputHash = {};
 
-    findPipes(function(){
-        searchForNodes(function(){
-            registerWithNodes(function(){
-                async.parallel([
-                    updateInputs,
-                    updateOutputs,
-                    updateDrivers
-                ], function(){
-                    refreshLink();
-                    if(callback){ callback(); }
-                })
-            });
+    searchForNodes(function(){
+        registerWithNodes(function(){
+            async.parallel([
+                updateInputs,
+                updateOutputs,
+                updateDrivers
+            ], function(){
+                refreshLink();
+                if(callback){ callback(); }
+            })
         });
     });
 }
 
-updateAll();
-
-function refreshLink(){
-    module.exports.nodes = nodes;
-    module.exports.outputs = outputs;
-    module.exports.inputs = inputs;
-    module.exports.pipes = pipes;
-    module.exports.outputDriverHash = outputDriverHash;
-    module.exports.inputDriverHash = inputDriverHash;
-    module.exports.nodeHash = nodeHash;
-    module.exports.inputHash = inputHash;
-    module.exports.outputHash = outputHash;
-    module.exports.pipeHash = pipeHash;
-}
-
 refreshLink();
+updateAll();
 
 exports.updateNodes = function(req, res){
     updateAll(function(){
-        res.send('Pipes Updated!');
+        res.send('Update Complete!');
     });
 };
 

@@ -175,66 +175,6 @@ angular.module('node').config(['$stateProvider',
                     }
                 }
             }
-        }).
-        state('node.links', {
-            url: '/links',
-            bcName: 'Link Lists',
-            bcInclude: true,
-            views: {
-                '@node': {
-                    templateUrl: 'modules/node/client/views/node-link-list.client.view.html',
-                    controller: 'nodeLinkListController'
-                },
-                'headerView@node': {
-                    controller: function($scope) {
-                        $scope.header = {
-                            label: 'List of Links',
-                            desc: '',
-                            faIcon: 'fa-circle fa-fw'
-                        };
-                    }
-                }
-            }
-        }).
-        state('node.links.add', {
-            url: '/create',
-            bcName: 'Add Link',
-            bcInclude: true,
-            views: {
-                '@node': {
-                    templateUrl: 'modules/node/client/views/node-link-edit.client.view.html',
-                    controller: 'nodeLinkCreateController'
-                },
-                'headerView@node': {
-                    controller: function($scope) {
-                        $scope.header = {
-                            label: 'Add Link',
-                            desc: '',
-                            faIcon: 'fa-circle fa-fw'
-                        };
-                    }
-                }
-            }
-        }).
-        state('node.links.edit', {
-            url: '/:linkId',
-            bcName: 'Edit Link',
-            bcInclude: true,
-            views: {
-                '@node': {
-                    templateUrl: 'modules/node/client/views/node-link-edit.client.view.html',
-                    controller: 'nodeLinkUpdateController'
-                },
-                'headerView@node': {
-                    controller: function($scope) {
-                        $scope.header = {
-                            label: 'Edit Link',
-                            desc: '',
-                            faIcon: 'fa-circle fa-fw'
-                        };
-                    }
-                }
-            }
         });
     }
 ]);
