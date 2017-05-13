@@ -3,7 +3,14 @@
 var async = require('async'),
     _ = require('lodash'),
     mongoose = require('mongoose'),
+    chalk = require('chalk'),
     logs = mongoose.model('Logs');
+
+var debugLog = {
+    error: function(str, obj) { console.log(chalk.bold.red(str), obj || ''); }
+    info: function(str, obj) { console.log(chalk.blue.bold.underline(str), obj || ''); },
+    success: function(str, obj) { console.log(chalk.green.bold(str), obj || ''); }
+};
 
 function addLog(typ, msg, data, source, callback){
     var log = new logs({
@@ -13,7 +20,9 @@ function addLog(typ, msg, data, source, callback){
         data: data
     });
 
-    console.log(typ, msg, data);
+    if((process.env.NODE_ENV || '').toLowerCase() === 'development'){
+        debugLog[typ](msg,data);
+    }
 
     return log.save(function(err, newLog){
         if(callback){
@@ -28,10 +37,6 @@ exports.error = function(msg, data){
 
 exports.success = function(msg, data){
     return addLog('success', msg, data, null);
-};
-
-exports.info = function(msg, data){
-    return addLog('info', msg, data, null);
 };
 
 exports.info = function(msg, data){

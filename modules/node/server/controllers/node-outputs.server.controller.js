@@ -3,7 +3,8 @@
 var async = require('async'),
     _ = require('lodash'),
     request = require('request'),
-    masterNode = require('./node.server.controller');
+    masterNode = require('./node.server.controller'),
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 exports.list = function(req, res){
     res.json(masterNode.outputs.map(function(output){
@@ -16,9 +17,9 @@ exports.listDrivers = function(req, res){
 };
 
 exports.set = function (req, res){
-    var output = req.output;
-    var value = req.body ? req.body.value : undefined;
-    var type = req.body ? req.body.type : undefined;
+    var output = req.output,
+        value = req.body ? req.body.value : undefined,
+        type = req.body ? req.body.type : undefined;
 
     var info = {
         url: 'http://' + output.node.ip + '/api/output/' + output.id + '/set',
@@ -27,6 +28,8 @@ exports.set = function (req, res){
 
     request.post(info, function (err, reqs, body){
         if(err){
+            output.node.active = false;
+            log.error('Failed to set output value on node: ' + output.node.ip + ', output: ' + output.id, err);
             return res.status(400).send('Error attempting to set output');
         }
 
@@ -44,6 +47,8 @@ exports.set = function (req, res){
         if(newOutput.config){ output.config = newOutput.config; }
         if(newOutput.driverId){ output.driverId = newOutput.driverId; }
 
+        output.node.active = true;
+        log.info('Set value of output on node: ' + output.node.ip, output);
         res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
     });
 };
@@ -83,7 +88,12 @@ exports.update = function (req, res){
     };
 
     request.put(info, function (err, reqs, body){
-        if(err) return res.status(400).send('Error attempting to update output');
+        if(err){
+            output.node.active = false;
+            log.error('Failed to update output config on node: ' + output.node.ip + ', output: ' + output.id, err);
+            return res.status(400).send('Error attempting to update output');
+        }
+
         var newOutput;
 
         try{
@@ -98,6 +108,8 @@ exports.update = function (req, res){
         if(!_.isUndefined(newOutput.config)) output.config = newOutput.config;
         if(!_.isUndefined(newOutput.driverId)) output.driverId = newOutput.driverId;
 
+        output.node.active = true;
+        log.info('Updated output config on node: ' + output.node.ip, output);
         res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
     });
 };
@@ -111,8 +123,16 @@ exports.remove = function (req, res){
     };
 
     request.del(info, function (err){
-        if(err){ return res.status(400).send('Error attempting to remove output'); }
+        if(err){
+            output.node.active = false;
+            log.error('Failed to remove output on node: ' + output.node.ip + ', output: ' + output.id, err);
+            return res.status(400).send('Error attempting to remove output');
+        }
+
         var index = masterNode.outputs.indexOf(output);
+
+        output.node.active = true;
+        log.info('Removed output on node: ' + output.node.ip, output);
 
         if(index !== -1){
             masterNode.outputs.splice(index, 1);
@@ -156,7 +176,12 @@ exports.add = function (req, res){
         };
 
         request.post(info, function (err, resq, body) {
-            if (err) return res.status(400).send('Error attempting to add output');
+            if(err) {
+                node.active = false;
+                log.error('Failed to create output on node: ' + node.ip, err);
+                return res.status(400).send('Error attempting to add output');
+            }
+
             var newOutput, output = {};
 
             try{
@@ -173,6 +198,8 @@ exports.add = function (req, res){
             output.driverId = newOutput.driverId;
             output.node = node;
             masterNode.registerOutput(output);
+            output.node.active = true;
+            log.info('Created output on node: ' + node.ip, output);
             res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
         });
     }else{

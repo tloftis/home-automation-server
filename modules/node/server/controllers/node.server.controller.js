@@ -33,7 +33,7 @@ for (var j in interfaces){
 }
 
 var end = 0; //because this is the best option
-var ipIntro = '10.0.0.'; //because it's my default network
+var ipIntro = '192.168.1.'; //because it's my default network
 
 if(netMask){
     end = +netMask.split('.').pop();
@@ -93,6 +93,12 @@ function searchForNodes(callback){
     }, function (){
         module.exports.nodeHash = nodeHash;
         module.exports.nodes = nodes = Object.keys(nodeHash).map(k=>nodeHash[k]);
+
+        nodes.forEach(n=>{
+            if(!node.active){
+                log.error('Failed to to connect to node: ' + n.ip, n);
+            }
+        });
         callback();
     });
 }
@@ -131,8 +137,10 @@ function updateNodeInputs(node, callback){
         }
 
         if(err){
+            node.active = false;
             return callback();
         }else{
+            node.active = true;
             inputs = inputs.filter((input)=>{
                 if(input.node.id === node.id){
                     delete inputHash[input.id];
@@ -186,8 +194,10 @@ function updateNodeOutputs(node, callback){
         }
 
         if(err){
+            node.active = false;
             return callback();
         }else{
+            node.active = true;
             outputs = outputs.filter((output)=>{
                 if(output.node.id === node.id){
                     delete outputHash[output.id];
@@ -242,8 +252,10 @@ function updateNodeDrivers(node, callback){
             }
 
             if(err){
+                node.active = false;
                 return nextMid();
             }else{
+                node.active = true;
                 node.outputDrivers = (node.outputDrivers || []).filter((outputDriver)=>{
                     if(node.outputDrivers.indexOf(outputDriver) !== -1){
                         delete outputDriverHash[outputDriver.id];
@@ -260,10 +272,12 @@ function updateNodeDrivers(node, callback){
                         description: driver.description,
                         type: driver.type,
                         config: driver.config,
+                        node: node,
                         id: driver.id
                     };
 
                     node.outputDrivers.push(newDriver);
+                    node.active = true;
                     outputDriverHash[newDriver.id] = newDriver;
                     next();
                 },function(){
@@ -284,8 +298,11 @@ function updateNodeDrivers(node, callback){
             }
 
             if(err){
+                node.active = false;
                 return nextMid();
             }else{
+                node.active = true;
+
                 node.inputDrivers = (node.inputDrivers || []).filter((inputDriver)=>{
                     if(node.inputDrivers.indexOf(inputDriver) !== -1){
                         delete inputDriverHash[inputDriver.id];
@@ -302,6 +319,7 @@ function updateNodeDrivers(node, callback){
                         description: driver.description,
                         type: driver.type,
                         config: driver.config,
+                        node: node,
                         id: driver.id
                     };
 
@@ -375,6 +393,7 @@ exports.updateNode = function(req, res){
             updateNodeInputs(node, done);
         }
     ], function(){
+        log.info('Node added back to system!', node);
         res.send('Node Updated!');
     })
 };
@@ -414,6 +433,7 @@ exports.update = function (req, res){
         selNode.description = newOutput.description;
         selNode.location = newOutput.location;
         selNode.name = newOutput.name;
+        selNode.active = true;
         res.json(selNode);
     });
 };

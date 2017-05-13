@@ -46,7 +46,12 @@ exports.update = function (req, res){
     };
 
     request.put(info, function (err, reqs, body){
-        if(err) return res.status(400).send('Error attempting to update input');
+        if(err) {
+            input.node.active = false;
+            log.error('Failed to update node: ' + node.ip + ', input:' + input.id, err);
+            return res.status(400).send('Error attempting to update input');
+        }
+
         var newInput;
 
         try{
@@ -60,6 +65,8 @@ exports.update = function (req, res){
         if(!_.isUndefined(newInput.description)) input.description = newInput.description;
         if(!_.isUndefined(newInput.config)) input.config = newInput.config;
         if(!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
+        node.active = true;
+        log.info('Updated input config on node: ' + input.node.ip, input);
         res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
     });
 };
@@ -74,16 +81,22 @@ exports.remove = function (req, res){
     };
 
     request.del(info, function (err){
-        if(err) return res.status(400).send('Error attempting to remove input');
+        if(err){
+            input.node.active = false;
+            log.error('Failed to delete on node: ' + node.ip + ', input:' + input.id, err);
+            return res.status(400).send('Error attempting to remove input');
+        }
 
         index = masterNode.inputs.indexOf(input);
 
         if(index !== -1){
             delete masterNode.inputHash[input.id];
             masterNode.inputs.splice(index, 1);
+            input.node.active = true;
             return res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         }
 
+        log.info('Deleted input on node: ' + input.node.ip, input);
         return res.status(400).send('Error attempting to remove input from server memory');
     });
 };
@@ -119,7 +132,12 @@ exports.add = function (req, res){
         };
 
         request.post(info, function (err, resq, body) {
-            if (err) return res.status(400).send('Error attempting to add input');
+            if(err){
+                node.active = false;
+                log.error('Failed to add input on node: ' + node.ip, err);
+                return res.status(400).send('Error attempting to add input');
+            }
+
             var newInput, input = {};
 
             try{
@@ -135,7 +153,9 @@ exports.add = function (req, res){
             input.config = newInput.config;
             input.driverId = newInput.driverId;
             input.node = node;
+            input.node.active = true;
             masterNode.registerInput(input);
+            log.info('Created new input on node: ' + input.node.ip, input);
             res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
         });
     }else{
@@ -143,12 +163,12 @@ exports.add = function (req, res){
     }
 };
 
-var pipeData = {};
-
 exports.change = function(req, res){
     var input = req.input,
         value = req.body.value,
         type = req.body.type;
+
+    input.node.active = true;
 
     if(!type){
         res.status(400).jsonp({
@@ -175,7 +195,7 @@ exports.change = function(req, res){
         return res.status(400).send('Unknown Input posted to server');
     }
 
-    log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, { inputId: input.id });
+    log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, input);
 
     res.status(200).jsonp({
         message:'Update Succeeded!'

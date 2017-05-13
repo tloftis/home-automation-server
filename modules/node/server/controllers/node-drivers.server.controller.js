@@ -13,7 +13,8 @@ var async = require('async'),
     inputDriverLocs = [],
     outputDriverLocHash = {},
     inputDriverLocHash = {},
-    masterNode = require('./node.server.controller');
+    masterNode = require('./node.server.controller').
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 //Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
