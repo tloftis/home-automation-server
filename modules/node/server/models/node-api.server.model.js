@@ -19,6 +19,11 @@ var NodeAPISchema = new Schema({
         trim: false,
         required: true
     },
+    permissions: {
+        type: [String],
+        required: false,
+        default: []
+    }
     token: {
         type: String,
         unique: true,

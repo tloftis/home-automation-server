@@ -6,7 +6,8 @@ var _ = require('lodash'),
     request = require('request'),
     fs = require('fs'),
     os = require('os'),
-    testAddresses = [];
+    testAddresses = [],
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 var nodes = [],
     outputs = [],
@@ -69,6 +70,8 @@ function searchForNodes(callback){
                     return next();
                 }
 
+                Object.keys(nodeHash).forEach(()=>nodeHash[k].active=false);
+
                 if(node && (node.id !== '')){
                     var newNode = {
                         id: node.id,
@@ -77,10 +80,10 @@ function searchForNodes(callback){
                         description: node.description || '',
                         location: node.location || '',
                         inputDrivers : [],
-                        outputDrivers : []
+                        outputDrivers : [],
+                        active: true
                     };
 
-                    nodes.push(newNode);
                     nodeHash[node.id] = newNode;
                 }
             }
@@ -88,6 +91,8 @@ function searchForNodes(callback){
             next();
         });
     }, function (){
+        module.exports.nodeHash = nodeHash;
+        module.exports.nodes = nodes = Object.keys(nodeHash).map(k=>nodeHash[k]);
         callback();
     });
 }
@@ -150,9 +155,10 @@ function updateNodeInputs(node, callback){
 
                 inputs.push(newInput);
                 inputHash[newInput.id] = newInput;
-
                 next();
             },function(){
+                module.exports.inputs = inputs;
+                module.exports.inputHash = inputHash;
                 callback();
             });
         }
@@ -206,6 +212,8 @@ function updateNodeOutputs(node, callback){
                 outputHash[newOutput.id] = newOutput;
                 next();
             },function(){
+                module.exports.outputs = outputs;
+                module.exports.outputHash = outputHash;
                 callback();
             });
         }
@@ -259,6 +267,8 @@ function updateNodeDrivers(node, callback){
                     outputDriverHash[newDriver.id] = newDriver;
                     next();
                 },function(){
+                    module.exports.outputDrivers = outputDrivers;
+                    module.exports.outputDriverHash = outputDriverHash;
                     nextMid();
                 });
             }
@@ -299,6 +309,8 @@ function updateNodeDrivers(node, callback){
                     inputDriverHash[newDriver.id] = newDriver;
                     next();
                 },function(){
+                    module.exports.inputDrivers = inputDrivers;
+                    module.exports.inputDriverHash = inputDriverHash;
                     nextMid();
                 });
             }
@@ -316,24 +328,11 @@ function updateDrivers(callback){
     }, callback);
 }
 
-function refreshLink(){
-    module.exports.nodes = nodes;
-    module.exports.outputs = outputs;
-    module.exports.inputs = inputs;
-    module.exports.outputDriverHash = outputDriverHash;
-    module.exports.inputDriverHash = inputDriverHash;
-    module.exports.nodeHash = nodeHash;
-    module.exports.inputHash = inputHash;
-    module.exports.outputHash = outputHash;
-}
-
 function updateAll(callback){
-    nodes = [];
     outputs = [];
     inputs = [];
     inputDriverHash = {};
     outputDriverHash = {};
-    nodeHash = {};
     outputHash = {};
     inputHash = {};
 
@@ -344,14 +343,12 @@ function updateAll(callback){
                 updateOutputs,
                 updateDrivers
             ], function(){
-                refreshLink();
                 if(callback){ callback(); }
             })
         });
     });
 }
 
-refreshLink();
 updateAll();
 
 exports.updateNodes = function(req, res){
@@ -378,7 +375,6 @@ exports.updateNode = function(req, res){
             updateNodeInputs(node, done);
         }
     ], function(){
-        refreshLink();
         res.send('Node Updated!');
     })
 };

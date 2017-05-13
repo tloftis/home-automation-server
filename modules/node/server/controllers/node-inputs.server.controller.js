@@ -150,9 +150,15 @@ exports.change = function(req, res){
         value = req.body.value,
         type = req.body.type;
 
+    if(!type){
+        res.status(400).jsonp({
+            message:'Update Failed!'
+        });
+    }
+
     if(type === 'boolean'){
-        if(value === 'true'){ value = true; }
-        if(value === 'false'){ value = false; }
+        if(value.toLowerCase() === 'true'){ value = true; }
+        if(value.toLowerCase() === 'false'){ value = false; }
 
         value = value ? true : false;
     }
@@ -169,64 +175,10 @@ exports.change = function(req, res){
         return res.status(400).send('Unknown Input posted to server');
     }
 
-    var query = {
-        inputId: input.id
-    };
-
     log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, { inputId: input.id });
 
-    NodeLink.find(query).exec(function(err, links){
-        if(err){
-            return res.send('Error getting input to output links');
-        }
-
-        links.forEach(function(link){
-            var pipeLine = [],
-                output = masterNode.outputHash[link.outputId],
-                data = pipeData[link._id] = pipeData[link._id] || {};
-
-            if(!output){ return; }
-
-            link.pipes.forEach(function(pipe){
-                var userInput = pipe.data,
-                    currentPipe = masterNode.pipeHash[pipe.pipeId];
-
-                if(!currentPipe){ return; }
-
-                var index = pipeLine.push(function(val){
-                    currentPipe.funct(val, userInput, data, function(val){
-                        if(typeof val !== 'undefined'){
-                            pipeLine[index](val);
-                        }
-                    });
-                });
-            });
-
-            if(pipeLine.length !== link.pipes.length){ return; }
-
-            //This is hacky, the set function needs to be stripped out of the express middleware
-            //and exposed to call directly, the express middleware will call this new function as well
-            var fakeRes = {
-                send: function(){ },
-                json: function(){ },
-                status: function(){
-                    return fakeRes;
-                }
-            };
-
-            pipeLine.push(function(val){
-                outputController.set({ output: output,
-                    body: {
-                        value: val,
-                        type: typeof val
-                    }
-                }, fakeRes);
-            });
-
-            pipeLine[0](value);
-        });
-
-        res.send('Updated Successfully');
+    res.status(200).jsonp({
+        message:'Update Succeeded!'
     });
 };
 

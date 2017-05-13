@@ -13,6 +13,8 @@ function addLog(typ, msg, data, source, callback){
         data: data
     });
 
+    console.log(typ, msg, data);
+
     return log.save(function(err, newLog){
         if(callback){
             callback(err, newLog);
