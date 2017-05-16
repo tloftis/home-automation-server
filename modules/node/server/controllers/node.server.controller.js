@@ -421,7 +421,12 @@ exports.update = function (req, res){
     };
 
     request.put(info, function (err, reqs, body){
-        if(err) return res.status(400).send('Error attempting to update node server config');
+        if(err) {
+            node.active = false;
+            log.error('Failed to update config of node: ' + node.ip, err);
+            return res.status(400).send('Error attempting to update node server config');
+        }
+
         var newOutput;
 
         try{
