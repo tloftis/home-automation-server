@@ -23,7 +23,7 @@ var NodeAPISchema = new Schema({
         type: [String],
         required: false,
         default: []
-    }
+    },
     token: {
         type: String,
         unique: true,
