@@ -8,9 +8,10 @@ var _ = require('lodash'),
     os = require('os'),
     testAddresses = [],
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
+
 var comms = {};
 
-comms.getAllIps = ()=> {
+comms.getAllIps = ()=>{
     let netMask, 
         localIp,
         interfaces = os.networkInterfaces();
@@ -45,18 +46,18 @@ comms.getAllIps = ()=> {
 };
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
-function searchForNodes(callback){
+comms.searchForNodes = (callback)=>{
     if(!callback) callback = ()=>{};
 
-    async.each(comms.getAllIps(), function (address, next){
-        var info = {
+    async.each(comms.getAllIps(), function(address, next){
+        let info = {
             url: 'http://' + address + '/api/server',
             timeout: 2000
         };
 
-        request.get(info, function (err, res, body){
+        request.get(info, function(err, res, body){
             if (!err && body){
-                var node;
+                let node;
 
                 //parse out the info gained back from the server
                 try {
@@ -68,7 +69,7 @@ function searchForNodes(callback){
                 Object.keys(comms.nodeHash).forEach(()=>comms.nodeHash[k].active=false);
 
                 if(node && (node.id !== '')){
-                    var newNode = {
+                    comms.nodeHash[node.id] = {
                         id: node.id,
                         ip: address,
                         name: node.name || '',
@@ -78,14 +79,12 @@ function searchForNodes(callback){
                         outputDrivers : [],
                         active: true
                     };
-
-                    comms.nodeHash[node.id] = newNode;
                 }
             }
 
             next();
         });
-    }, function (){
+    },()=>{
         comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
 
         comms.nodes.forEach(n=>{
@@ -95,34 +94,34 @@ function searchForNodes(callback){
         });
         callback();
     });
-}
+};
 
-function registerWithNode(node, callback){
+comms.registerWithNode = (node, callback)=>{
     if(!callback) callback = function(){};
 
-    var info = {
+    let info = {
         url: 'http://' + node.ip + '/api/register',
         form: {}
     };
 
-    request.post(info, function (){
+    request.post(info, ()=>{
         callback();
     });
-}
+};
 
-function registerWithNodes(callback){
+comms.registerWithNodes = (callback)=>{
     if(!callback) callback = function(){};
 
-    async.each(comms.nodes, function (node, next){
+    async.each(comms.nodes, (node, next)=>{
         registerWithNode(node, next);
     }, callback);
-}
+};
 
-function updateNodeInputs(node, callback){
+comms.updateNodeInputs = (node, callback)=>{
     if(!callback) callback = function(){};
 
-    request.get('http://' + node.ip + '/api/input', function (err, res, body){
-        var newInputs;
+    request.get('http://' + node.ip + '/api/input', function(err, res, body){
+        let newInputs;
 
         try {
             newInputs = JSON.parse(body);
@@ -135,6 +134,7 @@ function updateNodeInputs(node, callback){
             return callback();
         }else{
             node.active = true;
+
             comms.inputs = comms.inputs.filter((input)=>{
                 if(input.node.id === node.id){
                     delete comms.inputHash[input.id];
@@ -145,7 +145,7 @@ function updateNodeInputs(node, callback){
             });
 
             async.each(newInputs, function (input, next){
-                var newInput = {
+                let newInput = {
                     name: input.name,
                     location: input.location,
                     description: input.description,
@@ -163,21 +163,21 @@ function updateNodeInputs(node, callback){
             });
         }
     });
-}
+};
 
-function updateInputs(callback){
+comms.updateInputs = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, function (node, nextMain){
         updateNodeInputs(node, nextMain);
     }, callback);
-}
+};
 
-function updateNodeOutputs(node, callback){
+comms.updateNodeOutputs = (node, callback)=>{
     if(!callback) callback = function(){};
 
-    request.get('http://' + node.ip + '/api/output', function (err, res, body){
-        var newOutputs;
+    request.get('http://' + node.ip + '/api/output', function(err, res, body){
+        let newOutputs;
 
         try {
             newOutputs = JSON.parse(body);
@@ -190,6 +190,7 @@ function updateNodeOutputs(node, callback){
             return callback();
         }else{
             node.active = true;
+
             comms.outputs = comms.outputs.filter((output)=>{
                 if(output.node.id === node.id){
                     delete comms.outputHash[output.id];
@@ -199,8 +200,8 @@ function updateNodeOutputs(node, callback){
                 return true;
             });
 
-            async.each(newOutputs, function (output, next){
-                var newOutput = {
+            async.each(newOutputs, function(output, next){
+                let newOutput = {
                     name: output.name,
                     location: output.location,
                     description: output.description,
@@ -218,22 +219,22 @@ function updateNodeOutputs(node, callback){
             });
         }
     });
-}
+};
 
-function updateOutputs(callback){
+comms.updateOutputs = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, function (node, nextMain){
-        updateNodeOutputs(node, nextMain)
+        updateNodeOutputs(node, nextMain);
     }, callback);
-}
+};
 
-function updateNodeDrivers(node, callback){
+comms.updateNodeDrivers = (node, callback)=>{
     if(!callback) callback = function(){};
 
     async.parallel([function(nextMid){
-        request.get('http://' + node.ip + '/api/output/drivers', function (err, res, body){
-            var newDrivers;
+        request.get('http://' + node.ip + '/api/output/drivers', function(err, res, body){
+            let newDrivers;
 
             try {
                 newDrivers = JSON.parse(body);
@@ -246,6 +247,7 @@ function updateNodeDrivers(node, callback){
                 return nextMid();
             }else{
                 node.active = true;
+
                 node.outputDrivers = (node.outputDrivers || []).filter((outputDriver)=>{
                     if(node.outputDrivers.indexOf(outputDriver) !== -1){
                         delete comms.outputDriverHash[outputDriver.id];
@@ -255,8 +257,8 @@ function updateNodeDrivers(node, callback){
                     return true;
                 });
 
-                async.each(newDrivers, function (driver, next){
-                    var newDriver = {
+                async.each(newDrivers, function(driver, next){
+                    let newDriver = {
                         name: driver.name,
                         location: driver.location,
                         description: driver.description,
@@ -276,8 +278,8 @@ function updateNodeDrivers(node, callback){
             }
         });
     }, function(nextMid){
-        request.get('http://' + node.ip + '/api/input/drivers', function (err, res, body){
-            var newDrivers;
+        request.get('http://' + node.ip + '/api/input/drivers', function(err, res, body){
+            let newDrivers;
 
             try {
                 newDrivers = JSON.parse(body);
@@ -300,8 +302,8 @@ function updateNodeDrivers(node, callback){
                     return true;
                 });
 
-                async.each(newDrivers, function (driver, next){
-                    var newDriver = {
+                async.each(newDrivers, function(driver, next){
+                    let newDriver = {
                         name: driver.name,
                         location: driver.location,
                         description: driver.description,
@@ -322,17 +324,17 @@ function updateNodeDrivers(node, callback){
     }], function(){
         callback();
     });
-}
+};
 
-function updateDrivers(callback){
+comms.updateDrivers = (callback)=>{
     if(!callback) callback = function(){};
 
-    async.each(comms.nodes, function (node, nextMain){
+    async.each(comms.nodes, function(node, nextMain){
         updateNodeDrivers(node, nextMain);
     }, callback);
-}
+};
 
-function updateAll(callback){
+comms.updateAll = (callback)=>{
     comms.outputs = [];
     comms.inputs = [];
     comms.inputDriverHash = {};
@@ -351,8 +353,7 @@ function updateAll(callback){
             })
         });
     });
-}
+};
 
-updateAll();
-
+comms.updateAll();
 exports = comms;
