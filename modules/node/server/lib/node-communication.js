@@ -1,15 +1,14 @@
 'use strict';
 
 //Only can find address in a subnet mask of 255.255.255.0
-var _ = require('lodash'),
+let _ = require('lodash'),
     async = require('async'),
     request = require('request'),
-    fs = require('fs'),
     os = require('os'),
     testAddresses = [],
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
-var comms = {};
+let comms = {};
 
 comms.getAllIps = ()=>{
     let netMask, 
@@ -113,7 +112,7 @@ comms.registerWithNodes = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, (node, next)=>{
-        registerWithNode(node, next);
+        comms.registerWithNode(node, next);
     }, callback);
 };
 
@@ -169,7 +168,7 @@ comms.updateInputs = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, function (node, nextMain){
-        updateNodeInputs(node, nextMain);
+        comms.updateNodeInputs(node, nextMain);
     }, callback);
 };
 
@@ -225,7 +224,7 @@ comms.updateOutputs = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, function (node, nextMain){
-        updateNodeOutputs(node, nextMain);
+        comms.updateNodeOutputs(node, nextMain);
     }, callback);
 };
 
@@ -330,7 +329,7 @@ comms.updateDrivers = (callback)=>{
     if(!callback) callback = function(){};
 
     async.each(comms.nodes, function(node, nextMain){
-        updateNodeDrivers(node, nextMain);
+        comms.updateNodeDrivers(node, nextMain);
     }, callback);
 };
 
@@ -345,9 +344,9 @@ comms.updateAll = (callback)=>{
     searchForNodes(function(){
         registerWithNodes(function(){
             async.parallel([
-                updateInputs,
-                updateOutputs,
-                updateDrivers
+                comms.updateInputs,
+                comms.updateOutputs,
+                comms.updateDrivers
             ], function(){
                 if(callback){ callback(); }
             })
@@ -355,5 +354,22 @@ comms.updateAll = (callback)=>{
     });
 };
 
+//Used to register new node input and output, adds to array and gives them new ids
+exports.registerInput = function(config){
+    inputs.push(config);
+    comms.inputHash[config.id] = config;
+};
+
+exports.registerOutput = function(config){
+    outputs.push(config);
+    comms.outputHash[config.id] = config;
+};
+
+function asyncParallel (array, funct, callback) {
+    async.parallel((array || []).map((val)=>(next)=>{
+        funct(val, next);
+    }), callback);
+}
+
 comms.updateAll();
-exports = comms;
+module.exports = comms;

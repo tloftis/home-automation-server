@@ -6,17 +6,17 @@ var async = require('async'),
     mongoose = require('mongoose'),
     outputController = require('../controllers/node-outputs.server.controller.js'),
     NodeLink = mongoose.model('NodeLink'),
-    masterNode = require('./node.server.controller'),
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 exports.list = function(req, res){
-    res.json(masterNode.inputs.map(function(input){
-        return _.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
+    res.json(nodeComm.inputs.map(function(input){
+        return _.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
     }));
 };
 
 exports.get = function (req, res){
-    res.json(_.extend({ driver: masterNode.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
+    res.json(_.extend({ driver: nodeComm.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
 };
 
 exports.update = function (req, res){
@@ -33,7 +33,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for(var key in masterNode.inputDriverHash[node.driverId].config){
+        for(var key in nodeComm.inputDriverHash[node.driverId].config){
             if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
@@ -67,7 +67,7 @@ exports.update = function (req, res){
         if(!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
         node.active = true;
         log.info('Updated input config on node: ' + input.node.ip, input);
-        res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
+        res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
     });
 };
 
@@ -87,13 +87,13 @@ exports.remove = function (req, res){
             return res.status(400).send('Error attempting to remove input');
         }
 
-        index = masterNode.inputs.indexOf(input);
+        index = nodeComm.inputs.indexOf(input);
 
         if(index !== -1){
-            delete masterNode.inputHash[input.id];
-            masterNode.inputs.splice(index, 1);
+            delete nodeComm.inputHash[input.id];
+            nodeComm.inputs.splice(index, 1);
             input.node.active = true;
-            return res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
+            return res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
         }
 
         log.info('Deleted input on node: ' + input.node.ip, input);
@@ -118,7 +118,7 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.config)){
         newInput.config = {};
 
-        for(var key in masterNode.inputDriverHash[newNode.driverId].config){
+        for(var key in nodeComm.inputDriverHash[newNode.driverId].config){
             if(!_.isUndefined(newNode.config[key])){
                 newInput.config[key] = newNode.config[key];
             }
@@ -154,9 +154,9 @@ exports.add = function (req, res){
             input.driverId = newInput.driverId;
             input.node = node;
             input.node.active = true;
-            masterNode.registerInput(input);
+            nodeComm.registerInput(input);
             log.info('Created new input on node: ' + input.node.ip, input);
-            res.json(_.extend({ driver: masterNode.inputDriverHash[input.driverId] }, input));
+            res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
         });
     }else{
         return res.status(400).send('No input driver specified, cannot create configuration');
@@ -203,7 +203,7 @@ exports.change = function(req, res){
 };
 
 exports.inputById = function (req, res, next, id){
-    if(!(req.input = masterNode.inputHash[id])){
+    if(!(req.input = nodeComm.inputHash[id])){
         return res.status(400).send({
             message: 'Input id not found'
         });

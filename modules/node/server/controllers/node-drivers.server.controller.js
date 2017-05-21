@@ -13,7 +13,7 @@ var async = require('async'),
     inputDriverLocs = [],
     outputDriverLocHash = {},
     inputDriverLocHash = {},
-    masterNode = require('./node.server.controller').
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 //Gets the absolute location of the folder contained by a require file selector
@@ -44,6 +44,7 @@ function updateDriverLocations(){
     outputDriverLocs.forEach(function(val){ outputDriverLocHash[val.id] = val; });
     inputDriverLocs.forEach(function(val){ inputDriverLocHash[val.id] = val; });
 }
+
 updateDriverLocations();
 
 exports.list = function(req, res){
@@ -105,6 +106,7 @@ exports.add = function (req, res){
 
         .pipe(zlib.createGzip())
         .on('error', onError)
+        
         .pipe(request.post(url, function (err, resq, body){
             var newDrivers;
 
@@ -126,13 +128,13 @@ exports.add = function (req, res){
                 node.inputDrivers = newDrivers;
 
                 newDrivers.forEach(function(driver){
-                    masterNode.inputDriverHash[driver.id] = driver;
+                    nodeComm.inputDriverHash[driver.id] = driver;
                 });
             }else{
                 node.outputDrivers = newDrivers;
 
                 newDrivers.forEach(function(driver){
-                    masterNode.outputDriverHash[driver.id] = driver;
+                    nodeComm.outputDriverHash[driver.id] = driver;
                 });
             }
 
@@ -145,7 +147,7 @@ exports.removeDriver = function (req, res){
     var driver = req.driver;
     var node, isInput = false;
 
-    if(!masterNode.nodes.some(function(curNode){
+    if(!nodeComm.nodes.some(function(curNode){
         if(curNode.inputDrivers.indexOf(driver) !== -1){
             node = curNode;
             isInput = true;
@@ -165,10 +167,10 @@ exports.removeDriver = function (req, res){
 
         if(isInput){
             node.inputDrivers.splice(node.inputDrivers.indexOf(driver), 1);
-            delete masterNode.inputDriverHash[driver.id];
+            delete nodeComm.inputDriverHash[driver.id];
         }else{
             node.outputDrivers.splice(node.outputDrivers.indexOf(driver), 1);
-            delete masterNode.outputDriverHash[driver.id];
+            delete nodeComm.outputDriverHash[driver.id];
         }
 
         res.json(driver);
@@ -176,7 +178,7 @@ exports.removeDriver = function (req, res){
 };
 
 exports.driverById = function (req, res, next, id){
-    if(!(req.driver = (masterNode.outputDriverHash[id] || masterNode.inputDriverHash[id]))){
+    if(!(req.driver = (nodeComm.outputDriverHash[id] || nodeComm.inputDriverHash[id]))){
         return res.status(400).send({
             message: 'Driver id not found'
         });

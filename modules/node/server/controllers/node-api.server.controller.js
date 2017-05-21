@@ -6,7 +6,7 @@ var async = require('async'),
     mongoose = require('mongoose'),
     NodeAPI = mongoose.model('NodeAPI'),
     crypto = require('crypto'),
-    masterNode = require('./node.server.controller'),
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 function genId(){

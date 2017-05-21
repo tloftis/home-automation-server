@@ -3,17 +3,17 @@
 var async = require('async'),
     _ = require('lodash'),
     request = require('request'),
-    masterNode = require('./node.server.controller'),
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 exports.list = function(req, res){
-    res.json(masterNode.outputs.map(function(output){
-        return _.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output); //Gives the driver as well as the output info
+    res.json(nodeComm.outputs.map(function(output){
+        return _.extend({ driver: nodeComm.outputDriverHash[output.driverId] }, output); //Gives the driver as well as the output info
     }));
 };
 
 exports.listDrivers = function(req, res){
-    res.json(masterNode.outputDrivers);
+    res.json(nodeComm.outputDrivers);
 };
 
 exports.set = function (req, res){
@@ -49,12 +49,12 @@ exports.set = function (req, res){
 
         output.node.active = true;
         log.info('Set value of output on node: ' + output.node.ip, output);
-        res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
+        res.json(_.extend({ driver: nodeComm.outputDriverHash[output.driverId] }, output));
     });
 };
 
 exports.get = function (req, res){
-    res.json(_.extend({ driver: masterNode.outputDriverHash[req.output.driverId] }, req.output));
+    res.json(_.extend({ driver: nodeComm.outputDriverHash[req.output.driverId] }, req.output));
 };
 
 exports.getDriver = function (req, res){
@@ -75,7 +75,7 @@ exports.update = function (req, res){
     if(!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for(var key in masterNode.outputDriverHash[node.driverId].config){
+        for(var key in nodeComm.outputDriverHash[node.driverId].config){
             if(!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
@@ -110,7 +110,7 @@ exports.update = function (req, res){
 
         output.node.active = true;
         log.info('Updated output config on node: ' + output.node.ip, output);
-        res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
+        res.json(_.extend({ driver: nodeComm.outputDriverHash[output.driverId] }, output));
     });
 };
 
@@ -129,15 +129,15 @@ exports.remove = function (req, res){
             return res.status(400).send('Error attempting to remove output');
         }
 
-        var index = masterNode.outputs.indexOf(output);
+        var index = nodeComm.outputs.indexOf(output);
 
         output.node.active = true;
         log.info('Removed output on node: ' + output.node.ip, output);
 
         if(index !== -1){
-            masterNode.outputs.splice(index, 1);
-            delete masterNode.outputHash[output.id];
-            return res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
+            nodeComm.outputs.splice(index, 1);
+            delete nodeComm.outputHash[output.id];
+            return res.json(_.extend({ driver: nodeComm.outputDriverHash[output.driverId] }, output));
         }
 
         return res.status(400).send('Error attempting to remove output from server memory');
@@ -162,7 +162,7 @@ exports.add = function (req, res){
     if(!_.isUndefined(newNode.config)){
         newOutput.config = {};
 
-        for(var key in masterNode.outputDriverHash[newNode.driverId].config){
+        for(var key in nodeComm.outputDriverHash[newNode.driverId].config){
             if(!_.isUndefined(newNode.config[key])){
                 newOutput.config[key] = newNode.config[key];
             }
@@ -197,10 +197,10 @@ exports.add = function (req, res){
             output.config = newOutput.config;
             output.driverId = newOutput.driverId;
             output.node = node;
-            masterNode.registerOutput(output);
+            nodeComm.registerOutput(output);
             output.node.active = true;
             log.info('Created output on node: ' + node.ip, output);
-            res.json(_.extend({ driver: masterNode.outputDriverHash[output.driverId] }, output));
+            res.json(_.extend({ driver: nodeComm.outputDriverHash[output.driverId] }, output));
         });
     }else{
         return res.status(400).send('No output driver specified, cannot create configuration');
@@ -208,7 +208,7 @@ exports.add = function (req, res){
 };
 
 exports.outputById = function (req, res, next, id){
-    if(!(req.output = masterNode.outputHash[id])){
+    if(!(req.output = nodeComm.outputHash[id])){
         return res.status(400).send({
             message: 'Output id not found'
         });
