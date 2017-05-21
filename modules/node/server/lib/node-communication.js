@@ -5,15 +5,15 @@ let _ = require('lodash'),
     async = require('async'),
     request = require('request'),
     os = require('os'),
-    testAddresses = [],
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 let comms = {};
 
-comms.getAllIps = ()=>{
+comms.getAllIps = (intro)=>{
     let netMask, 
         localIp,
-        interfaces = os.networkInterfaces();
+        interfaces = os.networkInterfaces(),
+        testAddresses = [];
 
     interfaces.forEach((interF) => {
         interF.forEach((address) => {
@@ -25,16 +25,20 @@ comms.getAllIps = ()=>{
     });
 
     let end = 0, //because this is the best option
-        ipIntro = '192.168.1.'; //because it's my default network
+        ipIntro = ipIntro || '192.168.1.'; //because it's my default network
 
     if (netMask) {
         end = +netMask.split('.').pop();
     }
 
-    if (localIp) {
+    if (!ipIntro && localIp) {
         let ipArr = localIp.split('.');
         ipArr.pop();
         ipIntro = ipArr.join('.') + '.';
+    }
+
+    if(ipIntro[--ipIntro.length] !== '.'){
+        ipIntro += '.';
     }
 
     for (i = end; i <= 255; i++) {
@@ -45,10 +49,26 @@ comms.getAllIps = ()=>{
 };
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
-comms.searchForNodes = (callback)=>{
+comms.searchForNodes = function(){
+    if(arguments.length ===1){
+        searchForNodes(null, arguments[0]);
+    } else if(arguments.length === 2){
+        searchForNodes(arguments[0], arguments[1]);
+    } else {
+        searchForNodes();
+    }
+};
+
+function searchForNodes (addresses, callback) {
     if(!callback) callback = ()=>{};
 
-    async.each(comms.getAllIps(), function(address, next){
+    if(typeof addresses === 'string'){
+        addresses = [addresses];
+    } else if(!addresses || !addresses instanceof Array){
+        addresses = comms.getAllIps();
+    }
+
+    async.each(addresses, function(address, next){
         let info = {
             url: 'http://' + address + '/api/server',
             timeout: 2000
@@ -93,7 +113,7 @@ comms.searchForNodes = (callback)=>{
         });
         callback();
     });
-};
+}
 
 comms.registerWithNode = (node, callback)=>{
     if(!callback) callback = function(){};
