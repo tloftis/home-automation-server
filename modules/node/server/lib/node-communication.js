@@ -7,7 +7,16 @@ let _ = require('lodash'),
     os = require('os'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
-let comms = {};
+let comms = {
+    registered: [],
+    outputs: [],
+    inputs: [],
+    nodes: [],
+    inputDriverHash: [],
+    outputDriverHash: [],
+    outputHash: [],
+    inputHash: []
+};
 
 comms.getAllIps = (intro)=>{
     let netMask, 
@@ -383,6 +392,54 @@ exports.registerInput = function(config){
 exports.registerOutput = function(config){
     outputs.push(config);
     comms.outputHash[config.id] = config;
+};
+
+exports.registerInit = (data)=>{
+    let registered = registered.some((reg)=>{
+        return reg.token === data.token;
+    });
+
+    if (registered) {
+        return;
+    }
+
+    registered.push(data);
+
+    let inputs = comms.inputs.filter((input)=>{
+            return data.permissions.indexOf(input.id) !== -1;
+        }),
+        outputs = comms.outputs.filter((output)=>{
+            return data.permissions.indexOf(output.id) !== -1;
+        });
+
+    inputs = inputs.map((input)=>{
+        return {
+            id: input.id,
+            name: input.name,
+            description: input.description,
+            location: input.location,
+            active: input.active
+        }
+    });
+
+    outputs = outputs.map((output)=>{
+        return {
+            id: output.id,
+            name: output.name,
+            description: output.description,
+            location: output.location,
+            active: output.active
+        }
+    });
+
+    return {
+        inputs: inputs,
+        outputs: outputs
+    }
+};
+
+exports.deRegister = (token)=>{
+
 };
 
 function asyncParallel (array, funct, callback) {

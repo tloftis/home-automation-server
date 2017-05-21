@@ -103,6 +103,37 @@ exports.create = function (req, res){
     });
 };
 
+exports.register = function(req, res){
+    let tokenData = req.body,
+        address = '';
+
+    if(!tokenData.token){
+        return res.status(400).send({
+            message: 'Incorrect or Missing Token'
+        });
+    }
+
+
+    Object.keys(req.headers).some((key)=>{
+        if (key.toLowerCase() === 'x-forwarded-for') {
+            address = req.headers[key];
+        }
+    });
+
+    NodeLink.findOne({ token: tokenData.token }).lean().exec((err, data)=>{
+        if(err || !(data || {}).token){
+            log.error('Token Registration failure', err || { message: 'Token was not found' });
+
+            return res.status(400).send({
+                message: 'Incorrect or Missing Token'
+            });
+        }
+
+        data.address = address;
+        res.jsonp(nodeComm.registerInit(data));
+    });
+};
+
 exports.tokenById = function (req, res, next, id){
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).send({
