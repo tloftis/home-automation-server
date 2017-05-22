@@ -70,11 +70,11 @@ module.exports = function (app, db) {
     });
 
     // Intercept Socket.io's handshake request
-    io.use(function (socket, next) {
+    let userAuth = function (socket, next) {
         // Use the 'cookie-parser' module to parse the request cookies
         cookieParser(config.sessionSecret)(socket.request, {}, function (err) {
             // Get the session id from the request cookies
-            var sessionId = socket.request.signedCookies ? socket.request.signedCookies[config.sessionKey] : undefined;
+            let sessionId = socket.request.signedCookies ? socket.request.signedCookies[config.sessionKey] : undefined;
             if (!sessionId){ return next(new Error('sessionId was not found in socket.request'), false); }
 
             // Use the mongoStorage instance to get the Express session information
@@ -96,6 +96,19 @@ module.exports = function (app, db) {
                 });
             });
         });
+    };
+
+    let tokenAuth = function(socket, next){
+        let token = socket.request.headers['x-token'];
+
+    };
+
+    io.use(function(socket, next){
+        if(socket.request.headers['x-token']){
+            tokenAuth(socket, next);
+        } else {
+            userAuth(socket, next);
+        }
     });
 
     // Add an event listener to the 'connection' event

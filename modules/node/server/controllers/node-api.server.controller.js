@@ -74,7 +74,7 @@ exports.remove = function (req, res){
 };
 
 exports.create = function (req, res){
-    var api = res.body || {};
+    let api = res.body || {};
 
     if(!api.name){
         return res.status(400).send('Error name is required');
@@ -87,9 +87,9 @@ exports.create = function (req, res){
     }
 
     api.token = genId();
-    var newApi = new NodeAPI(api);
+    let newApi = new NodeAPI(api);
 
-    return newApi.save(function(err){
+    newApi.save(function(err){
         if (err) {
             log.error('Failed to create a new token', err);
 
@@ -107,12 +107,13 @@ exports.register = function(req, res){
     let tokenData = req.body,
         address = '';
 
+    tokenData.token = req.headers['X-Token'];
+
     if(!tokenData.token){
         return res.status(400).send({
             message: 'Incorrect or Missing Token'
         });
     }
-
 
     Object.keys(req.headers).some((key)=>{
         if (key.toLowerCase() === 'x-forwarded-for') {

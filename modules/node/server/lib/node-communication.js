@@ -439,7 +439,9 @@ exports.registerInit = (data)=>{
 };
 
 exports.deRegister = (token)=>{
-
+    comms.registered = comms.registered.filter((data)=>{
+        return data.token === token
+    });
 };
 
 function asyncParallel (array, funct, callback) {
