@@ -9,8 +9,10 @@ var config = require('../config'),
     cookieParser = require('cookie-parser'),
     passport = require('passport'),
     socketio = require('socket.io'),
+    NodeAPI = mongoose.model('NodeAPI'),
     session = require('express-session'),
-    MongoStore = require('connect-mongo')(session);
+    MongoStore = require('connect-mongo')(session),
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 // Define the Socket.io configuration method
 module.exports = function (app, db) {
@@ -101,6 +103,15 @@ module.exports = function (app, db) {
     let tokenAuth = function(socket, next){
         let token = socket.request.headers['x-token'];
 
+        NodeLink.findOne({ token: token }).lean().exec((err, data)=>{
+            if(err || !(data || {}).token){
+                log.error('Token Registration through Socket failure', err || { message: 'Token was not found' });
+                return next(new Error( 'Incorrect or Missing Token'));
+            }
+
+            socket.request.token = data;
+            next(null, true);
+        });
     };
 
     io.use(function(socket, next){
