@@ -121,7 +121,7 @@ exports.register = function(req, res){
         }
     });
 
-    NodeLink.findOne({ token: tokenData.token }).lean().exec((err, data)=>{
+    NodeAPI.findOne({ token: tokenData.token }).lean().exec((err, data)=>{
         if(err || !(data || {}).token){
             log.error('Token Registration failure', err || { message: 'Token was not found' });
 
@@ -142,7 +142,7 @@ exports.tokenById = function (req, res, next, id){
         });
     }
 
-    NodeLink.findById(id).exec(function (err, token) {
+    NodeAPI.findById(id).exec(function (err, token) {
         if(err){
             log.error('Error attempting to get token: ' + id, err);
             return next(err);

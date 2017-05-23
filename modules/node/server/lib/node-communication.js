@@ -12,10 +12,11 @@ let comms = {
     outputs: [],
     inputs: [],
     nodes: [],
-    inputDriverHash: [],
-    outputDriverHash: [],
-    outputHash: [],
-    inputHash: []
+    nodeHash: {},
+    inputDriverHash: {},
+    outputDriverHash: {},
+    outputHash: {},
+    inputHash: {}
 };
 
 comms.getAllIps = (intro)=>{

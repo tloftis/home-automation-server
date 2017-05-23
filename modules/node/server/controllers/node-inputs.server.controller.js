@@ -5,7 +5,6 @@ var async = require('async'),
     request = require('request'),
     mongoose = require('mongoose'),
     outputController = require('../controllers/node-outputs.server.controller.js'),
-    NodeLink = mongoose.model('NodeLink'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 

@@ -6,7 +6,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-// NodeLink Schema
+// NodeAPI Schema
 var NodeAPISchema = new Schema({
     description: {
         type: String,

@@ -7,7 +7,7 @@ var async = require('async'),
     logs = mongoose.model('Logs');
 
 var debugLog = {
-    error: function(str, obj) { console.log(chalk.bold.red(str), obj || ''); }
+    error: function(str, obj) { console.log(chalk.bold.red(str), obj || ''); },
     info: function(str, obj) { console.log(chalk.blue.bold.underline(str), obj || ''); },
     success: function(str, obj) { console.log(chalk.green.bold(str), obj || ''); }
 };
