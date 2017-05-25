@@ -4,6 +4,7 @@
 let _ = require('lodash'),
     async = require('async'),
     request = require('request'),
+    got = require('got'),
     os = require('os'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
@@ -19,41 +20,45 @@ let comms = {
     inputHash: {}
 };
 
+function objForEach(obj, funct){
+    Object.keys(obj).forEach((key)=>funct(obj[key]));
+}
+
 comms.getAllIps = (intro)=>{
     let netMask, 
         localIp,
         interfaces = os.networkInterfaces(),
         testAddresses = [];
 
-    interfaces.forEach((interF) => {
+    objForEach(interfaces, (interF) => {
         interF.forEach((address) => {
             if (address.family === 'IPv4' && !address.internal) {
                 netMask = address.netmask;
                 localIp = address.address;
+
+                let end = 0, //because this is the best option
+                    ipIntro = intro || '192.168.1.'; //because it's my default network
+
+                if (netMask) {
+                    end = +netMask.split('.').pop();
+                }
+
+                if (!ipIntro && localIp) {
+                    let ipArr = localIp.split('.');
+                    ipArr.pop();
+                    ipIntro = ipArr.join('.') + '.';
+                }
+
+                if(ipIntro[(ipIntro.length -1)] !== '.'){
+                    ipIntro += '.';
+                }
+
+                for (let i = end; i <= 255; i++) {
+                    testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
+                }
             }
         });
     });
-
-    let end = 0, //because this is the best option
-        ipIntro = ipIntro || '192.168.1.'; //because it's my default network
-
-    if (netMask) {
-        end = +netMask.split('.').pop();
-    }
-
-    if (!ipIntro && localIp) {
-        let ipArr = localIp.split('.');
-        ipArr.pop();
-        ipIntro = ipArr.join('.') + '.';
-    }
-
-    if(ipIntro[--ipIntro.length] !== '.'){
-        ipIntro += '.';
-    }
-
-    for (i = end; i <= 255; i++) {
-        testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
-    }
     
     return testAddresses;
 };
@@ -78,7 +83,9 @@ function searchForNodes (addresses, callback) {
         addresses = comms.getAllIps();
     }
 
-    async.each(addresses, function(address, next){
+    comms.nodes.forEach((node)=>node.active=false);
+
+    asyncParallel([addresses[5]], function(address, next){
         let info = {
             url: 'http://' + address + '/api/server',
             timeout: 2000
@@ -94,8 +101,6 @@ function searchForNodes (addresses, callback) {
                 }catch(err){
                     return next();
                 }
-
-                Object.keys(comms.nodeHash).forEach(()=>comms.nodeHash[k].active=false);
 
                 if(node && (node.id !== '')){
                     comms.nodeHash[node.id] = {
@@ -115,12 +120,14 @@ function searchForNodes (addresses, callback) {
         });
     },()=>{
         comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+        console.log(comms.nodes);
 
         comms.nodes.forEach(n=>{
             if(!node.active){
                 log.error('Failed to to connect to node: ' + n.ip, n);
             }
         });
+
         callback();
     });
 }
@@ -371,8 +378,8 @@ comms.updateAll = (callback)=>{
     comms.outputHash = {};
     comms.inputHash = {};
 
-    searchForNodes(function(){
-        registerWithNodes(function(){
+    comms.searchForNodes(function(){
+        comms.registerWithNodes(function(){
             async.parallel([
                 comms.updateInputs,
                 comms.updateOutputs,
@@ -451,5 +458,5 @@ function asyncParallel (array, funct, callback) {
     }), callback);
 }
 
-comms.updateAll();
+comms.updateAll(()=>{ console.log('found nodes')});
 module.exports = comms;
