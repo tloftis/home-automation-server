@@ -22,6 +22,9 @@ exports.set = function (req, res){
         type = req.body ? req.body.type : undefined;
 
     var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
         url: 'http://' + output.node.ip + '/api/output/' + output.id + '/set',
         form: { value: value, type: type }
     };
@@ -83,6 +86,9 @@ exports.update = function (req, res){
     }
 
     var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
         url: 'http://' + output.node.ip + '/api/output/' + output.id,
         form: { output: newNode }
     };
@@ -118,6 +124,9 @@ exports.remove = function (req, res){
     var output = req.output;
 
     var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
         url: 'http://' + output.node.ip + '/api/output/' + output.id,
         form: {}
     };
@@ -171,6 +180,9 @@ exports.add = function (req, res){
 
     if(newOutput.driverId) {
         var info = {
+            headers: {
+                'X-Token': node.serverToken
+            },
             url: 'http://' + node.ip + '/api/output',
             form: { output: newOutput }
         };

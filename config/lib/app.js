@@ -17,7 +17,7 @@ function seedDB() {
 }
 
 // Initialize Models
-console.log();
+
 mongoose.loadModels(seedDB);
 
 module.exports.loadModels = function loadModels() {
@@ -56,7 +56,5 @@ module.exports.start = function start(callback) {
 
             if (callback) callback(app, db, config);
         });
-
     });
-
 };

@@ -56,6 +56,9 @@ exports.update = function (req, res){
     if(node.description) newNode.description = node.description;
 
     var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
         url: 'http://' + selNode.ip + '/api/server',
         form: { node: newNode }
     };

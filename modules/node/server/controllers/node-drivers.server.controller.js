@@ -97,6 +97,13 @@ exports.add = function (req, res){
     var packer = tar.Pack({ noProprietary: true })
         .on('error', onError);
 
+    var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
+        url: url
+    };
+
     fstream
         .Reader({ path: driver.dir, type: 'Directory' })
         .on('error', onError)
@@ -107,7 +114,7 @@ exports.add = function (req, res){
         .pipe(zlib.createGzip())
         .on('error', onError)
 
-        .pipe(request.post(url, function (err, resq, body){
+        .pipe(request.post(info, function (err, resq, body){
             var newDrivers;
 
             try {
@@ -162,7 +169,14 @@ exports.removeDriver = function (req, res){
         return res.status(400).send('Node to remove driver from was not found');
     }
 
-    request.del('http://' + node.ip + '/api/drivers/' + driver.id, function (err, resq, body) {
+    var info = {
+        headers: {
+            'X-Token': node.serverToken
+        },
+        url: 'http://' + node.ip + '/api/drivers/' + driver.id
+    };
+
+    request.del(info, function (err, resq, body) {
         if (err){ return res.status(400).send('Error attempting to add input'); }
 
         if(isInput){

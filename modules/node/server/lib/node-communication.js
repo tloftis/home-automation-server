@@ -123,7 +123,7 @@ function searchForNodes (addresses, callback) {
         console.log(comms.nodes);
 
         comms.nodes.forEach(n=>{
-            if(!node.active){
+            if(!n.active){
                 log.error('Failed to to connect to node: ' + n.ip, n);
             }
         });
