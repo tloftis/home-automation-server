@@ -99,7 +99,7 @@ exports.add = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': node.serverToken
+            'X-Token': node.token
         },
         url: url
     };
@@ -151,10 +151,10 @@ exports.add = function (req, res){
 };
 
 exports.removeDriver = function (req, res){
-    var driver = req.driver;
-    var node, isInput = false;
+    let driver = req.driver,
+        node, isInput = false;
 
-    if(!nodeComm.nodes.some(function(curNode){
+    nodeComm.nodes.some(function(curNode){
         if(curNode.inputDrivers.indexOf(driver) !== -1){
             node = curNode;
             isInput = true;
@@ -165,13 +165,15 @@ exports.removeDriver = function (req, res){
             node = curNode;
             return true;
         }
-    })){
+    });
+
+    if(!node){
         return res.status(400).send('Node to remove driver from was not found');
     }
 
-    var info = {
+    let info = {
         headers: {
-            'X-Token': node.serverToken
+            'X-Token': node.token
         },
         url: 'http://' + node.ip + '/api/drivers/' + driver.id
     };

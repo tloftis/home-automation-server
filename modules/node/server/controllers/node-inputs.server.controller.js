@@ -41,7 +41,7 @@ exports.update = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': node.serverToken
+            'X-Token': input.node.token
         },
         url: 'http://' + input.node.ip + '/api/input/' + input.id,
         form: { input: newNode }
@@ -79,7 +79,7 @@ exports.remove = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': node.serverToken
+            'X-Token': input.node.token
         },
         url: 'http://' + input.node.ip + '/api/input/' + input.id,
         form: {}
@@ -133,7 +133,7 @@ exports.add = function (req, res){
     if(newInput.driverId){
         var info = {
             headers: {
-                'X-Token': node.serverToken
+                'X-Token': node.token
             },
             url: 'http://' + node.ip + '/api/input',
             form: { input: newInput }

@@ -13,6 +13,7 @@ module.exports = function (app) {
     // Users collection routes
     app.route('/api/node').all(nodePolicy.isAllowed).
         get(node.list).
+        post(node.register).
         put(node.updateNodes);
 
     app.route('/api/node/:nodeId').all(nodePolicy.isAllowed).

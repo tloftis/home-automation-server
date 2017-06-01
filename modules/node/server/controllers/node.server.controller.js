@@ -38,6 +38,22 @@ exports.updateNode = function(req, res){
     })
 };
 
+exports.register = function(req,res,next){
+    let node = req.body;
+    node.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    nodeComm.registerNode(node, (err, node)=>{
+        if(!err){
+            req.node = node;
+            next();
+        } else {
+            res.status(400).jsonp({
+                message: 'Error registering node!'
+            })
+        }
+    })
+};
+
 exports.list = function(req, res){
     res.json(nodeComm.nodes);
 };

@@ -87,76 +87,59 @@ function searchForNodes (addresses, callback) {
 
     asyncParallel([addresses[5]], function(address, next){
         let info = {
-            url: 'http://' + address + '/api/server',
+            url: 'http://' + address + '/api/register',
             timeout: 2000
         };
 
-        request.get(info, function(err, res, body){
-            if (!err && body){
-                let node;
-
-                //parse out the info gained back from the server
-                try {
-                    node = JSON.parse(body);
-                }catch(err){
-                    return next();
-                }
-
-                if(node && (node.id !== '')){
-                    comms.nodeHash[node.id] = {
-                        id: node.id,
-                        ip: address,
-                        name: node.name || '',
-                        description: node.description || '',
-                        location: node.location || '',
-                        inputDrivers : [],
-                        outputDrivers : [],
-                        active: true
-                    };
-                }
-            }
-
+        request.get(info, function(){
             next();
         });
     },()=>{
-        comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
-        console.log(comms.nodes);
-
-        comms.nodes.forEach(n=>{
-            if(!n.active){
-                log.error('Failed to to connect to node: ' + n.ip, n);
-            }
-        });
-
         callback();
     });
 }
 
-comms.registerWithNode = (node, callback)=>{
-    if(!callback) callback = function(){};
+comms.registerNode = function(node, callback){
+    if(!callback){
+        callback = ()=>{};
+    }
 
-    let info = {
-        url: 'http://' + node.ip + '/api/register',
-        form: {}
-    };
+    if(node && (node.id !== '') && (node.token !== '')){
+        let newNode = {
+            id: node.id,
+            ip: ip,
+            name: node.name || '',
+            description: node.description || '',
+            location: node.location || '',
+            token: node.token,
+            inputDrivers : [],
+            outputDrivers : [],
+            active: true
+        };
 
-    request.post(info, ()=>{
-        callback();
-    });
-};
+        comms.nodeHash[node.id] = newNode;
+        comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
 
-comms.registerWithNodes = (callback)=>{
-    if(!callback) callback = function(){};
-
-    async.each(comms.nodes, (node, next)=>{
-        comms.registerWithNode(node, next);
-    }, callback);
+        updateNode(node, ()=>{
+            callback(undefined, newNode);
+        });
+    } else {
+        callback(new Error('Error registering node!'))
+    }
 };
 
 comms.updateNodeInputs = (node, callback)=>{
     if(!callback) callback = function(){};
 
-    request.get('http://' + node.ip + '/api/input', function(err, res, body){
+    let info = {
+        headers: {
+            'X-Token': node.token
+        },
+        url: 'http://' + node.ip + '/api/input',
+        rejectUnhauthorized : false
+    };
+
+    request.get(info, function(err, res, body){
         let newInputs;
 
         try {
@@ -212,7 +195,15 @@ comms.updateInputs = (callback)=>{
 comms.updateNodeOutputs = (node, callback)=>{
     if(!callback) callback = function(){};
 
-    request.get('http://' + node.ip + '/api/output', function(err, res, body){
+    let info = {
+        headers: {
+            'X-Token': node.token
+        },
+        url: 'http://' + node.ip + '/api/output',
+        rejectUnhauthorized : false
+    };
+
+    request.get(info, function(err, res, body){
         let newOutputs;
 
         try {
@@ -269,7 +260,15 @@ comms.updateNodeDrivers = (node, callback)=>{
     if(!callback) callback = function(){};
 
     async.parallel([function(nextMid){
-        request.get('http://' + node.ip + '/api/output/drivers', function(err, res, body){
+        let info = {
+            headers: {
+                'X-Token': node.token
+            },
+            url: 'http://' + node.ip + '/api/output/drivers',
+            rejectUnhauthorized : false
+        };
+
+        request.get(info, function(err, res, body){
             let newDrivers;
 
             try {
@@ -314,7 +313,15 @@ comms.updateNodeDrivers = (node, callback)=>{
             }
         });
     }, function(nextMid){
-        request.get('http://' + node.ip + '/api/input/drivers', function(err, res, body){
+        let info = {
+            headers: {
+                'X-Token': node.token
+            },
+            url: 'http://' + node.ip + '/api/input/drivers',
+            rejectUnhauthorized : false
+        };
+
+        request.get(info, function(err, res, body){
             let newDrivers;
 
             try {
@@ -370,6 +377,18 @@ comms.updateDrivers = (callback)=>{
     }, callback);
 };
 
+comms.updateNode = (node, callback)=>{
+    comms.registerWithNodes(function(){
+        async.parallel([
+            (next)=>comms.updateNodeInputs(node, next),
+            (next)=>comms.updateNodeOutputs(node, next),
+            (next)=>comms.updateNodeDrivers(node, next)
+        ], ()=>{
+            if(callback){ callback(); }
+        })
+    });
+};
+
 comms.updateAll = (callback)=>{
     comms.outputs = [];
     comms.inputs = [];
@@ -379,15 +398,7 @@ comms.updateAll = (callback)=>{
     comms.inputHash = {};
 
     comms.searchForNodes(function(){
-        comms.registerWithNodes(function(){
-            async.parallel([
-                comms.updateInputs,
-                comms.updateOutputs,
-                comms.updateDrivers
-            ], function(){
-                if(callback){ callback(); }
-            })
-        });
+        callback();
     });
 };
 
@@ -444,6 +455,18 @@ exports.registerInit = (data)=>{
         inputs: inputs,
         outputs: outputs
     }
+};
+
+exports.verifyToken = function(req, res, next){
+    var token = req.headers['x-token'];
+
+    if(token !== node.token){
+        return res.status(400).send({
+            message: 'Improper token: Rejected'
+        });
+    }
+
+    next();
 };
 
 exports.deRegister = (token)=>{
