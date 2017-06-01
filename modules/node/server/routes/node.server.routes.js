@@ -5,16 +5,21 @@
  */
 var nodePolicy = require('../policies/node.server.policy'),
     node = require('../controllers/node.server.controller.js'),
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     outputs = require('../controllers/node-outputs.server.controller.js'),
     drivers = require('../controllers/node-drivers.server.controller.js'),
     inputs = require('../controllers/node-inputs.server.controller.js');
 
 module.exports = function (app) {
     // Users collection routes
-    app.route('/api/node').all(nodePolicy.isAllowed).
-        get(node.list).
-        post(node.register).
-        put(node.updateNodes);
+    app.route('/api/node').
+        get(nodePolicy.isAllowed, node.list).
+        post(nodeComm.verifyToken, node.register).
+        put(nodePolicy.isAllowed, node.updateNodes);
+
+    // Users collection routes
+    app.route('/api/node/token').
+        get(nodePolicy.isAllowed, node.getToken);
 
     app.route('/api/node/:nodeId').all(nodePolicy.isAllowed).
         get(node.get).

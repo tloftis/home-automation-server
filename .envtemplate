@@ -2,6 +2,9 @@
 
 NODE_ENV=production
 
+#Change this to '0' if using Self Signed Certs, Reduces security
+NODE_TLS_REJECT_UNAUTHORIZED='1'
+
 ################### OPTIONAL PARAMETERS ###################
 
 ### Express ###

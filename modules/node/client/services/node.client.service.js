@@ -8,6 +8,10 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('node');
         };
 
+        service.getToken= function (){
+            return Utility.http.get('node/token');
+        };
+
         service.getDrivers = function (){
             return Utility.http.get('driver');
         };

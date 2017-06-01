@@ -12,7 +12,8 @@ global.rootRequire.resolve = function(str){
 };
 
 require('./config/lib/app').start(function(app, db, config){
-    if(config.secure.ssl && (config.port !== 80)){
+    //TODO: Fix this server redirect code, keeps breaking if 80's in use
+    /*if(config.secure.ssl && (config.port !== 80)){
         var redirectApp = require('express')();
 
         redirectApp.get('*',function(req,res){
@@ -22,5 +23,5 @@ require('./config/lib/app').start(function(app, db, config){
         redirectApp.listen(80, function(){
             console.log('Redirecting HTTP traffic to HTTPS');
         });
-    }
+    }*/
 });

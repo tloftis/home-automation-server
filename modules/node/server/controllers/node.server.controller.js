@@ -44,8 +44,9 @@ exports.register = function(req,res,next){
 
     nodeComm.registerNode(node, (err, node)=>{
         if(!err){
-            req.node = node;
-            next();
+            res.status(200).jsonp({
+                message: 'Node Successfully Registered!'
+            })
         } else {
             res.status(400).jsonp({
                 message: 'Error registering node!'
@@ -60,6 +61,10 @@ exports.list = function(req, res){
 
 exports.get = function (req, res){
     res.json(req.node);
+};
+
+exports.getToken = function (req, res){
+    res.json({token: nodeComm.serverToken});
 };
 
 exports.update = function (req, res){

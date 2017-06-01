@@ -25,7 +25,7 @@ exports.set = function (req, res){
         headers: {
             'X-Token': output.node.token
         },
-        url: 'http://' + output.node.ip + '/api/output/' + output.id + '/set',
+        url: 'https://' + output.node.ip + '/api/output/' + output.id + '/set',
         form: { value: value, type: type }
     };
 
@@ -89,7 +89,7 @@ exports.update = function (req, res){
         headers: {
             'X-Token': output.node.token
         },
-        url: 'http://' + output.node.ip + '/api/output/' + output.id,
+        url: 'https://' + output.node.ip + '/api/output/' + output.id,
         form: { output: newNode }
     };
 
@@ -127,7 +127,7 @@ exports.remove = function (req, res){
         headers: {
             'X-Token': output.node.token
         },
-        url: 'http://' + output.node.ip + '/api/output/' + output.id,
+        url: 'https://' + output.node.ip + '/api/output/' + output.id,
         form: {}
     };
 
@@ -183,7 +183,7 @@ exports.add = function (req, res){
             headers: {
                 'X-Token': node.token
             },
-            url: 'http://' + node.ip + '/api/output',
+            url: 'https://' + node.ip + '/api/output',
             form: { output: newOutput }
         };
 

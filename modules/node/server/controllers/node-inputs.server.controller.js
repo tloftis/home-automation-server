@@ -43,7 +43,7 @@ exports.update = function (req, res){
         headers: {
             'X-Token': input.node.token
         },
-        url: 'http://' + input.node.ip + '/api/input/' + input.id,
+        url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: { input: newNode }
     };
 
@@ -81,7 +81,7 @@ exports.remove = function (req, res){
         headers: {
             'X-Token': input.node.token
         },
-        url: 'http://' + input.node.ip + '/api/input/' + input.id,
+        url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: {}
     };
 
@@ -135,7 +135,7 @@ exports.add = function (req, res){
             headers: {
                 'X-Token': node.token
             },
-            url: 'http://' + node.ip + '/api/input',
+            url: 'https://' + node.ip + '/api/input',
             form: { input: newInput }
         };
 
@@ -185,8 +185,13 @@ exports.change = function(req, res){
     }
 
     if(type === 'boolean'){
-        if(value.toLowerCase() === 'true'){ value = true; }
-        if(value.toLowerCase() === 'false'){ value = false; }
+        if(typeof value === 'string') {
+            if ((value || '').toLowerCase() === 'true') {
+                value = true;
+            } else if ((value || '').toLowerCase() === 'false') {
+                value = false;
+            }
+        }
 
         value = value ? true : false;
     }

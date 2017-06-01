@@ -1,6 +1,10 @@
 <div class="wrapper wrapper-content row animated fadeInRight" data-ng-init="init()">
     <div class="ibox float-e-margins">
         <div class="ibox-content inspinia-timeline">
+            <div class="row" data-ng-if="token">
+               <small class="text-muted prepend-bottom-5">{{token}}</small>
+            </div>
+
             <div class="row">
                 <button class="btn btn-default pull-right"
                         style="margin-right: 5px;" data-ng-click="updateNodes()">Update Nodes</button>

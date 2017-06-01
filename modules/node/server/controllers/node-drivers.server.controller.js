@@ -74,9 +74,9 @@ exports.add = function (req, res){
     }
 
     if(driver = inputDriverLocHash[driverId]){
-        url = 'http://' + node.ip + '/api/input/drivers'
+        url = 'https://' + node.ip + '/api/input/drivers'
     }else if(driver = outputDriverLocHash[driverId]){
-        url = 'http://' + node.ip + '/api/output/drivers'
+        url = 'https://' + node.ip + '/api/output/drivers'
     }else{
         return res.status(400).send({
             message: 'Driver can not be found, ID not linked to existing driver'
@@ -175,7 +175,7 @@ exports.removeDriver = function (req, res){
         headers: {
             'X-Token': node.token
         },
-        url: 'http://' + node.ip + '/api/drivers/' + driver.id
+        url: 'https://' + node.ip + '/api/drivers/' + driver.id
     };
 
     request.del(info, function (err, resq, body) {

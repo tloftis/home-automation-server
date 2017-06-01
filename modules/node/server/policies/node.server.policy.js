@@ -18,6 +18,9 @@ exports.invokeRolesPolicies = function (){
             resources: '/api/node',
             permissions: '*'
         }, {
+            resources: '/api/node/token',
+            permissions: '*'
+        }, {
             resources: '/api/node/:nodeId',
             permissions: '*'
         }, {

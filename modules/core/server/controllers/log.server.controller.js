@@ -13,6 +13,11 @@ var debugLog = {
 };
 
 function addLog(typ, msg, data, source, callback){
+    if((process.env.NODE_ENV || '').toLowerCase() === 'development'){
+        (debugLog[typ] || console.log)(msg,data);
+    }
+
+    /*
     var log = new logs({
         message: msg,
         type: typ,
@@ -20,15 +25,13 @@ function addLog(typ, msg, data, source, callback){
         data: data
     });
 
-    if((process.env.NODE_ENV || '').toLowerCase() === 'development'){
-        debugLog[typ](msg,data);
-    }
+    console.log('logging', process.env.NODE_ENV);
 
     return log.save(function(err, newLog){
         if(callback){
             callback(err, newLog);
         }
-    });
+    });*/
 }
 
 exports.error = function(msg, data){

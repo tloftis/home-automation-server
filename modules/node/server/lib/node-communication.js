@@ -6,7 +6,11 @@ let _ = require('lodash'),
     request = require('request'),
     got = require('got'),
     os = require('os'),
-    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
+    crypto = require('crypto'),
+    mongoose = require('mongoose'),
+    NodeServerToken = mongoose.model('NodeServerToken'),
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js'),
+    nodePort = (process.env.RELAY_PORT || 2000);
 
 let comms = {
     registered: [],
@@ -17,7 +21,8 @@ let comms = {
     inputDriverHash: {},
     outputDriverHash: {},
     outputHash: {},
-    inputHash: {}
+    inputHash: {},
+    serverToken: ''
 };
 
 function objForEach(obj, funct){
@@ -54,7 +59,7 @@ comms.getAllIps = (intro)=>{
                 }
 
                 for (let i = end; i <= 255; i++) {
-                    testAddresses.push(ipIntro + i + ':' + (process.env.RELAY_PORT || 2000));
+                    testAddresses.push(ipIntro + i + ':' + nodePort);
                 }
             }
         });
@@ -65,7 +70,7 @@ comms.getAllIps = (intro)=>{
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
 comms.searchForNodes = function(){
-    if(arguments.length ===1){
+    if(arguments.length === 1){
         searchForNodes(null, arguments[0]);
     } else if(arguments.length === 2){
         searchForNodes(arguments[0], arguments[1]);
@@ -83,11 +88,9 @@ function searchForNodes (addresses, callback) {
         addresses = comms.getAllIps();
     }
 
-    comms.nodes.forEach((node)=>node.active=false);
-
-    asyncParallel([addresses[5]], function(address, next){
+    asyncParallel(addresses, function(address, next){
         let info = {
-            url: 'http://' + address + '/api/register',
+            url: 'https://' + address + '/api/register',
             timeout: 2000
         };
 
@@ -104,10 +107,10 @@ comms.registerNode = function(node, callback){
         callback = ()=>{};
     }
 
-    if(node && (node.id !== '') && (node.token !== '')){
+    if(node && node.id && node.token && node.ip){
         let newNode = {
             id: node.id,
-            ip: ip,
+            ip: node.ip + ':' + nodePort,
             name: node.name || '',
             description: node.description || '',
             location: node.location || '',
@@ -117,13 +120,15 @@ comms.registerNode = function(node, callback){
             active: true
         };
 
-        comms.nodeHash[node.id] = newNode;
+        comms.nodeHash[newNode.id] = newNode;
         comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
 
-        updateNode(node, ()=>{
+        comms.updateNode(newNode, ()=>{
+            log.success('Registered new node', newNode);
             callback(undefined, newNode);
         });
     } else {
+        log.error('Error attempting to validate new Node', node);
         callback(new Error('Error registering node!'))
     }
 };
@@ -135,21 +140,26 @@ comms.updateNodeInputs = (node, callback)=>{
         headers: {
             'X-Token': node.token
         },
-        url: 'http://' + node.ip + '/api/input',
+        url: 'https://' + node.ip + '/api/input',
         rejectUnhauthorized : false
     };
 
     request.get(info, function(err, res, body){
         let newInputs;
 
+        if(err){
+            node.active = false;
+            log.error('Failed To get Inputs of Node: ' + node.id, err);
+        }
+
         try {
             newInputs = JSON.parse(body);
         } catch (err){
+            log.error('Failed To Parse Inputs of Node: ' + node.id, body);
             return callback();
         }
 
         if(err){
-            node.active = false;
             return callback();
         }else{
             node.active = true;
@@ -178,6 +188,7 @@ comms.updateNodeInputs = (node, callback)=>{
                 comms.inputHash[newInput.id] = newInput;
                 next();
             },function(){
+                log.success('Updated all inputs of node: ' + node.id, node);
                 callback();
             });
         }
@@ -199,52 +210,55 @@ comms.updateNodeOutputs = (node, callback)=>{
         headers: {
             'X-Token': node.token
         },
-        url: 'http://' + node.ip + '/api/output',
+        url: 'https://' + node.ip + '/api/output',
         rejectUnhauthorized : false
     };
 
     request.get(info, function(err, res, body){
         let newOutputs;
 
+        if(err){
+            log.error('Error getting outputs for node: ' + node.id, err);
+            node.active = false;
+            return callback();
+        }
+
         try {
             newOutputs = JSON.parse(body);
         } catch (err){
+            log.error('Error Parsing Node Outputs: ' + node.id, body);
             return callback();
         }
 
-        if(err){
-            node.active = false;
-            return callback();
-        }else{
-            node.active = true;
+        node.active = true;
 
-            comms.outputs = comms.outputs.filter((output)=>{
-                if(output.node.id === node.id){
-                    delete comms.outputHash[output.id];
-                    return false;
-                }
+        comms.outputs = comms.outputs.filter((output)=>{
+            if(output.node.id === node.id){
+                delete comms.outputHash[output.id];
+                return false;
+            }
 
-                return true;
-            });
+            return true;
+        });
 
-            async.each(newOutputs, function(output, next){
-                let newOutput = {
-                    name: output.name,
-                    location: output.location,
-                    description: output.description,
-                    driverId: output.driverId,
-                    config: output.config,
-                    id: output.id,
-                    node: node
-                };
+        async.each(newOutputs, function(output, next){
+            let newOutput = {
+                name: output.name,
+                location: output.location,
+                description: output.description,
+                driverId: output.driverId,
+                config: output.config,
+                id: output.id,
+                node: node
+            };
 
-                comms.outputs.push(newOutput);
-                comms.outputHash[newOutput.id] = newOutput;
-                next();
-            },function(){
-                callback();
-            });
-        }
+            comms.outputs.push(newOutput);
+            comms.outputHash[newOutput.id] = newOutput;
+            next();
+        },function(){
+            log.success('Updated outputs for node!', node);
+            callback();
+        });
     });
 };
 
@@ -264,7 +278,7 @@ comms.updateNodeDrivers = (node, callback)=>{
             headers: {
                 'X-Token': node.token
             },
-            url: 'http://' + node.ip + '/api/output/drivers',
+            url: 'https://' + node.ip + '/api/output/drivers',
             rejectUnhauthorized : false
         };
 
@@ -299,7 +313,6 @@ comms.updateNodeDrivers = (node, callback)=>{
                         description: driver.description,
                         type: driver.type,
                         config: driver.config,
-                        node: node,
                         id: driver.id
                     };
 
@@ -317,7 +330,7 @@ comms.updateNodeDrivers = (node, callback)=>{
             headers: {
                 'X-Token': node.token
             },
-            url: 'http://' + node.ip + '/api/input/drivers',
+            url: 'https://' + node.ip + '/api/input/drivers',
             rejectUnhauthorized : false
         };
 
@@ -352,7 +365,6 @@ comms.updateNodeDrivers = (node, callback)=>{
                         description: driver.description,
                         type: driver.type,
                         config: driver.config,
-                        node: node,
                         id: driver.id
                     };
 
@@ -378,15 +390,15 @@ comms.updateDrivers = (callback)=>{
 };
 
 comms.updateNode = (node, callback)=>{
-    comms.registerWithNodes(function(){
-        async.parallel([
-            (next)=>comms.updateNodeInputs(node, next),
-            (next)=>comms.updateNodeOutputs(node, next),
-            (next)=>comms.updateNodeDrivers(node, next)
-        ], ()=>{
-            if(callback){ callback(); }
-        })
-    });
+    console.log('Updating', node);
+
+    async.parallel([
+        (next)=>comms.updateNodeInputs(node, next),
+        (next)=>comms.updateNodeOutputs(node, next),
+        (next)=>comms.updateNodeDrivers(node, next)
+    ], ()=>{
+        if(callback){ callback(); }
+    })
 };
 
 comms.updateAll = (callback)=>{
@@ -403,17 +415,17 @@ comms.updateAll = (callback)=>{
 };
 
 //Used to register new node input and output, adds to array and gives them new ids
-exports.registerInput = function(config){
-    inputs.push(config);
+comms.registerInput = function(config){
+    comms.inputs.push(config);
     comms.inputHash[config.id] = config;
 };
 
-exports.registerOutput = function(config){
-    outputs.push(config);
+comms.registerOutput = function(config){
+    comms.outputs.push(config);
     comms.outputHash[config.id] = config;
 };
 
-exports.registerInit = (data)=>{
+comms.registerInit = (data)=>{
     let registered = registered.some((reg)=>{
         return reg.token === data.token;
     });
@@ -457,19 +469,22 @@ exports.registerInit = (data)=>{
     }
 };
 
-exports.verifyToken = function(req, res, next){
-    var token = req.headers['x-token'];
+comms.verifyToken = function(req, res, next){
+    let token = req.headers['x-token'];
+    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    if(token !== node.token){
+    if(comms.serverToken !== token){
+        log.error('Node Token Validation Attempt Failed: ' + token, ip);
+
         return res.status(400).send({
-            message: 'Improper token: Rejected'
+            message: 'Token Invalid'
         });
     }
 
     next();
 };
 
-exports.deRegister = (token)=>{
+comms.deRegister = (token)=>{
     comms.registered = comms.registered.filter((data)=>{
         return data.token === token
     });
@@ -481,5 +496,23 @@ function asyncParallel (array, funct, callback) {
     }), callback);
 }
 
-comms.updateAll(()=>{ console.log('found nodes')});
+NodeServerToken.find({}).sort({ created: -1 }).lean().exec(function(err, tokens){
+    if(!tokens.length){
+        let token = new NodeServerToken({token: crypto.randomBytes(40).toString('hex')});
+
+        comms.serverToken = token;
+
+        return token.save(function(err, newLog){
+            log.error('Error attempting to save Server Token: ' + token, err);
+            throw err;
+        });
+    }else{
+        comms.serverToken = tokens[0].token;
+    }
+
+    console.log('Server Token:', comms.serverToken);
+    comms.updateAll(()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
+    //comms.searchForNodes('192.168.1.131:2000', ()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
+});
+
 module.exports = comms;
