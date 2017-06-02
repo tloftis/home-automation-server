@@ -36,12 +36,12 @@
                         <td class="text-center"></td>
                     </tr>
 
-                    <tr data-ng-repeat="node in nodes" data-ng-class="{bg-warning: node.active}">
+                    <tr data-ng-repeat="node in nodes" data-ng-class="{ 'bg-warning': !node.active }">
                         <td>{{node.name}}</td>
                         <td>{{node.ip}}</td>
                         <td>{{node.description}}</td>
                         <td>{{node.location}}</td>
-                        <td>{{node.active ? 'Offline':'Online'}}</td>
+                        <td>{{node.active ? 'Online':'Offline'}}</td>
 
                         <td class="text-center">
                             <div class="btn-group" data-ng-class='{open: openConfig}'>

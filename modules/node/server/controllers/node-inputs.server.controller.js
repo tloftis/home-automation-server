@@ -8,14 +8,34 @@ var async = require('async'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
+function stripObjProp(obj, props){
+    if(typeof props === 'string'){
+        props = [props];
+    }
+
+    let newObj = {};
+
+    Object.keys(obj).forEach(k=>{
+        if(props.indexOf(k) === -1){
+            newObj[k] = obj[k];
+        }
+    });
+
+    return newObj;
+}
+
 exports.list = function(req, res){
     res.json(nodeComm.inputs.map(function(input){
-        return _.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input); //Gives the driver as well as the input info
+        let inputClone = stripObjProp(input, []);
+        inputClone.node =  stripObjProp(inputClone.node, 'token');
+        return _.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone); //Gives the driver as well as the input info
     }));
 };
 
 exports.get = function (req, res){
-    res.json(_.extend({ driver: nodeComm.inputDriverHash[req.input.driverId] }, req.input)); //Gives the driver as well as the input info
+    let inputClone = stripObjProp(req.input, []);
+    inputClone.node =  stripObjProp(inputClone.node, 'token');
+    res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); //Gives the driver as well as the input info
 };
 
 exports.update = function (req, res){
@@ -50,7 +70,8 @@ exports.update = function (req, res){
     request.put(info, function (err, reqs, body){
         if(err) {
             input.node.active = false;
-            log.error('Failed to update node: ' + node.ip + ', input:' + input.id, err);
+            console.log(input.node);
+            log.error('Failed to update node: ' + input.node.ip + ', input:' + input.id, err);
             return res.status(400).send('Error attempting to update input');
         }
 
@@ -67,9 +88,14 @@ exports.update = function (req, res){
         if(!_.isUndefined(newInput.description)) input.description = newInput.description;
         if(!_.isUndefined(newInput.config)) input.config = newInput.config;
         if(!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
-        node.active = true;
+
+        input.node.active = true;
         log.info('Updated input config on node: ' + input.node.ip, input);
-        res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input)); //Gives the driver as well as the input info
+
+        let inputClone = stripObjProp(req.input, []);
+        inputClone.node =  stripObjProp(inputClone.node, 'token');
+
+        res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); //Gives the driver as well as the input info
     });
 };
 

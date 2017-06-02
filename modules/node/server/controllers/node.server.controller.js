@@ -9,6 +9,22 @@ var _ = require('lodash'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
+function stripObjProp(obj, props){
+    if(typeof props === 'string'){
+        props = [props];
+    }
+
+    let newObj = {};
+
+    Object.keys(obj).forEach(k=>{
+        if(props.indexOf(k) === -1){
+            newObj[k] = obj[k];
+        }
+    });
+
+    return newObj;
+}
+
 exports.updateNodes = function(req, res){
     nodeComm.updateAll(function(){
         res.send('Update Complete!');
@@ -56,11 +72,11 @@ exports.register = function(req,res,next){
 };
 
 exports.list = function(req, res){
-    res.json(nodeComm.nodes);
+    res.json(nodeComm.nodes.map(n=>stripObjProp(n, 'token')));
 };
 
 exports.get = function (req, res){
-    res.json(req.node);
+    res.json(stripObjProp(req.node, 'token'));
 };
 
 exports.getToken = function (req, res){
@@ -78,9 +94,9 @@ exports.update = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': node.serverToken
+            'X-Token': selNode.token
         },
-        url: 'http://' + selNode.ip + '/api/server',
+        url: 'https://' + selNode.ip + '/api/server',
         form: { node: newNode }
     };
 
@@ -103,7 +119,7 @@ exports.update = function (req, res){
         selNode.location = newOutput.location;
         selNode.name = newOutput.name;
         selNode.active = true;
-        res.json(selNode);
+        res.json(stripObjProp(selNode, 'token'));
     });
 };
 

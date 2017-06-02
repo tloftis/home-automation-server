@@ -511,8 +511,8 @@ NodeServerToken.find({}).sort({ created: -1 }).lean().exec(function(err, tokens)
     }
 
     console.log('Server Token:', comms.serverToken);
-    comms.updateAll(()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
-    //comms.searchForNodes('192.168.1.131:2000', ()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
+    //comms.updateAll(()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
+    comms.searchForNodes('192.168.1.131:2000', ()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
 });
 
 module.exports = comms;
