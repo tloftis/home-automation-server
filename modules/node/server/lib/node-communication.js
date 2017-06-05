@@ -90,14 +90,42 @@ function searchForNodes (addresses, callback) {
 
     asyncParallel(addresses, function(address, next){
         let info = {
-            url: 'https://' + address + '/api/register',
+            headers: {
+                'X-Token': comms.serverToken
+            },
+            url: 'https://' + address + '/api/server',
             timeout: 2000
         };
 
-        request.get(info, function(){
-            next();
+        request.get(info, function (err, res, body){
+            if (!err && body){
+                let node;
+
+                //parse out the info gained back from the server
+                try {
+                    node = JSON.parse(body);
+                }catch(err){
+                    return next();
+                }
+
+                node.ip = address;
+
+                comms.registerNode(node, ()=>{
+                    next()
+                });
+            } else {
+                next();
+            }
         });
     },()=>{
+        comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+
+        comms.nodes.forEach(n=>{
+            if(!n.active){
+                log.error('Failed to to connect to node: ' + n.ip, n);
+            }
+        });
+
         callback();
     });
 }
@@ -107,10 +135,12 @@ comms.registerNode = function(node, callback){
         callback = ()=>{};
     }
 
+    console.log(node);
+
     if(node && node.id && node.token && node.ip){
         let newNode = {
             id: node.id,
-            ip: node.ip + ':' + nodePort,
+            ip: node.ip.split(':')[0] + ':' + (node.ip.split(':')[1] || nodePort),
             name: node.name || '',
             description: node.description || '',
             location: node.location || '',
@@ -138,7 +168,7 @@ comms.updateNodeInputs = (node, callback)=>{
 
     let info = {
         headers: {
-            'X-Token': node.token
+            'X-Token': comms.serverToken
         },
         url: 'https://' + node.ip + '/api/input',
         rejectUnhauthorized : false
@@ -208,7 +238,7 @@ comms.updateNodeOutputs = (node, callback)=>{
 
     let info = {
         headers: {
-            'X-Token': node.token
+            'X-Token': comms.serverToken
         },
         url: 'https://' + node.ip + '/api/output',
         rejectUnhauthorized : false
@@ -276,7 +306,7 @@ comms.updateNodeDrivers = (node, callback)=>{
     async.parallel([function(nextMid){
         let info = {
             headers: {
-                'X-Token': node.token
+                'X-Token': comms.serverToken
             },
             url: 'https://' + node.ip + '/api/output/drivers',
             rejectUnhauthorized : false
@@ -328,7 +358,7 @@ comms.updateNodeDrivers = (node, callback)=>{
     }, function(nextMid){
         let info = {
             headers: {
-                'X-Token': node.token
+                'X-Token': comms.serverToken
             },
             url: 'https://' + node.ip + '/api/input/drivers',
             rejectUnhauthorized : false
@@ -389,10 +419,43 @@ comms.updateDrivers = (callback)=>{
     }, callback);
 };
 
+comms.updateNodeServer = (node, callback)=>{
+    if(!callback) callback = function(){};
+
+    let info = {
+        headers: {
+            'X-Token': comms.serverToken
+        },
+        url: 'https://' + node.ip + '/api/register',
+        rejectUnhauthorized : false,
+        form: {
+            port: process.env.PORT
+        }
+    };
+
+    request.post(info, function(err, res, body){
+        if(err){
+            log.error('Error registering server: ' + node.id, err);
+            node.active = false;
+            return callback(err);
+        }
+
+        if(res.statusCode !== 200){
+            log.error('Error registering server: ' + node.id, body);
+            node.active = false;
+            return callback(body);
+        }
+
+        log.success('Registered server to node!', node);
+        callback();
+    });
+};
+
 comms.updateNode = (node, callback)=>{
     console.log('Updating', node);
 
     async.parallel([
+        (next)=>comms.updateNodeServer(node, next),
         (next)=>comms.updateNodeInputs(node, next),
         (next)=>comms.updateNodeOutputs(node, next),
         (next)=>comms.updateNodeDrivers(node, next)
@@ -471,9 +534,9 @@ comms.registerInit = (data)=>{
 
 comms.verifyToken = function(req, res, next){
     let token = req.headers['x-token'];
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
 
-    if(comms.serverToken !== token){
+    if(comms.nodes.some((node)=>(node.token !== token))){
         log.error('Node Token Validation Attempt Failed: ' + token, ip);
 
         return res.status(400).send({

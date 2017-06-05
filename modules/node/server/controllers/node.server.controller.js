@@ -32,7 +32,7 @@ exports.updateNodes = function(req, res){
 };
 
 exports.updateNode = function(req, res){
-    var node = req.node;
+    let node = req.node;
 
     if(!node){
         return res.status(400).send('Error attempting to update node!');
@@ -54,19 +54,25 @@ exports.updateNode = function(req, res){
     })
 };
 
-exports.register = function(req,res,next){
-    let node = req.body;
-    node.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+exports.register = function(req, res, next){
+    let config = req.body,
+        ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
 
-    nodeComm.registerNode(node, (err, node)=>{
+    if (!config.port){
+        return res.status(400).jsonp({
+            message: 'Error registering node!'
+        });
+    }
+
+    nodeComm.searchForNodes(ip + ':' + config.port, (err)=>{
         if(!err){
             res.status(200).jsonp({
                 message: 'Node Successfully Registered!'
-            })
+            });
         } else {
             res.status(400).jsonp({
                 message: 'Error registering node!'
-            })
+            });
         }
     })
 };
@@ -84,7 +90,7 @@ exports.getToken = function (req, res){
 };
 
 exports.update = function (req, res){
-    var node = req.body.node,
+    let node = req.body.node,
         selNode = req.node,
         newNode = {};
 
@@ -92,9 +98,9 @@ exports.update = function (req, res){
     if(node.location) newNode.location = node.location;
     if(node.description) newNode.description = node.description;
 
-    var info = {
+    let info = {
         headers: {
-            'X-Token': selNode.token
+            'X-Token': nodeComm.serverToken
         },
         url: 'https://' + selNode.ip + '/api/server',
         form: { node: newNode }
@@ -107,7 +113,7 @@ exports.update = function (req, res){
             return res.status(400).send('Error attempting to update node server config');
         }
 
-        var newOutput;
+        let newOutput;
 
         try{
             newOutput = JSON.parse(body);

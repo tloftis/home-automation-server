@@ -1,6 +1,6 @@
 'use strict';
 
-var async = require('async'),
+let async = require('async'),
     _ = require('lodash'),
     request = require('request'),
     mongoose = require('mongoose'),
@@ -9,12 +9,12 @@ var async = require('async'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
-function genId(){
+function genId() {
     return crypto.randomBytes(40).toString('hex');
 }
 
-exports.list = function(req, res){
-    NodeAPI.find({}).lean().exec(function(err, tokens){
+exports.list = function(req, res) {
+    NodeAPI.find({}).lean().exec(function(err, tokens) {
         if (err) {
             log.error('Failed to get tokens', err);
 
@@ -27,22 +27,22 @@ exports.list = function(req, res){
     });
 };
 
-exports.get = function (req, res){
+exports.get = function (req, res) {
     res.json(req.token);
 };
 
-exports.update = function (req, res){
-    var token = req.token,
+exports.update = function (req, res) {
+    let token = req.token,
         newToken = req.body.token || {};
 
     token.description = newToken.description || token.description;
     token.name = newToken.name || token.name;
 
-    if(req.user.roles.indexOf('admin') !== -1){
+    if (req.user.roles.indexOf('admin') !== -1) {
         token.permissions = newToken.permissions || token.permissions;
     }
 
-    return token.save(function(err){
+    return token.save(function(err) {
         if (err) {
             log.error('Failed to update token: ' + token.token + ', id:' + token._id, err);
 
@@ -56,7 +56,7 @@ exports.update = function (req, res){
     });
 };
 
-exports.remove = function (req, res){
+exports.remove = function (req, res) {
     let token = req.token;
 
     token.remove(function (err) {
@@ -73,14 +73,14 @@ exports.remove = function (req, res){
     });
 };
 
-exports.create = function (req, res){
+exports.create = function (req, res) {
     let api = res.body || {};
 
-    if(!api.name){
+    if (!api.name) {
         return res.status(400).send('Error name is required');
     }
 
-    if(!api.permissions){
+    if (!api.permissions) {
         api.permissions = [];
     } else if (typeof api.permissions === 'string') {
         api.permissions = [api.permissions];
@@ -89,7 +89,7 @@ exports.create = function (req, res){
     api.token = genId();
     let newApi = new NodeAPI(api);
 
-    newApi.save(function(err){
+    newApi.save(function(err) {
         if (err) {
             log.error('Failed to create a new token', err);
 
@@ -103,13 +103,13 @@ exports.create = function (req, res){
     });
 };
 
-exports.register = function(req, res){
+exports.register = function(req, res) {
     let tokenData = req.body,
         address = '';
 
     tokenData.token = req.headers['X-Token'];
 
-    if(!tokenData.token){
+    if (!tokenData.token) {
         return res.status(400).send({
             message: 'Incorrect or Missing Token'
         });
@@ -117,12 +117,12 @@ exports.register = function(req, res){
 
     Object.keys(req.headers).some((key)=>{
         if (key.toLowerCase() === 'x-forwarded-for') {
-            address = req.headers[key];
+            address = req.headers[key].split(':').pop();
         }
     });
 
     NodeAPI.findOne({ token: tokenData.token }).lean().exec((err, data)=>{
-        if(err || !(data || {}).token){
+        if (err || !(data || {}).token) {
             log.error('Token Registration failure', err || { message: 'Token was not found' });
 
             return res.status(400).send({
@@ -135,7 +135,7 @@ exports.register = function(req, res){
     });
 };
 
-exports.tokenById = function (req, res, next, id){
+exports.tokenById = function (req, res, next, id) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).send({
             message: 'Token id is invalid'
@@ -143,10 +143,10 @@ exports.tokenById = function (req, res, next, id){
     }
 
     NodeAPI.findById(id).exec(function (err, token) {
-        if(err){
+        if (err) {
             log.error('Error attempting to get token: ' + id, err);
             return next(err);
-        }else if(!token) {
+        } else if (!token) {
             return next(new Error('Failed to load link', id));
         }
 

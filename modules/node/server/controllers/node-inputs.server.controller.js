@@ -4,7 +4,6 @@ var async = require('async'),
     _ = require('lodash'),
     request = require('request'),
     mongoose = require('mongoose'),
-    outputController = require('../controllers/node-outputs.server.controller.js'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
@@ -61,7 +60,7 @@ exports.update = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': input.node.token
+            'X-Token': nodeComm.serverToken
         },
         url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: { input: newNode }
@@ -105,7 +104,7 @@ exports.remove = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': input.node.token
+            'X-Token': nodeComm.serverToken
         },
         url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: {}
@@ -159,7 +158,7 @@ exports.add = function (req, res){
     if(newInput.driverId){
         var info = {
             headers: {
-                'X-Token': node.token
+                'X-Token': nodeComm.serverToken
             },
             url: 'https://' + node.ip + '/api/input',
             form: { input: newInput }

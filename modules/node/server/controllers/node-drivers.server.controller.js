@@ -99,7 +99,7 @@ exports.add = function (req, res){
 
     var info = {
         headers: {
-            'X-Token': node.token
+            'X-Token': nodeComm.serverToken
         },
         url: url
     };
@@ -173,7 +173,7 @@ exports.removeDriver = function (req, res){
 
     let info = {
         headers: {
-            'X-Token': node.token
+            'X-Token': nodeComm.serverToken
         },
         url: 'https://' + node.ip + '/api/drivers/' + driver.id
     };
