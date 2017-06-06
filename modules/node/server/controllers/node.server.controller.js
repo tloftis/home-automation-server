@@ -38,20 +38,10 @@ exports.updateNode = function(req, res){
         return res.status(400).send('Error attempting to update node!');
     }
 
-    async.parallel([
-        function(done){
-            nodeComm.updateNodeDrivers(node, done);
-        },
-        function(done){
-            nodeComm.updateNodeOutputs(node, done);
-        },
-        function(done){
-            nodeComm.updateNodeInputs(node, done);
-        }
-    ], function(){
+    nodeComm.updateNode(node, ()=>{
         log.info('Node added back to system!', node);
         res.send('Node Updated!');
-    })
+    });
 };
 
 exports.register = function(req, res, next){
@@ -85,7 +75,7 @@ exports.get = function (req, res){
     res.json(stripObjProp(req.node, 'token'));
 };
 
-exports.getToken = function (req, res){
+exports.getServerToken = function (req, res){
     res.json({token: nodeComm.serverToken});
 };
 

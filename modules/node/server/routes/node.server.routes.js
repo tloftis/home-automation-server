@@ -18,8 +18,8 @@ module.exports = function (app) {
         put(nodePolicy.isAllowed, node.updateNodes);
 
     // Users collection routes
-    app.route('/api/node/token').
-        get(nodePolicy.isAllowed, node.getToken);
+    app.route('/api/node/server-token').
+        get(nodePolicy.isAllowed, node.getServerToken);
 
     app.route('/api/node/:nodeId').all(nodePolicy.isAllowed).
         get(node.get).

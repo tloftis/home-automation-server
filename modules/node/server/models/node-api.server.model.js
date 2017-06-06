@@ -17,7 +17,7 @@ var NodeAPISchema = new Schema({
     name: {
         type: String,
         trim: false,
-        required: true
+        required: false
     },
     permissions: {
         type: [String],
@@ -29,6 +29,11 @@ var NodeAPISchema = new Schema({
         unique: true,
         trim: false,
         required: true
+    },
+    enabled: {
+        type: Boolean,
+        required: false,
+        default: false
     },
     created: {
         type: Date,

@@ -8,8 +8,37 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('node');
         };
 
-        service.getToken= function (){
+        service.getTokens = function (){
             return Utility.http.get('node/token');
+        };
+
+        service.getToken = function (token){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.get('node/token/' + id);
+        };
+
+        service.getServerToken = function (token){
+            return Utility.http.get('node/server-token');
+        };
+
+        service.updateToken = function (token, config){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.put('node/token/' + id, { token: config });
+        };
+
+        service.createToken = function (config){
+            return Utility.http.post('node/token', { token: config });
+        };
+
+        service.removeToken = function (token){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.delete('node/token/' + id);
         };
 
         service.getDrivers = function (){

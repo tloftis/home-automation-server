@@ -27,6 +27,12 @@ angular.module('node').run(['Menus',
             state: 'node.nodes',
             roles: ['user', 'admin']
         });
+
+        Menus.addSubMenuItem('topbar', 'node', {
+            title: 'Token List',
+            state: 'node.tokens',
+            roles: ['admin']
+        });
     }
 ]);
 

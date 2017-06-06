@@ -1,0 +1,68 @@
+<div class="wrapper wrapper-content animated fadeInRight" data-ng-init="init()">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 row">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+
+                        <input type="text" id="name" name="username" class="form-control" ng-model="token.name"
+                               placeholder="Name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+
+                        <input type="text" id="description" name="description" class="form-control" ng-model="token.description"
+                               placeholder="Description of Token" required/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Enabled</label>
+                        <input type="checkbox" class="form-control" data-ng-model="token.enabled" required/>
+                    </div>
+
+                    <div class="form-group">
+                        <div data-ng-click="update(token)" class="btn btn-primary">Update</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 row">
+            <div>Input Permissions</div>
+
+            <div class="col-md-6 col-md-offset-3">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="form-group">
+                            <label>Current Permissions</label>
+
+                            <div class="well well-sm">
+                                <span class="label label-info btn" ng-click="possiblePermissions.push(id); token.permissions.splice($index, 1)"
+                                      data-ng-repeat="id in token.permissions track by $index" style="margin-right: 3px;"
+                                      tooltip="{{nodes[id].name + ' ' + nodes[id].description}}">{{id}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-md-offset-3">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="form-group">
+                            <label>Possible Permissions</label>
+
+                            <div class="well well-sm">
+                                <span class="label label-default btn" ng-click="token.permissions.push(id); possiblePermissions.splice($index, 1)"
+                                      data-ng-repeat="id in possiblePermissions track by $index" style="margin-right: 3px;"
+                                      tooltip="{{nodes[id].name + ' ' + nodes[id].description}}">{{id}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

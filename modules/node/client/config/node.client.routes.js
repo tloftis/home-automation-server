@@ -12,6 +12,69 @@ angular.module('node').config(['$stateProvider',
                 roles: ['user', 'admin']
             }
         }).
+        state('node.tokens', {
+            url: '/tokens',
+            views: {
+                '@node': {
+                    templateUrl: 'modules/node/client/views/node-api-list.client.view.html',
+                    controller: 'nodeApiListController'
+                },
+                'headerView@node': {
+                    controller: function($scope) {
+                        $scope.header = {
+                            label: 'List Tokens',
+                            desc: 'all api tokens',
+                            faIcon: 'fa-server fa-fw'
+                        };
+                    }
+                }
+            },
+            data: {
+                roles: ['admin']
+            }
+        }).
+        state('node.tokens.edit', {
+            url: '/:tokenId',
+            views: {
+                '@node': {
+                    templateUrl: 'modules/node/client/views/node-api-edit.client.view.html',
+                    controller: 'nodeApiUpdateController'
+                },
+                'headerView@node': {
+                    controller: function($scope) {
+                        $scope.header = {
+                            label: 'Edit Token',
+                            desc: 'Edit API Token',
+                            faIcon: 'fa-server fa-fw'
+                        };
+                    }
+                }
+            },
+            data: {
+                roles: ['admin']
+            }
+        }).
+        state('node.tokens.create', {
+            url: '/create',
+            views: {
+                '@node': {
+                    templateUrl: 'modules/node/client/views/node-api-edit.client.view.html',
+                    controller: 'nodeApiCreateController'
+                },
+                'headerView@node': {
+                    controller: function($scope) {
+                        $scope.header = {
+                            label: 'Create Token',
+                            desc: 'Create New API Token',
+                            faIcon: 'fa-server fa-fw'
+                        };
+                    }
+                }
+            },
+            data: {
+                roles: ['admin']
+            }
+        }).
         state('node.nodes', {
             url: '/nodes',
             views: {

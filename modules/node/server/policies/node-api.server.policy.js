@@ -15,39 +15,21 @@ exports.invokeRolesPolicies = function (){
     acl.allow([{
         roles: ['admin'],
         allows: [{
-            resources: '/api/node',
+            resources: '/api/node/token',
             permissions: '*'
         }, {
-            resources: '/api/node/server-token',
+            resources: '/api/node/token/:tokenId',
             permissions: '*'
         }, {
-            resources: '/api/node/:nodeId',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/output',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/input',
-            permissions: '*'
-        }, {
-            resources: '/api/node/:nodeId/driver',
+            resources: '/api/node/token/register',
             permissions: '*'
         }]
     }, {
         roles: ['user'],
-        allows: [{
-            resources: '/api/node',
-            permissions: ['get']
-        }, {
-            resources: '/api/node/:nodeId',
-            permissions: ['get', 'post']
-        }]
+        allows: []
     },{
         roles: ['guest'],
-        allows: [{
-            resources: '/api/node/:nodeId',
-            permissions: ['post']
-        }]
+        allows: []
     }]);
 };
 

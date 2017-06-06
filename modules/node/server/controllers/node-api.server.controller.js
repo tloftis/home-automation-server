@@ -37,6 +37,7 @@ exports.update = function (req, res) {
 
     token.description = newToken.description || token.description;
     token.name = newToken.name || token.name;
+    token.enabled = typeof newToken.enabled === 'boolean' ? newToken.enabled : token.enabled;
 
     if (req.user.roles.indexOf('admin') !== -1) {
         token.permissions = newToken.permissions || token.permissions;
@@ -52,7 +53,7 @@ exports.update = function (req, res) {
         }
 
         log.info('Updated token: ' + token.token + ', id:' + token._id, token);
-        res.json(link);
+        res.json(token);
     });
 };
 
@@ -76,9 +77,11 @@ exports.remove = function (req, res) {
 exports.create = function (req, res) {
     let api = res.body || {};
 
+    /*
     if (!api.name) {
         return res.status(400).send('Error name is required');
     }
+    */
 
     if (!api.permissions) {
         api.permissions = [];
@@ -147,9 +150,10 @@ exports.tokenById = function (req, res, next, id) {
             log.error('Error attempting to get token: ' + id, err);
             return next(err);
         } else if (!token) {
-            return next(new Error('Failed to load link', id));
+            return next(new Error('Failed to load Token', id));
         }
 
+        console.log(token);
         req.token = token;
         next();
     });
