@@ -136,17 +136,6 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.event.on('coverage', function(lcovFileContents, done) {
-        // Set coverage config so karma-coverage knows to run coverage
-        testConfig.coverage = true;
-        require('coveralls').handleInput(lcovFileContents, function(err) {
-            if (err) {
-                return done(err);
-            }
-            done();
-        });
-    });
-
     // Load NPM tasks
     require('load-grunt-tasks')(grunt);
 
