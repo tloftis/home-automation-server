@@ -4,9 +4,8 @@ let async = require('async'),
     _ = require('lodash'),
     request = require('request'),
     mongoose = require('mongoose'),
-    NodeAPI = mongoose.model('NodeAPI'),
+    NodeToken = mongoose.model('NodeToken'),
     crypto = require('crypto'),
-    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 function genId() {
@@ -14,7 +13,7 @@ function genId() {
 }
 
 exports.list = function(req, res) {
-    NodeAPI.find({}).lean().exec(function(err, tokens) {
+    NodeToken.find({}).lean().exec(function(err, tokens) {
         if (err) {
             log.error('Failed to get tokens', err);
 
@@ -33,15 +32,11 @@ exports.get = function (req, res) {
 
 exports.update = function (req, res) {
     let token = req.token,
-        newToken = req.body.token || {};
+        newToken = (req.body || {}).token;
 
+    token.enabled = !!(newToken || {}).enabled;
     token.description = newToken.description || token.description;
     token.name = newToken.name || token.name;
-    token.enabled = typeof newToken.enabled === 'boolean' ? newToken.enabled : token.enabled;
-
-    if (req.user.roles.indexOf('admin') !== -1) {
-        token.permissions = newToken.permissions || token.permissions;
-    }
 
     return token.save(function(err) {
         if (err) {
@@ -75,24 +70,14 @@ exports.remove = function (req, res) {
 };
 
 exports.create = function (req, res) {
-    let api = res.body || {};
+    let token = (req.body || {}).token || {};
 
-    /*
-    if (!api.name) {
-        return res.status(400).send('Error name is required');
-    }
-    */
+    token.token = genId();
+    token.enabled = false;
 
-    if (!api.permissions) {
-        api.permissions = [];
-    } else if (typeof api.permissions === 'string') {
-        api.permissions = [api.permissions];
-    }
+    let newToken = new NodeToken(token);
 
-    api.token = genId();
-    let newApi = new NodeAPI(api);
-
-    newApi.save(function(err) {
+    newToken.save(function(err) {
         if (err) {
             log.error('Failed to create a new token', err);
 
@@ -101,40 +86,8 @@ exports.create = function (req, res) {
             });
         }
 
-        log.info('New token created!', { user: req.user, token: api });
-        res.json(newApi);
-    });
-};
-
-exports.register = function(req, res) {
-    let tokenData = req.body,
-        address = '';
-
-    tokenData.token = req.headers['X-Token'];
-
-    if (!tokenData.token) {
-        return res.status(400).send({
-            message: 'Incorrect or Missing Token'
-        });
-    }
-
-    Object.keys(req.headers).some((key)=>{
-        if (key.toLowerCase() === 'x-forwarded-for') {
-            address = req.headers[key].split(':').pop();
-        }
-    });
-
-    NodeAPI.findOne({ token: tokenData.token }).lean().exec((err, data)=>{
-        if (err || !(data || {}).token) {
-            log.error('Token Registration failure', err || { message: 'Token was not found' });
-
-            return res.status(400).send({
-                message: 'Incorrect or Missing Token'
-            });
-        }
-
-        data.address = address;
-        res.jsonp(nodeComm.registerInit(data));
+        log.info('New token created!', { user: req.user, token: newToken });
+        res.json(newToken);
     });
 };
 
@@ -145,7 +98,7 @@ exports.tokenById = function (req, res, next, id) {
         });
     }
 
-    NodeAPI.findById(id).exec(function (err, token) {
+    NodeToken.findById(id).exec(function (err, token) {
         if (err) {
             log.error('Error attempting to get token: ' + id, err);
             return next(err);

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('node').controller('nodeApiListController', ['$scope', '$state', 'nodeService', '$location', '$window', 'Authentication',
+angular.module('node').controller('nodeTokenListController', ['$scope', '$state', 'nodeService', '$location', '$window', 'Authentication',
     function ($scope, $state, nodeService, $location, $window, Authentication) {
         if (!Authentication.user) {
             $location.path('/');
@@ -9,22 +9,22 @@ angular.module('node').controller('nodeApiListController', ['$scope', '$state', 
         $scope.nodes = [];
 
         $scope.init = function () {
-            nodeService.getApiTokens().then(function(tokens){
+            nodeService.getTokens().then(function(tokens){
                 $scope.tokens = tokens;
             });
         };
 
         $scope.enableDisable = function(token){
-            nodeService.updateApiToken(token, {enabled:token.enabled}).then(function(){
-                return nodeService.getApiTokens();
+            nodeService.updateToken(token, {enabled:token.enabled}).then(function(){
+                return nodeService.getTokens();
             }).then(function(tokens){
                 $scope.tokens = tokens;
             });
         };
 
         $scope.create = function(){
-            nodeService.createApiToken({}).then(function(token){
-                $state.go('node.api-tokens.edit', { tokenId: token._id });
+            nodeService.createToken().then(function(token){
+                $state.go('node.tokens.edit', { tokenId: token._id });
             });
         };
 
@@ -38,8 +38,8 @@ angular.module('node').controller('nodeApiListController', ['$scope', '$state', 
                 confirmButtonText: 'Yes',
                 closeOnConfirm: true
             }, function(){
-                nodeService.removeApiToken(token).then(function(){
-                    return nodeService.getApiTokens();
+                nodeService.removeToken(token).then(function(){
+                    return nodeService.getTokens();
                 }).then(function(tokens){
                     $scope.tokens = tokens;
                 });
@@ -47,7 +47,7 @@ angular.module('node').controller('nodeApiListController', ['$scope', '$state', 
         };
 
         $scope.edit = function(token){
-            $state.go('node.api-tokens.edit', { tokenId: token._id });
+            $state.go('node.tokens.edit', { tokenId: token._id });
         };
     }
 ]);

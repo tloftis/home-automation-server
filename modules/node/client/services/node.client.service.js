@@ -8,6 +8,35 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('node');
         };
 
+        service.getApiTokens = function (){
+            return Utility.http.get('node/api');
+        };
+
+        service.getApiToken = function (token){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.get('node/api/' + id);
+        };
+
+        service.updateApiToken = function (token, config){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.put('node/api/' + id, { token: config });
+        };
+
+        service.createApiToken = function (config){
+            return Utility.http.post('node/api', { token: config });
+        };
+
+        service.removeApiToken = function (token){
+            var id = token;
+            if(token && token._id) id = token._id;
+
+            return Utility.http.delete('node/api/' + id);
+        };
+
         service.getTokens = function (){
             return Utility.http.get('node/token');
         };
@@ -17,10 +46,6 @@ angular.module('node').service('nodeService', ['Utility',
             if(token && token._id) id = token._id;
 
             return Utility.http.get('node/token/' + id);
-        };
-
-        service.getServerToken = function (token){
-            return Utility.http.get('node/server-token');
         };
 
         service.updateToken = function (token, config){
@@ -39,6 +64,10 @@ angular.module('node').service('nodeService', ['Utility',
             if(token && token._id) id = token._id;
 
             return Utility.http.delete('node/token/' + id);
+        };
+
+        service.getServerToken = function (token){
+            return Utility.http.get('node/server-token');
         };
 
         service.getDrivers = function (){

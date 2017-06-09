@@ -9,10 +9,12 @@ let _ = require('lodash'),
     crypto = require('crypto'),
     mongoose = require('mongoose'),
     NodeServerToken = mongoose.model('NodeServerToken'),
+    NodeToken = mongoose.model('NodeToken'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js'),
     nodePort = (process.env.RELAY_PORT || 2000);
 
 let comms = {
+    tokens: [],
     registered: [],
     outputs: [],
     inputs: [],
@@ -536,7 +538,7 @@ comms.verifyToken = function(req, res, next){
     let token = req.headers['x-token'];
     let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
 
-    if(comms.nodes.some((node)=>(node.token !== token))){
+    if(comms.tokens.some((token)=>(token.token !== token && token.enabled))){
         log.error('Node Token Validation Attempt Failed: ' + token, ip);
 
         return res.status(400).send({
@@ -576,6 +578,10 @@ NodeServerToken.find({}).sort({ created: -1 }).lean().exec(function(err, tokens)
     console.log('Server Token:', comms.serverToken);
     //comms.updateAll(()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
     comms.searchForNodes('192.168.1.131:2000', ()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
+});
+
+NodeToken.find({}).lean().exec((err, tokens)=>{
+    comms.tokens = tokens;
 });
 
 module.exports = comms;

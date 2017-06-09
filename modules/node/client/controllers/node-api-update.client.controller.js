@@ -11,7 +11,7 @@ angular.module('node').controller('nodeApiUpdateController', ['$scope', '$state'
         $scope.nodes = {};
 
         $scope.init = function () {
-            nodeService.getToken($stateParams.tokenId).then(function(token){
+            nodeService.getApiToken($stateParams.tokenId).then(function(token){
                 return $scope.token = token;
             }).then(function(token){
                 nodeService.getInputs().then(function(inputs){
@@ -37,9 +37,9 @@ angular.module('node').controller('nodeApiUpdateController', ['$scope', '$state'
         };
 
         $scope.update = function(token){
-            nodeService.updateToken(token, token).then(function(token){
+            nodeService.updateApiToken(token, token).then(function(token){
                 $scope.token = token;
-                $state.go('node.tokens');
+                $state.go('node.api-tokens');
             });
         };
     }

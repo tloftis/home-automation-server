@@ -16,14 +16,14 @@ angular.module('node').config(['$stateProvider',
             url: '/tokens',
             views: {
                 '@node': {
-                    templateUrl: 'modules/node/client/views/node-api-list.client.view.html',
-                    controller: 'nodeApiListController'
+                    templateUrl: 'modules/node/client/views/node-token-list.client.view.html',
+                    controller: 'nodeTokenListController'
                 },
                 'headerView@node': {
                     controller: function($scope) {
                         $scope.header = {
                             label: 'List Tokens',
-                            desc: 'all api tokens',
+                            desc: 'all node tokens',
                             faIcon: 'fa-server fa-fw'
                         };
                     }
@@ -37,14 +37,14 @@ angular.module('node').config(['$stateProvider',
             url: '/:tokenId',
             views: {
                 '@node': {
-                    templateUrl: 'modules/node/client/views/node-api-edit.client.view.html',
-                    controller: 'nodeApiUpdateController'
+                    templateUrl: 'modules/node/client/views/node-token-edit.client.view.html',
+                    controller: 'nodeTokenUpdateController'
                 },
                 'headerView@node': {
                     controller: function($scope) {
                         $scope.header = {
                             label: 'Edit Token',
-                            desc: 'Edit API Token',
+                            desc: 'Edit Node Token',
                             faIcon: 'fa-server fa-fw'
                         };
                     }
@@ -54,18 +54,39 @@ angular.module('node').config(['$stateProvider',
                 roles: ['admin']
             }
         }).
-        state('node.tokens.create', {
-            url: '/create',
+        state('node.api-tokens', {
+            url: '/api-tokens',
             views: {
                 '@node': {
-                    templateUrl: 'modules/node/client/views/node-api-edit.client.view.html',
-                    controller: 'nodeApiCreateController'
+                    templateUrl: 'modules/node/client/views/node-api-list.client.view.html',
+                    controller: 'nodeApiListController'
                 },
                 'headerView@node': {
                     controller: function($scope) {
                         $scope.header = {
-                            label: 'Create Token',
-                            desc: 'Create New API Token',
+                            label: 'List API Tokens',
+                            desc: 'all api tokens',
+                            faIcon: 'fa-server fa-fw'
+                        };
+                    }
+                }
+            },
+            data: {
+                roles: ['admin']
+            }
+        }).
+        state('node.api-tokens.edit', {
+            url: '/:tokenId',
+            views: {
+                '@node': {
+                    templateUrl: 'modules/node/client/views/node-api-edit.client.view.html',
+                    controller: 'nodeApiUpdateController'
+                },
+                'headerView@node': {
+                    controller: function($scope) {
+                        $scope.header = {
+                            label: 'Edit Token',
+                            desc: 'Edit API Token',
                             faIcon: 'fa-server fa-fw'
                         };
                     }

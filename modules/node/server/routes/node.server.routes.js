@@ -5,6 +5,7 @@
  */
 var nodePolicy = require('../policies/node.server.policy'),
     node = require('../controllers/node.server.controller.js'),
+    nodeToken = require('../controllers/node-token.server.controller.js'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     outputs = require('../controllers/node-outputs.server.controller.js'),
     drivers = require('../controllers/node-drivers.server.controller.js'),
