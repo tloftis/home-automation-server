@@ -1,110 +1,114 @@
 'use strict';
+/* eslint new-cap: "warn"*/
 
 var async = require('async'),
-    _ = require('lodash'),
-    request = require('request'),
-    zlib = require('zlib'),
-    tar = require('tar'),
-    fstream = require('fstream'),
-    fs = require('fs'),
-    glob = require('glob'),
-    driverId = 0,
-    outputDriverLocs = [],
-    inputDriverLocs = [],
-    outputDriverLocHash = {},
-    inputDriverLocHash = {},
-    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
-    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
+  _ = require('lodash'),
+  request = require('request'),
+  zlib = require('zlib'),
+  tar = require('tar'),
+  fstream = require('fstream'),
+  fs = require('fs'),
+  glob = require('glob'),
+  driverId = 0,
+  outputDriverLocs = [],
+  inputDriverLocs = [],
+  outputDriverLocHash = {},
+  inputDriverLocHash = {},
+  nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
+  log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
-//Gets the absolute location of the folder contained by a require file selector
+// Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
-    var path, config;
+  var path,
+    config;
 
-    for(var i = 0, len = array.length; i < len; i++){
-        path = rootRequire.resolve(array[i]);
+  for (var i = 0, len = array.length; i < len; i++){
+    path = rootRequire.resolve(array[i]);
 
-        array[i] = {
-            dir: path.replace(/index\.js/, ''),
-            config: (rootRequire(path.replace(/index\.js/, 'config.json')) || {}),
-            id: ++driverId
-        };
-    }
+    array[i] = {
+      dir: path.replace(/index\.js/, ''),
+      config: (rootRequire(path.replace(/index\.js/, 'config.json')) || {}),
+      id: ++driverId
+    };
+  }
 
-    return array;
+  return array;
 }
 
 function updateDriverLocations(){
-    driverId = 0;
+  driverId = 0;
 
-    outputDriverLocs = rationalizePaths(glob.sync('./drivers/outputs/*/index.js', { cwd: rootDir }));
-    inputDriverLocs = rationalizePaths(glob.sync('./drivers/inputs/*/index.js', { cwd: rootDir }));
-    outputDriverLocHash = {};
-    inputDriverLocHash = {};
+  outputDriverLocs = rationalizePaths(glob.sync('./drivers/outputs/*/index.js', { cwd: rootDir }));
+  inputDriverLocs = rationalizePaths(glob.sync('./drivers/inputs/*/index.js', { cwd: rootDir }));
+  outputDriverLocHash = {};
+  inputDriverLocHash = {};
 
-    outputDriverLocs.forEach(function(val){ outputDriverLocHash[val.id] = val; });
-    inputDriverLocs.forEach(function(val){ inputDriverLocHash[val.id] = val; });
+  outputDriverLocs.forEach(function(val){ outputDriverLocHash[val.id] = val; });
+  inputDriverLocs.forEach(function(val){ inputDriverLocHash[val.id] = val; });
 }
 
 updateDriverLocations();
 
 exports.list = function(req, res){
-    res.send({
-        outputDriver: outputDriverLocs,
-        inputDriver: inputDriverLocs
-    });
+  res.send({
+    outputDriver: outputDriverLocs,
+    inputDriver: inputDriverLocs
+  });
 };
 
 exports.update = function (req, res){
-    updateDriverLocations();
+  updateDriverLocations();
 
-    return res.send({
-        message: 'Driver List updated!'
-    });
+  return res.send({
+    message: 'Driver List updated!'
+  });
 };
 
 exports.add = function (req, res){
-    var node = req.node,
-        driverId = (req.body || {}).driverId,
-        driver, url;
+  var node = req.node,
+    driverId = (req.body || {}).driverId,
+    driver,
+    url;
 
-    if(!driverId){
-        return res.status(400).send({
-            message: 'Driver can not be found, ID not provided'
-        });
+  if (!driverId){
+    return res.status(400).send({
+      message: 'Driver can not be found, ID not provided'
+    });
+  }
+
+  if (driver = inputDriverLocHash[driverId]){
+    url = 'https://' + node.ip + '/api/input/drivers'
+  } else if (driver = outputDriverLocHash[driverId]){
+    url = 'https://' + node.ip + '/api/output/drivers'
+  } else {
+    return res.status(400).send({
+      message: 'Driver can not be found, ID not linked to existing driver'
+    });
+  }
+
+  var called = false;
+  function onError(err) {
+    if (!called){
+      res.status(400).send({
+        message: (err || {}).message || 'An unknown error has occurred'
+      });
     }
 
-    if(driver = inputDriverLocHash[driverId]){
-        url = 'https://' + node.ip + '/api/input/drivers'
-    }else if(driver = outputDriverLocHash[driverId]){
-        url = 'https://' + node.ip + '/api/output/drivers'
-    }else{
-        return res.status(400).send({
-            message: 'Driver can not be found, ID not linked to existing driver'
-        });
-    }
+    called = true;
+  }
 
-    var called = false;
-    function onError(err) {
-        if(!called){
-            res.status(400).send({
-                message: (err || {}).message || 'An unknown error has occurred'
-            });
-        }
-
-        called = true;
-    }
-
-    var packer = tar.Pack({ noProprietary: true })
+  // es
+  var packer = tar.Pack({ noProprietary: true })
         .on('error', onError);
 
-    var info = {
-        headers: {
-            'X-Token': nodeComm.serverToken
-        },
-        url: url
-    };
+  var info = {
+    headers: {
+      'X-Token': nodeComm.serverToken
+    },
+    url: url
+  };
 
-    fstream
+  fstream
         .Reader({ path: driver.dir, type: 'Directory' })
         .on('error', onError)
 
@@ -115,90 +119,91 @@ exports.add = function (req, res){
         .on('error', onError)
 
         .pipe(request.post(info, function (err, resq, body){
-            var newDrivers;
+          var newDrivers;
 
-            try {
-                newDrivers = JSON.parse(body);
-            } catch (err){
-                return res.status(400).send({
-                    message: 'Failure to upload driver!'
-                });
-            }
+          try {
+            newDrivers = JSON.parse(body);
+          } catch (err){
+            return res.status(400).send({
+              message: 'Failure to upload driver!'
+            });
+          }
 
-            if(newDrivers.message){
-                return res.status(400).send({
-                    message: newDrivers.message
-                });
-            }
+          if (newDrivers.message){
+            return res.status(400).send({
+              message: newDrivers.message
+            });
+          }
 
-            if(inputDriverLocHash[driverId]){
-                node.inputDrivers = newDrivers;
+          if (inputDriverLocHash[driverId]){
+            node.inputDrivers = newDrivers;
 
-                newDrivers.forEach(function(driver){
-                    nodeComm.inputDriverHash[driver.id] = driver;
-                });
-            }else{
-                node.outputDrivers = newDrivers;
+            newDrivers.forEach(function(driver){
+              nodeComm.inputDriverHash[driver.id] = driver;
+            });
+          } else {
+            node.outputDrivers = newDrivers;
 
-                newDrivers.forEach(function(driver){
-                    nodeComm.outputDriverHash[driver.id] = driver;
-                });
-            }
+            newDrivers.forEach(function(driver){
+              nodeComm.outputDriverHash[driver.id] = driver;
+            });
+          }
 
-            return res.send(node);
+          return res.send(node);
         }))
         .on('error', onError);
 };
 
 exports.removeDriver = function (req, res){
-    let driver = req.driver,
-        node, isInput = false;
+  let driver = req.driver,
+    node,
+    isInput = false;
 
-    nodeComm.nodes.some(function(curNode){
-        if(curNode.inputDrivers.indexOf(driver) !== -1){
-            node = curNode;
-            isInput = true;
-            return true;
-        }
-
-        if(curNode.outputDrivers.indexOf(driver) !== -1){
-            node = curNode;
-            return true;
-        }
-    });
-
-    if(!node){
-        return res.status(400).send('Node to remove driver from was not found');
+  nodeComm.nodes.some(function(curNode){
+    if (curNode.inputDrivers.indexOf(driver) !== -1){
+      node = curNode;
+      isInput = true;
+      return true;
     }
 
-    let info = {
-        headers: {
-            'X-Token': nodeComm.serverToken
-        },
-        url: 'https://' + node.ip + '/api/drivers/' + driver.id
-    };
+    if (curNode.outputDrivers.indexOf(driver) !== -1){
+      node = curNode;
+      return true;
+    }
+  });
 
-    request.del(info, function (err, resq, body) {
-        if (err){ return res.status(400).send('Error attempting to add input'); }
+  if (!node){
+    return res.status(400).send('Node to remove driver from was not found');
+  }
 
-        if(isInput){
-            node.inputDrivers.splice(node.inputDrivers.indexOf(driver), 1);
-            delete nodeComm.inputDriverHash[driver.id];
-        }else{
-            node.outputDrivers.splice(node.outputDrivers.indexOf(driver), 1);
-            delete nodeComm.outputDriverHash[driver.id];
-        }
+  let info = {
+    headers: {
+      'X-Token': nodeComm.serverToken
+    },
+    url: 'https://' + node.ip + '/api/drivers/' + driver.id
+  };
 
-        res.json(driver);
-    });
+  request.del(info, function (err, resq, body) {
+    if (err){ return res.status(400).send('Error attempting to add input'); }
+
+    if (isInput){
+      node.inputDrivers.splice(node.inputDrivers.indexOf(driver), 1);
+      delete nodeComm.inputDriverHash[driver.id];
+    } else {
+      node.outputDrivers.splice(node.outputDrivers.indexOf(driver), 1);
+      delete nodeComm.outputDriverHash[driver.id];
+    }
+
+    res.json(driver);
+  });
 };
 
 exports.driverById = function (req, res, next, id){
-    if(!(req.driver = (nodeComm.outputDriverHash[id] || nodeComm.inputDriverHash[id]))){
-        return res.status(400).send({
-            message: 'Driver id not found'
-        });
-    }
+  if (!(req.driver = (nodeComm.outputDriverHash[id] || nodeComm.inputDriverHash[id]))){
+    return res.status(400).send({
+      message: 'Driver id not found'
+    });
+  }
 
-    return next();
+  return next();
 };

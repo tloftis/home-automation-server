@@ -4,16 +4,16 @@ require('dotenv').load();
 global.rootDir = __dirname;
 
 global.rootRequire = function(str){
-    return require(str);
+  return require(str);
 };
 
 global.rootRequire.resolve = function(str){
-    return require.resolve(str);
+  return require.resolve(str);
 };
 
 require('./config/lib/app').start(function(app, db, config){
-    //TODO: Fix this server redirect code, keeps breaking if 80's in use
-    /*if(config.secure.ssl && (config.port !== 80)){
+    // TODO: Fix this server redirect code, keeps breaking if 80's in use
+    /* if(config.secure.ssl && (config.port !== 80)){
         var redirectApp = require('express')();
 
         redirectApp.get('*',function(req,res){
