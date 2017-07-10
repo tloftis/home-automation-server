@@ -1,5 +1,5 @@
 'use strict';
-/* eslint new-cap: "warn"*/
+/* eslint new-cap: "off"*/
 
 var async = require('async'),
   _ = require('lodash'),

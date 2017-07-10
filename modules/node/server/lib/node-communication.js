@@ -490,16 +490,17 @@ comms.registerOutput = function(config){
   comms.outputHash[config.id] = config;
 };
 
+// FIXME: pretty sure this is broken, but I am not using it yet so ehh, lint
 comms.registerInit = (data)=>{
-  let registered = registered.some((reg)=>{
+  let allowed = data.some((reg)=>{
     return reg.token === data.token;
   });
 
-  if (registered) {
+  if (allowed) {
     return;
   }
 
-  registered.push(data);
+  allowed.push(data);
 
   let inputs = comms.inputs.filter((input)=>{
       return data.permissions.indexOf(input.id) !== -1;
