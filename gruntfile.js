@@ -99,7 +99,8 @@ module.exports = function (grunt) {
     uglify: {
       production: {
         options: {
-          mangle: false
+          mangle: false,
+          force: true
         },
         files: {
           'public/dist/application.min.js': [ defaultAssets.client.lib.js, 'public/dist/application.js' ]
