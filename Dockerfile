@@ -1,32 +1,33 @@
-FROM node:0.12
+FROM node:6-slim
 
-# Install gem sass for  grunt-contrib-sass
-RUN apt-get update -qq && apt-get install -y build-essential
-RUN apt-get install -y ruby
-RUN gem install sass
+MAINTAINER MEAN.JS
 
-WORKDIR /home/mean
-
-# Install Mean.JS Prerequisites
-RUN npm install -g grunt-cli
-RUN npm install -g bower
-
-# Install Mean.JS packages
-ADD package.json /home/mean/package.json
-RUN npm install
-
-# Manually trigger bower. Why doesnt this work via npm install?
-ADD .bowerrc /home/mean/.bowerrc
-ADD bower.json /home/mean/bower.json
-RUN bower install --config.interactive=false --allow-root
-
-# Make everything available for start
-ADD . /home/mean
+# 80 = HTTP, 443 = HTTPS, 3000 = MEAN.JS server, 35729 = livereload, 8080 = node-inspector
+EXPOSE 80 443
 
 # Set development environment as default
-ENV NODE_ENV development
+ENV NODE_ENV production
+RUN mkdir -p /opt/mean.js/public/lib
+WORKDIR /opt/mean.js
 
-# Port 3000 for server
-# Port 35729 for livereload
-EXPOSE 3000 35729
-CMD ["grunt"]
+# Install Utilities
+RUN apt-get update -q  \
+ && apt-get install -yqq \
+     git \
+     gcc \
+     make \
+     build-essential \
+     libkrb5-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY . /opt/mean.js
+
+# Install MEAN.JS Prerequisites
+RUN npm install --quiet -g grunt grunt-cli eslint bower
+  && npm install --quiet --production
+  && npm cache clean
+  && bower install --quiet --allow-root --config.interactive=false
+  && grunt build
+
+CMD ["node server.js"]

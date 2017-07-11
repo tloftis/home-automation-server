@@ -8,13 +8,12 @@ let _ = require('lodash'),
   os = require('os'),
   crypto = require('crypto'),
   mongoose = require('mongoose'),
-  NodeServerToken = mongoose.model('NodeServerToken'),
-  NodeToken = mongoose.model('NodeToken'),
+  NodeConfig = mongoose.model('NodeConfig'),
   log = rootRequire('./modules/core/server/controllers/log.server.controller.js'),
   nodePort = (process.env.RELAY_PORT || 2000);
 
 let comms = {
-  tokens: [],
+  nodeConfigs: {},
   registered: [],
   outputs: [],
   inputs: [],
@@ -23,12 +22,15 @@ let comms = {
   inputDriverHash: {},
   outputDriverHash: {},
   outputHash: {},
-  inputHash: {},
-  serverToken: ''
+  inputHash: {}
 };
 
 function objForEach(obj, funct){
   Object.keys(obj).forEach((key)=>funct(obj[key]));
+}
+
+function genToken() {
+  return crypto.randomBytes(40).toString('hex');
 }
 
 comms.getAllIps = (intro)=>{
@@ -92,9 +94,6 @@ function searchForNodes (addresses, callback) {
 
   asyncParallel(addresses, function(address, next){
     let info = {
-      headers: {
-        'X-Token': comms.serverToken
-      },
       url: 'https://' + address + '/api/server',
       timeout: 2000
     };
@@ -139,25 +138,29 @@ comms.registerNode = function(node, callback){
 
   console.log(node);
 
-  if (node && node.id && node.token && node.ip){
+  if (node && node.id && node.ip){
     let newNode = {
       id: node.id,
       ip: node.ip.split(':')[0] + ':' + (node.ip.split(':')[1] || nodePort),
       name: node.name || '',
       description: node.description || '',
       location: node.location || '',
-      token: node.token,
+      enableWebInterface: node.enableWebInterface || false,
       inputDrivers: [],
       outputDrivers: [],
       active: true
     };
 
-    comms.nodeHash[newNode.id] = newNode;
-    comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+    comms.updateNode(newNode, (err, finalNode)=>{
+      if(err){
+        log.error('Error attempting add node config', err);
+        return callback(err)
+      }
 
-    comms.updateNode(newNode, ()=>{
-      log.success('Registered new node', newNode);
-      callback(undefined, newNode);
+      log.success('Registered new node', finalNode);
+      comms.nodeHash[node.config.id] = node.config;
+      comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+      return callback(undefined, finalNode)
     });
   } else {
     log.error('Error attempting to validate new Node', node);
@@ -169,9 +172,6 @@ comms.updateNodeInputs = (node, callback)=>{
   if (!callback) callback = function(){};
 
   let info = {
-    headers: {
-      'X-Token': comms.serverToken
-    },
     url: 'https://' + node.ip + '/api/input',
     rejectUnhauthorized: false
   };
@@ -239,9 +239,6 @@ comms.updateNodeOutputs = (node, callback)=>{
   if (!callback) callback = function(){};
 
   let info = {
-    headers: {
-      'X-Token': comms.serverToken
-    },
     url: 'https://' + node.ip + '/api/output',
     rejectUnhauthorized: false
   };
@@ -307,9 +304,6 @@ comms.updateNodeDrivers = (node, callback)=>{
 
   async.parallel([function(nextMid){
     let info = {
-      headers: {
-        'X-Token': comms.serverToken
-      },
       url: 'https://' + node.ip + '/api/output/drivers',
       rejectUnhauthorized: false
     };
@@ -359,9 +353,6 @@ comms.updateNodeDrivers = (node, callback)=>{
     });
   }, function(nextMid){
     let info = {
-      headers: {
-        'X-Token': comms.serverToken
-      },
       url: 'https://' + node.ip + '/api/input/drivers',
       rejectUnhauthorized: false
     };
@@ -425,9 +416,6 @@ comms.updateNodeServer = (node, callback)=>{
   if (!callback) callback = function(){};
 
   let info = {
-    headers: {
-      'X-Token': comms.serverToken
-    },
     url: 'https://' + node.ip + '/api/register',
     rejectUnhauthorized: false,
     form: {
@@ -462,9 +450,65 @@ comms.updateNode = (node, callback)=>{
     (next)=>comms.updateNodeOutputs(node, next),
     (next)=>comms.updateNodeDrivers(node, next)
   ], ()=>{
-    if (callback){ callback(); }
+    NodeConfig.findOne({ 'config.id' : finalNode.id}, (err, node)=>{
+      if(err) {
+        log.error('Error attempting to find Node Config in database', finalNode);
+        return callback(new Error('Error registering node!'));
+      }
+
+      if(!node) {
+        node = new NodeConfig({ config: finalNode, enabled: false, token: genToken() });
+      } else {
+        node.config = finalNode;
+      }
+
+      return node.save((err)=>{
+          if (err) {
+            log.error('Failed to add Node Config', err);
+            return callback(err);
+          }
+
+          log.info('New Node Config Added!', node);
+
+          if (callback){ 
+            callback(undefined, node); 
+          }
+        });
+    });
   })
 };
+
+function removePrepNodeConfigRecurse(node, current){
+  if(node === current){
+    return undefined;
+  }
+
+  if(typeof current === 'object') {
+    var newConfig = {};
+
+    Object.keys(current).forEach((key)=>{
+      newConfig[key] = removePrepNodeConfigRecurse(node, current[key])
+
+      if(newConfig[key] === undefined) {
+        delete ewConfig[key];
+      }
+    });
+
+    return newConfig;
+  }
+
+  return current;
+}
+
+function removePrepNodeConfig(node){
+    let newConfig = {};
+
+    Object.keys(node).forEach((key)=>{
+      newConfig[key] = removePrepNodeConfigRecurse(node, node[key])
+    });
+
+    return newConfig;
+}
 
 comms.updateAll = (callback)=>{
   comms.outputs = [];
@@ -535,19 +579,21 @@ comms.registerInit = (data)=>{
   }
 };
 
-comms.verifyToken = function(req, res, next){
-  let token = req.headers['x-token'];
-  let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
+comms.verifyToken = (req, res, next)=>{
+  let token = req.headers['x-token'],
+    node = comms.nodeConfigs[token],
+    ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
 
-  if (comms.tokens.some((token)=>(token.token !== token && token.enabled))){
-    log.error('Node Token Validation Attempt Failed: ' + token, ip);
-
-    return res.status(400).send({
-      message: 'Token Invalid'
-    });
+  if (node && node.enabled) {
+    req.nodeConfig = node;
+    return next();
   }
 
-  next();
+  log.error('Node Token Validation Attempt Failed: ' + token, ip);
+
+  return res.status(400).send({
+    message: 'Token Invalid'
+  });
 };
 
 comms.deRegister = (token)=>{
@@ -562,27 +608,16 @@ function asyncParallel (array, funct, callback) {
   }), callback);
 }
 
-NodeServerToken.find({}).sort({ created: -1 }).lean().exec(function(err, tokens){
-  if (!tokens.length){
-    let token = new NodeServerToken({ token: crypto.randomBytes(40).toString('hex') });
-
-    comms.serverToken = token;
-
-    return token.save(function(err, newLog){
-      log.error('Error attempting to save Server Token: ' + token, err);
-      throw err;
-    });
-  } else {
-    comms.serverToken = tokens[0].token;
+NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
+  if(err) {
+    log.error('populate nodeConfigs', err);
+    return;
   }
 
-  console.log('Server Token:', comms.serverToken);
-  comms.updateAll(()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
-    // comms.searchForNodes('192.168.1.131:2000', ()=>{ console.log('Node Broadcast Complete! If nodes configured to this server exists, they will begin to propagate')});
-});
-
-NodeToken.find({}).lean().exec((err, tokens)=>{
-  comms.tokens = tokens;
+  comms.nodeConfigs = (nodeConfigs || []).reduce((cur, con)=>{
+    cur[con.token] = con;
+    return cur;
+  }, {});
 });
 
 module.exports = comms;

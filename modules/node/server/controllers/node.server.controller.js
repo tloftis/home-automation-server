@@ -77,10 +77,6 @@ exports.get = function (req, res){
   res.json(stripObjProp(req.node, 'token'));
 };
 
-exports.getServerToken = function (req, res){
-  res.json({ token: nodeComm.serverToken });
-};
-
 exports.update = function (req, res){
   let node = req.body.node,
     selNode = req.node,
@@ -89,11 +85,9 @@ exports.update = function (req, res){
   if (node.name) newNode.name = node.name;
   if (node.location) newNode.location = node.location;
   if (node.description) newNode.description = node.description;
+  if (typeof node.enableWebInterface === 'boolean') newNode.enableWebInterface = node.enableWebInterface;
 
   let info = {
-    headers: {
-      'X-Token': nodeComm.serverToken
-    },
     url: 'https://' + selNode.ip + '/api/server',
     form: { node: newNode }
   };

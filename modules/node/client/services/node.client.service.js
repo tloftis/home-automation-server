@@ -66,10 +66,6 @@ angular.module('node').service('nodeService', ['Utility',
       return Utility.http.delete('node/token/' + id);
     };
 
-    service.getServerToken = function (token){
-      return Utility.http.get('node/server-token');
-    };
-
     service.getDrivers = function (){
       return Utility.http.get('driver');
     };

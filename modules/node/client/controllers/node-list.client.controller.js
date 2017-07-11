@@ -14,12 +14,6 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
       });
     };
 
-    if (Authentication.user.roles.indexOf('admin') !== -1){
-      nodeService.getServerToken().then(function(token){
-        $scope.token = token.token;
-      });
-    }
-
     $scope.updateNodes = function(){
       nodeService.updateNodes().then(function(){
         return nodeService.getNodes();

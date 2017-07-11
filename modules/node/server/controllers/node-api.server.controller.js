@@ -2,7 +2,6 @@
 
 let async = require('async'),
   _ = require('lodash'),
-  request = require('request'),
   mongoose = require('mongoose'),
   NodeAPI = mongoose.model('NodeAPI'),
   crypto = require('crypto'),
