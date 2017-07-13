@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('core.admin').run(['Menus',
-  function (Menus) {
+    function (Menus) {
         /*
         Menus.addMenuItem('topbar', {
             title: 'Admin',
@@ -10,5 +10,5 @@ angular.module('core.admin').run(['Menus',
             roles: ['admin']
         });
         */
-  }
+    }
 ]);

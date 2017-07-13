@@ -1,191 +1,191 @@
 'use strict';
 
 angular.module('node').service('nodeService', ['Utility',
-  function (Utility) {
-    var service = {};
+    function (Utility) {
+        var service = {};
 
-    service.updateNodes = function (){
-      return Utility.http.put('node');
-    };
+        service.updateNodes = function (){
+            return Utility.http.put('node');
+        };
 
-    service.getApiTokens = function (){
-      return Utility.http.get('node/api');
-    };
+        service.getApiTokens = function (){
+            return Utility.http.get('node/api');
+        };
 
-    service.getApiToken = function (token){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.getApiToken = function (token){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.get('node/api/' + id);
-    };
+            return Utility.http.get('node/api/' + id);
+        };
 
-    service.updateApiToken = function (token, config){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.updateApiToken = function (token, config){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.put('node/api/' + id, { token: config });
-    };
+            return Utility.http.put('node/api/' + id, { token: config });
+        };
 
-    service.createApiToken = function (config){
-      return Utility.http.post('node/api', { token: config });
-    };
+        service.createApiToken = function (config){
+            return Utility.http.post('node/api', { token: config });
+        };
 
-    service.removeApiToken = function (token){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.removeApiToken = function (token){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.delete('node/api/' + id);
-    };
+            return Utility.http.delete('node/api/' + id);
+        };
 
-    service.getTokens = function (){
-      return Utility.http.get('node/token');
-    };
+        service.getTokens = function (){
+            return Utility.http.get('node/token');
+        };
 
-    service.getToken = function (token){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.getToken = function (token){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.get('node/token/' + id);
-    };
+            return Utility.http.get('node/token/' + id);
+        };
 
-    service.updateToken = function (token, config){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.updateToken = function (token, config){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.put('node/token/' + id, { token: config });
-    };
+            return Utility.http.put('node/token/' + id, { token: config });
+        };
 
-    service.createToken = function (config){
-      return Utility.http.post('node/token', { token: config });
-    };
+        service.createToken = function (config){
+            return Utility.http.post('node/token', { token: config });
+        };
 
-    service.removeToken = function (token){
-      var id = token;
-      if (token && token._id) id = token._id;
+        service.removeToken = function (token){
+            var id = token;
+            if (token && token._id) id = token._id;
 
-      return Utility.http.delete('node/token/' + id);
-    };
+            return Utility.http.delete('node/token/' + id);
+        };
 
-    service.getDrivers = function (){
-      return Utility.http.get('driver');
-    };
+        service.getDrivers = function (){
+            return Utility.http.get('driver');
+        };
 
-    service.addDriver = function (node, driver){
-      var id = node,
-        driveId = driver;
-      if (node && node.id) id = node.id;
-      if (driver && driver.id) driveId = driver.id;
+        service.addDriver = function (node, driver){
+            var id = node,
+                driveId = driver;
+            if (node && node.id) id = node.id;
+            if (driver && driver.id) driveId = driver.id;
 
-      return Utility.http.post('node/' + id + '/driver', { driverId: driveId });
-    };
+            return Utility.http.post('node/' + id + '/driver', { driverId: driveId });
+        };
 
-    service.removeDriver = function (driver){
-      var driveId = driver;
-      if (driver && driver.id) driveId = driver.id;
+        service.removeDriver = function (driver){
+            var driveId = driver;
+            if (driver && driver.id) driveId = driver.id;
 
-      return Utility.http.delete('driver/' + driveId, { driverId: driveId });
-    };
+            return Utility.http.delete('driver/' + driveId, { driverId: driveId });
+        };
 
-    service.uploadDriver = function (){
-      return Utility.http.get('driver');
-    };
+        service.uploadDriver = function (){
+            return Utility.http.get('driver');
+        };
 
-    service.getOutputs = function (){
-      return Utility.http.get('output');
-    };
+        service.getOutputs = function (){
+            return Utility.http.get('output');
+        };
 
-    service.getInputs = function (){
-      return Utility.http.get('input');
-    };
+        service.getInputs = function (){
+            return Utility.http.get('input');
+        };
 
-    service.getPipes = function (){
-      return Utility.http.get('pipe');
-    };
+        service.getPipes = function (){
+            return Utility.http.get('pipe');
+        };
 
-    service.getNodes = function (){
-      return Utility.http.get('node');
-    };
+        service.getNodes = function (){
+            return Utility.http.get('node');
+        };
 
-    service.getNode = function (node){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.getNode = function (node){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.get('node/' + id);
-    };
+            return Utility.http.get('node/' + id);
+        };
 
-    service.updateNode = function (node, config){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.updateNode = function (node, config){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.put('node/' + id, { node: config });
-    };
+            return Utility.http.put('node/' + id, { node: config });
+        };
 
-    service.getOutput = function (node){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.getOutput = function (node){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.get('output/' + id);
-    };
+            return Utility.http.get('output/' + id);
+        };
 
-    service.getInput = function (node){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.getInput = function (node){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.get('input/' + id);
-    };
+            return Utility.http.get('input/' + id);
+        };
 
-    service.removeOutput = function (node){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.removeOutput = function (node){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.delete('output/' + id, {});
-    };
+            return Utility.http.delete('output/' + id, {});
+        };
 
-    service.removeInput = function (node){
-      var id = node;
-      if (node && node.id) id = node.id;
+        service.removeInput = function (node){
+            var id = node;
+            if (node && node.id) id = node.id;
 
-      return Utility.http.delete('input/' + id, {});
-    };
+            return Utility.http.delete('input/' + id, {});
+        };
 
-    service.outputSet = function(node, val){
-      var id = node,
-        value = {};
+        service.outputSet = function(node, val){
+            var id = node,
+                value = {};
 
-      if (node && node.id){ id = node.id; }
+            if (node && node.id){ id = node.id; }
 
-      if (!_.isUndefined(val)){
-        value.value = val;
-        value.type = typeof val;
-      }
+            if (!_.isUndefined(val)){
+                value.value = val;
+                value.type = typeof val;
+            }
 
-      return Utility.http.post('output/' + id, value);
-    };
+            return Utility.http.post('output/' + id, value);
+        };
 
-    service.outputUpdate = function(node, newNode){
-      var id = node;
-      if (node && node.id) id = node.id;
-      return Utility.http.put('output/' + id, { node: newNode });
-    };
+        service.outputUpdate = function(node, newNode){
+            var id = node;
+            if (node && node.id) id = node.id;
+            return Utility.http.put('output/' + id, { node: newNode });
+        };
 
-    service.inputUpdate = function(node, newNode){
-      var id = node;
-      if (node && node.id) id = node.id;
-      return Utility.http.put('input/' + id, { node: newNode });
-    };
+        service.inputUpdate = function(node, newNode){
+            var id = node;
+            if (node && node.id) id = node.id;
+            return Utility.http.put('input/' + id, { node: newNode });
+        };
 
-    service.outputCreate = function(node, newNode){
-      var id = node;
-      if (node && node.id) id = node.id;
-      return Utility.http.post('node/' + id + '/output', { output: newNode });
-    };
+        service.outputCreate = function(node, newNode){
+            var id = node;
+            if (node && node.id) id = node.id;
+            return Utility.http.post('node/' + id + '/output', { output: newNode });
+        };
 
-    service.inputCreate = function(node, newNode){
-      var id = node;
-      if (node && node.id) id = node.id;
-      return Utility.http.post('node/' + id + '/input', { input: newNode });
-    };
+        service.inputCreate = function(node, newNode){
+            var id = node;
+            if (node && node.id) id = node.id;
+            return Utility.http.post('node/' + id + '/input', { input: newNode });
+        };
 
-    return service;
-  }
+        return service;
+    }
 ]);

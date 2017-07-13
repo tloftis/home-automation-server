@@ -4,100 +4,100 @@
  * Module dependencies.
  */
 var mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+    Schema = mongoose.Schema;
 
 // NodeAPI Schema
 var NodeConfigSchema = new Schema({
-  config: { },
-  token: {
-    type: String,
-    unique: true,
-    trim: false,
-    required: true
-  },
-  enabled: {
-    type: Boolean,
-    required: false,
-    default: false
-  },
-  created: {
-    type: Date,
-    default: Date.now
-  }
+    config: { },
+    token: {
+        type: String,
+        unique: true,
+        trim: false,
+        required: true
+    },
+    enabled: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    created: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 function removePrepNodeConfigRecurse(node, current) {
-  if(node === current){
-    return undefined;
-  }
+    if (node === current){
+        return undefined;
+    }
 
-  if(current instanceof Array) {
-    let newConfig = [];
+    if (current instanceof Array) {
+        let newConfig = [];
 
-    Object.keys(current).forEach((key)=>{
-      key = +key; //It comes as a string, cast it back
-      newConfig[key] = removePrepNodeConfigRecurse(node, current[key])
+        Object.keys(current).forEach((key)=>{
+            key = +key; // It comes as a string, cast it back
+            newConfig[key] = removePrepNodeConfigRecurse(node, current[key])
 
-      if(newConfig[key] === undefined) {
-        delete newConfig[key];
-      }
-    });
+            if (newConfig[key] === undefined) {
+                delete newConfig[key];
+            }
+        });
 
-    return newConfig;
-  } else if (typeof current === 'object') {
-    let newConfig = {};
+        return newConfig;
+    } else if (typeof current === 'object') {
+        let newConfig = {};
 
-    Object.keys(current).forEach((key)=>{
-      newConfig[key] = removePrepNodeConfigRecurse(node, current[key])
+        Object.keys(current).forEach((key)=>{
+            newConfig[key] = removePrepNodeConfigRecurse(node, current[key])
 
-      if(newConfig[key] === undefined) {
-        delete newConfig[key];
-      }
-    });
+            if (newConfig[key] === undefined) {
+                delete newConfig[key];
+            }
+        });
 
-    return newConfig;
-  }
+        return newConfig;
+    }
 
-  return current;
+    return current;
 }
 
 function removePrepNodeConfig(node){
     let newConfig = {};
 
     Object.keys(node).forEach((key)=>{
-      newConfig[key] = removePrepNodeConfigRecurse(node, node[key]);
+        newConfig[key] = removePrepNodeConfigRecurse(node, node[key]);
 
-      if(newConfig[key] === undefined) {
-        delete newConfig[key];
-      }
+        if (newConfig[key] === undefined) {
+            delete newConfig[key];
+        }
     });
 
     return newConfig;
 }
 
-//Remove circular refs
+// Remove circular refs
 NodeConfigSchema.pre('save', function (next) {
-  var now = new Date();
+    var now = new Date();
 
-  this.config = removePrepNodeConfig(this.config);
+    this.config = removePrepNodeConfig(this.config);
 
-  if (!this.created) {
-    this.created = now;
-  }
+    if (!this.created) {
+        this.created = now;
+    }
 
-  next();
+    next();
 });
 
 // I use these hooks so that I don't have to do a database call in order verify a token
 // The input events are far from real time, but I would like them to be a fast as piratically able without being too hacky
 NodeConfigSchema.post('save', function () {
-  let nodeComm = rootRequire('./modules/node/server/lib/node-communication.js');
-  nodeComm.nodeConfigs[this.token] = this;
+    let nodeComm = rootRequire('./modules/node/server/lib/node-communication.js');
+    nodeComm.nodeConfigs[this.token] = this;
 });
 
 NodeConfigSchema.post('remove', function () {
-  let nodeComm = rootRequire('./modules/node/server/lib/node-communication.js');
-  delete nodeComm.nodeConfigs[this.token];
+    let nodeComm = rootRequire('./modules/node/server/lib/node-communication.js');
+    delete nodeComm.nodeConfigs[this.token];
 });
 
 mongoose.model('NodeConfig', NodeConfigSchema);

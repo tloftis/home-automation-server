@@ -1,243 +1,243 @@
 'use strict';
 
 var async = require('async'),
-  _ = require('lodash'),
-  request = require('request'),
-  mongoose = require('mongoose'),
-  nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
-  log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
+    _ = require('lodash'),
+    request = require('request'),
+    mongoose = require('mongoose'),
+    nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
+    log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
 function stripObjProp(obj, props){
-  if (typeof props === 'string'){
-    props = [props];
-  }
-
-  let newObj = {};
-
-  Object.keys(obj).forEach(k=>{
-    if (props.indexOf(k) === -1){
-      newObj[k] = obj[k];
+    if (typeof props === 'string'){
+        props = [props];
     }
-  });
 
-  return newObj;
+    let newObj = {};
+
+    Object.keys(obj).forEach(k=>{
+        if (props.indexOf(k) === -1){
+            newObj[k] = obj[k];
+        }
+    });
+
+    return newObj;
 }
 
 exports.list = function(req, res){
-  res.json(nodeComm.inputs.map(function(input){
-    let inputClone = stripObjProp(input, []);
-    inputClone.node = stripObjProp(inputClone.node, 'token');
-    return _.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone); // Gives the driver as well as the input info
-  }));
+    res.json(nodeComm.inputs.map(function(input){
+        let inputClone = stripObjProp(input, []);
+        inputClone.node = stripObjProp(inputClone.node, 'token');
+        return _.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone); // Gives the driver as well as the input info
+    }));
 };
 
 exports.get = function (req, res){
-  let inputClone = stripObjProp(req.input, []);
-  inputClone.node = stripObjProp(inputClone.node, 'token');
-  res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); // Gives the driver as well as the input info
+    let inputClone = stripObjProp(req.input, []);
+    inputClone.node = stripObjProp(inputClone.node, 'token');
+    res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); // Gives the driver as well as the input info
 };
 
 exports.update = function (req, res){
-  var input = req.input,
-    node = req.body.node,
-    newNode = {};
+    var input = req.input,
+        node = req.body.node,
+        newNode = {};
 
-  if (!_.isUndefined(node.name)) newNode.name = node.name;
-  if (!_.isUndefined(node.location)) newNode.location = node.location;
-  if (!_.isUndefined(node.description)) newNode.description = node.description;
-  if (!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
+    if (!_.isUndefined(node.name)) newNode.name = node.name;
+    if (!_.isUndefined(node.location)) newNode.location = node.location;
+    if (!_.isUndefined(node.description)) newNode.description = node.description;
+    if (!_.isUndefined(node.driverId)) newNode.driverId = node.driverId;
 
     // Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
-  if (!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
-    newNode.config = {};
+    if (!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
+        newNode.config = {};
 
-    for (var key in nodeComm.inputDriverHash[node.driverId].config){
-      if (!_.isUndefined(node.config[key])){
-        newNode.config[key] = node.config[key];
-      }
-    }
-  }
-
-  var info = {
-    url: 'https://' + input.node.ip + '/api/input/' + input.id,
-    form: { input: newNode }
-  };
-
-  request.put(info, function (err, reqs, body){
-    if (err) {
-      input.node.active = false;
-      console.log(input.node);
-      log.error('Failed to update node: ' + input.node.ip + ', input:' + input.id, err);
-      return res.status(400).send('Error attempting to update input');
+        for (var key in nodeComm.inputDriverHash[node.driverId].config){
+            if (!_.isUndefined(node.config[key])){
+                newNode.config[key] = node.config[key];
+            }
+        }
     }
 
-    var newInput;
+    var info = {
+        url: 'https://' + input.node.ip + '/api/input/' + input.id,
+        form: { input: newNode }
+    };
 
-    try {
-      newInput = JSON.parse(body);
-    } catch (err){
-      return res.status(400).send(body || 'Unable to get updated input config');
-    }
+    request.put(info, function (err, reqs, body){
+        if (err) {
+            input.node.active = false;
+            console.log(input.node);
+            log.error('Failed to update node: ' + input.node.ip + ', input:' + input.id, err);
+            return res.status(400).send('Error attempting to update input');
+        }
 
-    if (!_.isUndefined(newInput.name)) input.name = newInput.name;
-    if (!_.isUndefined(newInput.location)) input.location = newInput.location;
-    if (!_.isUndefined(newInput.description)) input.description = newInput.description;
-    if (!_.isUndefined(newInput.config)) input.config = newInput.config;
-    if (!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
+        var newInput;
 
-    input.node.active = true;
-    log.info('Updated input config on node: ' + input.node.ip, input);
+        try {
+            newInput = JSON.parse(body);
+        } catch (err){
+            return res.status(400).send(body || 'Unable to get updated input config');
+        }
 
-    let inputClone = stripObjProp(req.input, []);
-    inputClone.node = stripObjProp(inputClone.node, 'token');
+        if (!_.isUndefined(newInput.name)) input.name = newInput.name;
+        if (!_.isUndefined(newInput.location)) input.location = newInput.location;
+        if (!_.isUndefined(newInput.description)) input.description = newInput.description;
+        if (!_.isUndefined(newInput.config)) input.config = newInput.config;
+        if (!_.isUndefined(newInput.driverId)) input.driverId = newInput.driverId;
 
-    res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); // Gives the driver as well as the input info
-  });
+        input.node.active = true;
+        log.info('Updated input config on node: ' + input.node.ip, input);
+
+        let inputClone = stripObjProp(req.input, []);
+        inputClone.node = stripObjProp(inputClone.node, 'token');
+
+        res.json(_.extend({ driver: nodeComm.inputDriverHash[inputClone.driverId] }, inputClone)); // Gives the driver as well as the input info
+    });
 };
 
 exports.remove = function (req, res){
-  var input = req.input,
-    index = -1;
+    var input = req.input,
+        index = -1;
 
-  var info = {
-    url: 'https://' + input.node.ip + '/api/input/' + input.id,
-    form: {}
-  };
+    var info = {
+        url: 'https://' + input.node.ip + '/api/input/' + input.id,
+        form: {}
+    };
 
-  request.del(info, function (err){
-    if (err){
-      input.node.active = false;
-      log.error('Failed to delete on node: ' + input.node.ip + ', input:' + input.id, err);
-      return res.status(400).send('Error attempting to remove input');
-    }
+    request.del(info, function (err){
+        if (err){
+            input.node.active = false;
+            log.error('Failed to delete on node: ' + input.node.ip + ', input:' + input.id, err);
+            return res.status(400).send('Error attempting to remove input');
+        }
 
-    index = nodeComm.inputs.indexOf(input);
+        index = nodeComm.inputs.indexOf(input);
 
-    if (index !== -1){
-      delete nodeComm.inputHash[input.id];
-      nodeComm.inputs.splice(index, 1);
-      input.node.active = true;
-      return res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
-    }
+        if (index !== -1){
+            delete nodeComm.inputHash[input.id];
+            nodeComm.inputs.splice(index, 1);
+            input.node.active = true;
+            return res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
+        }
 
-    log.info('Deleted input on node: ' + input.node.ip, input);
-    return res.status(400).send('Error attempting to remove input from server memory');
-  });
+        log.info('Deleted input on node: ' + input.node.ip, input);
+        return res.status(400).send('Error attempting to remove input from server memory');
+    });
 };
 
 exports.add = function (req, res){
-  var newInput = {},
-    node = req.node,
-    newNode = req.body.input;
+    var newInput = {},
+        node = req.node,
+        newNode = req.body.input;
 
-  if (!_.isUndefined(newNode.name)) newInput.name = newNode.name;
-  if (!_.isUndefined(newNode.location)) newInput.location = newNode.location;
-  if (!_.isUndefined(newNode.description)) newInput.description = newNode.description;
+    if (!_.isUndefined(newNode.name)) newInput.name = newNode.name;
+    if (!_.isUndefined(newNode.location)) newInput.location = newNode.location;
+    if (!_.isUndefined(newNode.description)) newInput.description = newNode.description;
 
     // Strip any config out that isn't suppose to be there, shouldn't be needed but nice to do.
-  if (!_.isUndefined(newNode.driverId)){
-    newInput.driverId = newNode.driverId;
-  }
-
-  if (!_.isUndefined(newNode.config)){
-    newInput.config = {};
-
-    for (var key in nodeComm.inputDriverHash[newNode.driverId].config){
-      if (!_.isUndefined(newNode.config[key])){
-        newInput.config[key] = newNode.config[key];
-      }
+    if (!_.isUndefined(newNode.driverId)){
+        newInput.driverId = newNode.driverId;
     }
-  }
 
-  if (newInput.driverId){
-    var info = {
-      url: 'https://' + node.ip + '/api/input',
-      form: { input: newInput }
-    };
+    if (!_.isUndefined(newNode.config)){
+        newInput.config = {};
 
-    request.post(info, function (err, resq, body) {
-      if (err){
-        node.active = false;
-        log.error('Failed to add input on node: ' + node.ip, err);
-        return res.status(400).send('Error attempting to add input');
-      }
+        for (var key in nodeComm.inputDriverHash[newNode.driverId].config){
+            if (!_.isUndefined(newNode.config[key])){
+                newInput.config[key] = newNode.config[key];
+            }
+        }
+    }
 
-      var newInput,
-        input = {};
+    if (newInput.driverId){
+        var info = {
+            url: 'https://' + node.ip + '/api/input',
+            form: { input: newInput }
+        };
 
-      try {
-        newInput = JSON.parse(body);
-      } catch (err){
-        return res.status(400).send('Unable to get updated input config');
-      }
+        request.post(info, function (err, resq, body) {
+            if (err){
+                node.active = false;
+                log.error('Failed to add input on node: ' + node.ip, err);
+                return res.status(400).send('Error attempting to add input');
+            }
 
-      input.name = newInput.name;
-      input.location = newInput.location;
-      input.description = newInput.description;
-      input.id = newInput.id;
-      input.config = newInput.config;
-      input.driverId = newInput.driverId;
-      input.node = node;
-      input.node.active = true;
-      nodeComm.registerInput(input);
-      log.info('Created new input on node: ' + input.node.ip, input);
-      res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
-    });
-  } else {
-    return res.status(400).send('No input driver specified, cannot create configuration');
-  }
+            var newInput,
+                input = {};
+
+            try {
+                newInput = JSON.parse(body);
+            } catch (err){
+                return res.status(400).send('Unable to get updated input config');
+            }
+
+            input.name = newInput.name;
+            input.location = newInput.location;
+            input.description = newInput.description;
+            input.id = newInput.id;
+            input.config = newInput.config;
+            input.driverId = newInput.driverId;
+            input.node = node;
+            input.node.active = true;
+            nodeComm.registerInput(input);
+            log.info('Created new input on node: ' + input.node.ip, input);
+            res.json(_.extend({ driver: nodeComm.inputDriverHash[input.driverId] }, input));
+        });
+    } else {
+        return res.status(400).send('No input driver specified, cannot create configuration');
+    }
 };
 
 exports.change = function(req, res){
-  var input = req.input,
-    value = req.body.value,
-    type = req.body.type;
+    var input = req.input,
+        value = req.body.value,
+        type = req.body.type;
 
-  input.node.active = true;
+    input.node.active = true;
 
-  if (!type){
-    res.status(400).jsonp({
-      message: 'Update Failed!'
-    });
-  }
-
-  if (type === 'boolean'){
-    if (typeof value === 'string') {
-      if ((value || '').toLowerCase() === 'true') {
-        value = true;
-      } else if ((value || '').toLowerCase() === 'false') {
-        value = false;
-      }
+    if (!type){
+        res.status(400).jsonp({
+            message: 'Update Failed!'
+        });
     }
 
-    value = !!value;
-  }
+    if (type === 'boolean'){
+        if (typeof value === 'string') {
+            if ((value || '').toLowerCase() === 'true') {
+                value = true;
+            } else if ((value || '').toLowerCase() === 'false') {
+                value = false;
+            }
+        }
 
-  if (type === 'number'){
-    value = +value;
-  }
+        value = !!value;
+    }
 
-  if (type === 'string'){
-    value += '';
-  }
+    if (type === 'number'){
+        value = +value;
+    }
 
-  if (!input){
-    return res.status(400).send('Unknown Input posted to server');
-  }
+    if (type === 'string'){
+        value += '';
+    }
 
-  log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, input);
+    if (!input){
+        return res.status(400).send('Unknown Input posted to server');
+    }
 
-  res.status(200).jsonp({
-    message: 'Update Succeeded!'
-  });
+    log.info('Input Change ID: "' + input.id + '" Value: ' + value + ', Type: ' + type, input);
+
+    res.status(200).jsonp({
+        message: 'Update Succeeded!'
+    });
 };
 
 exports.inputById = function (req, res, next, id){
-  if (!(req.input = nodeComm.inputHash[id])){
-    return res.status(400).send({
-      message: 'Input id not found'
-    });
-  }
+    if (!(req.input = nodeComm.inputHash[id])){
+        return res.status(400).send({
+            message: 'Input id not found'
+        });
+    }
 
-  return next();
+    return next();
 };
