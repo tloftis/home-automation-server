@@ -3,7 +3,7 @@
 // Only can find address in a subnet mask of 255.255.255.0
 let _ = require('lodash'),
     async = require('async'),
-    request = require('request'),
+    request = rootRequire('./config/config.js').request,
     got = require('got'),
     os = require('os'),
     crypto = require('crypto'),
@@ -93,12 +93,18 @@ function searchForNodes (addresses, callback) {
     }
 
     asyncParallel(addresses, function(address, next){
+        address = address.split(':')[0] + ':' + (address.split(':')[1] || nodePort);
+
         let info = {
             url: 'https://' + address + '/api/server',
             timeout: 2000
         };
 
         request.get(info, function (err, res, body){
+            console.log(address);
+            console.log(err);
+            console.log(body);
+
             if (!err && body){
                 let node;
 
@@ -158,7 +164,7 @@ comms.registerNode = function(node, callback){
             }
 
             log.success('Registered new node', finalNode);
-            comms.nodeHash[node.config.id] = node.config;
+            comms.nodeHash[finalNode.config.id] = finalNode.config;
             comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
             return callback(undefined, finalNode);
         });
@@ -172,8 +178,7 @@ comms.updateNodeInputs = (node, callback)=>{
     if (!callback) callback = function(){};
 
     let info = {
-        url: 'https://' + node.ip + '/api/input',
-        rejectUnhauthorized: false
+        url: 'https://' + node.ip + '/api/input'
     };
 
     request.get(info, function(err, res, body){
@@ -239,8 +244,7 @@ comms.updateNodeOutputs = (node, callback)=>{
     if (!callback) callback = function(){};
 
     let info = {
-        url: 'https://' + node.ip + '/api/output',
-        rejectUnhauthorized: false
+        url: 'https://' + node.ip + '/api/output'
     };
 
     request.get(info, function(err, res, body){
@@ -304,8 +308,7 @@ comms.updateNodeDrivers = (node, callback)=>{
 
     async.parallel([function(nextMid){
         let info = {
-            url: 'https://' + node.ip + '/api/output/drivers',
-            rejectUnhauthorized: false
+            url: 'https://' + node.ip + '/api/output/drivers'
         };
 
         request.get(info, function(err, res, body){
@@ -353,8 +356,7 @@ comms.updateNodeDrivers = (node, callback)=>{
         });
     }, function(nextMid){
         let info = {
-            url: 'https://' + node.ip + '/api/input/drivers',
-            rejectUnhauthorized: false
+            url: 'https://' + node.ip + '/api/input/drivers'
         };
 
         request.get(info, function(err, res, body){
@@ -417,7 +419,6 @@ comms.updateNodeServer = (node, callback)=>{
 
     let info = {
         url: 'https://' + node.ip + '/api/register',
-        rejectUnhauthorized: false,
         form: {
             port: process.env.PORT
         }
@@ -475,7 +476,7 @@ comms.updateNode = (node, callback)=>{
                 }
             });
         });
-    })
+    });
 };
 
 comms.updateAll = (callback)=>{
@@ -586,6 +587,11 @@ NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
         cur[con.token] = con;
         return cur;
     }, {});
+
+    comms.searchForNodes('192.168.1.129', ()=>{
+        console.log(comms.nodes);
+        console.log('Searched');
+    });
 });
 
 module.exports = comms;

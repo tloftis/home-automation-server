@@ -3,7 +3,7 @@
 
 var async = require('async'),
     _ = require('lodash'),
-    request = require('request'),
+    request = rootRequire('./config/config.js').request,
     zlib = require('zlib'),
     tar = require('tar'),
     fstream = require('fstream'),

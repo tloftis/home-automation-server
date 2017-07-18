@@ -2,7 +2,7 @@
 
 var async = require('async'),
     _ = require('lodash'),
-    request = require('request'),
+    request = rootRequire('./config/config.js').request,
     mongoose = require('mongoose'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');

@@ -3,7 +3,7 @@
 // Only can find address in a subnet mask of 255.255.255.0
 var _ = require('lodash'),
     async = require('async'),
-    request = require('request'),
+    request = rootRequire('./config/config.js').request,
     fs = require('fs'),
     os = require('os'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),

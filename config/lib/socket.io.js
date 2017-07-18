@@ -1,7 +1,7 @@
 'use strict';
 
 // Load the module dependencies
-var config = require('../config'),
+var config = rootRequire('./config/config.js'),
     path = require('path'),
     fs = require('fs'),
     http = require('http'),
@@ -10,6 +10,7 @@ var config = require('../config'),
     passport = require('passport'),
     socketio = require('socket.io'),
     mongoose = require('mongoose'),
+    request = require('request'),
     NodeAPI = mongoose.model('NodeAPI'),
     session = require('express-session'),
     MongoStore = require('connect-mongo')(session),
@@ -20,13 +21,9 @@ module.exports = function (app, db) {
     var server;
 
     if (config.secure && config.secure.ssl === true) {
-        // Load SSL key and certificate
-        var privateKey = fs.readFileSync(path.resolve(config.secure.privateKey), 'utf8');
-        var certificate = fs.readFileSync(path.resolve(config.secure.certificate), 'utf8');
-
         var options = {
-            key: privateKey,
-            cert: certificate,
+            key: config.secure.key,
+            cert: config.secure.cert,
             //    requestCert : true,
             //    rejectUnauthorized : true,
             secureProtocol: 'TLSv1_method',

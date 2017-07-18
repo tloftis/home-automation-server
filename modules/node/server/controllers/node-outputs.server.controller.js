@@ -2,7 +2,7 @@
 
 var async = require('async'),
     _ = require('lodash'),
-    request = require('request'),
+    request = rootRequire('./config/config.js').request,
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js');
 
@@ -17,11 +17,11 @@ exports.listDrivers = function(req, res){
 };
 
 exports.set = function (req, res){
-    var output = req.output,
+    let output = req.output,
         value = req.body ? req.body.value : undefined,
         type = req.body ? req.body.type : undefined;
 
-    var info = {
+    let info = {
         url: 'https://' + output.node.ip + '/api/output/' + output.id + '/set',
         form: { value: value, type: type }
     };
@@ -33,7 +33,7 @@ exports.set = function (req, res){
             return res.status(400).send('Error attempting to set output');
         }
 
-        var newOutput;
+        let newOutput;
 
         try {
             newOutput = JSON.parse(body);
@@ -62,7 +62,7 @@ exports.getDriver = function (req, res){
 };
 
 exports.update = function (req, res){
-    var output = req.output,
+    let output = req.output,
         node = req.body.node,
         newNode = {};
 
@@ -75,14 +75,14 @@ exports.update = function (req, res){
     if (!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for (var key in nodeComm.outputDriverHash[node.driverId].config){
+        for (let key in nodeComm.outputDriverHash[node.driverId].config){
             if (!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
         }
     }
 
-    var info = {
+    let info = {
         url: 'https://' + output.node.ip + '/api/output/' + output.id,
         form: { output: newNode }
     };
@@ -94,7 +94,7 @@ exports.update = function (req, res){
             return res.status(400).send('Error attempting to update output');
         }
 
-        var newOutput;
+        let newOutput;
 
         try {
             newOutput = JSON.parse(body);
@@ -115,9 +115,9 @@ exports.update = function (req, res){
 };
 
 exports.remove = function (req, res){
-    var output = req.output;
+    let output = req.output;
 
-    var info = {
+    let info = {
         url: 'https://' + output.node.ip + '/api/output/' + output.id,
         form: {}
     };
@@ -129,7 +129,7 @@ exports.remove = function (req, res){
             return res.status(400).send('Error attempting to remove output');
         }
 
-        var index = nodeComm.outputs.indexOf(output);
+        let index = nodeComm.outputs.indexOf(output);
 
         output.node.active = true;
         log.info('Removed output on node: ' + output.node.ip, output);
@@ -145,7 +145,7 @@ exports.remove = function (req, res){
 };
 
 exports.add = function (req, res){
-    var newOutput = {},
+    let newOutput = {},
         node = req.node,
         newNode = req.body.output;
 
@@ -162,7 +162,7 @@ exports.add = function (req, res){
     if (!_.isUndefined(newNode.config)){
         newOutput.config = {};
 
-        for (var key in nodeComm.outputDriverHash[newNode.driverId].config){
+        for (let key in nodeComm.outputDriverHash[newNode.driverId].config){
             if (!_.isUndefined(newNode.config[key])){
                 newOutput.config[key] = newNode.config[key];
             }
@@ -170,7 +170,7 @@ exports.add = function (req, res){
     }
 
     if (newOutput.driverId) {
-        var info = {
+        let info = {
             url: 'https://' + node.ip + '/api/output',
             form: { output: newOutput }
         };
@@ -182,7 +182,7 @@ exports.add = function (req, res){
                 return res.status(400).send('Error attempting to add output');
             }
 
-            var newOutput,
+            let newOutput,
                 output = {};
 
             try {
