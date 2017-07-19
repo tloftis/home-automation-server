@@ -8,7 +8,31 @@ let mongoose = require('mongoose'),
 
 // NodeAPI Schema
 let NodeConfigSchema = new Schema({
-    config: { },
+    config: {
+        active : {
+            type: Boolean
+        },
+        enableWebInterface : {
+            type: Boolean
+        },
+        location : {
+            type: String
+        },
+        description : {
+            type: String
+        },
+        name : {
+            type: String
+        },
+        ip : {
+            type: String
+        },
+        id : {
+            type: String,
+            unique: true,
+            required: true
+        }
+    },
     token: {
         type: String,
         unique: true,

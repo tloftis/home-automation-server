@@ -582,7 +582,7 @@ NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
         return cur;
     }, {});
 
-    comms.searchForNodes('192.168.1.129', ()=>{
+    comms.searchForNodes('localhost', ()=>{
         console.log('Searched');
     });
 });
