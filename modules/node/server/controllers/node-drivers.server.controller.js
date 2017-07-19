@@ -1,7 +1,7 @@
 'use strict';
 /* eslint new-cap: "off"*/
 
-var async = require('async'),
+let async = require('async'),
     _ = require('lodash'),
     request = rootRequire('./config/config.js').request,
     zlib = require('zlib'),
@@ -19,10 +19,10 @@ var async = require('async'),
 
 // Gets the absolute location of the folder contained by a require file selector
 function rationalizePaths(array){
-    var path,
+    let path,
         config;
 
-    for (var i = 0, len = array.length; i < len; i++){
+    for (let i = 0, len = array.length; i < len; i++){
         path = rootRequire.resolve(array[i]);
 
         array[i] = {
@@ -65,7 +65,7 @@ exports.update = function (req, res){
 };
 
 exports.add = function (req, res){
-    var node = req.node,
+    let node = req.node,
         driverId = (req.body || {}).driverId,
         driver,
         url;
@@ -86,7 +86,7 @@ exports.add = function (req, res){
         });
     }
 
-    var called = false;
+    let called = false;
     function onError(err) {
         if (!called){
             res.status(400).send({
@@ -98,10 +98,10 @@ exports.add = function (req, res){
     }
 
   // es
-    var packer = tar.Pack({ noProprietary: true })
+    let packer = tar.Pack({ noProprietary: true })
         .on('error', onError);
 
-    var info = {
+    let info = {
         url: url
     };
 
@@ -116,7 +116,7 @@ exports.add = function (req, res){
         .on('error', onError)
 
         .pipe(request.post(info, function (err, resq, body){
-            var newDrivers;
+            let newDrivers;
 
             try {
                 newDrivers = JSON.parse(body);

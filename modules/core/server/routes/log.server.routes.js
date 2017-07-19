@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var log = require('../controllers/log.server.controller');
+let log = require('../controllers/log.server.controller');
 
 module.exports = function (app) {
     app.route('/api/log').

@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var nodeInputPolicy = require('../policies/node-input.server.policy'),
+let nodeInputPolicy = require('../policies/node-input.server.policy'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     inputs = require('../controllers/node-inputs.server.controller.js');
 

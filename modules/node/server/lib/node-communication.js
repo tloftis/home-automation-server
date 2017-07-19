@@ -101,10 +101,6 @@ function searchForNodes (addresses, callback) {
         };
 
         request.get(info, function (err, res, body){
-            console.log(address);
-            console.log(err);
-            console.log(body);
-
             if (!err && body){
                 let node;
 
@@ -141,8 +137,6 @@ comms.registerNode = function(node, callback){
     if (!callback){
         callback = ()=>{};
     }
-
-    console.log(node);
 
     if (node && node.id && node.ip){
         let newNode = {
@@ -443,8 +437,6 @@ comms.updateNodeServer = (node, callback)=>{
 };
 
 comms.updateNode = (node, callback)=>{
-    console.log('Updating', node);
-
     async.parallel([
         (next)=>comms.updateNodeServer(node, next),
         (next)=>comms.updateNodeInputs(node, next),
@@ -589,7 +581,6 @@ NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
     }, {});
 
     comms.searchForNodes('192.168.1.129', ()=>{
-        console.log(comms.nodes);
         console.log('Searched');
     });
 });

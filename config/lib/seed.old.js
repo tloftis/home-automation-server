@@ -1,17 +1,17 @@
 'use strict';
 
-var _ = require('lodash'),
+let _ = require('lodash'),
     config = require('../config'),
     mongoose = require('mongoose'),
     chalk = require('chalk'),
     crypto = require('crypto');
 
 // global seed options object
-var seedOptions = {};
+let seedOptions = {};
 
 function removeUser (user) {
     return new Promise(function (resolve, reject) {
-        var User = mongoose.model('User');
+        let User = mongoose.model('User');
 
         User.find({ username: user.username }).remove(function (err) {
             if (err) {
@@ -41,7 +41,7 @@ function saveUser (user) {
 
 function checkUserNotExists (user) {
     return new Promise(function (resolve, reject) {
-        var User = mongoose.model('User');
+        let User = mongoose.model('User');
 
         User.find({ username: user.username }, function (err, users) {
             if (err) {
@@ -73,7 +73,7 @@ function reportSuccess (password) {
 function seedTheUser (user) {
     return function (password) {
         return new Promise(function (resolve, reject) {
-            var User = mongoose.model('User');
+            let User = mongoose.model('User');
             // set the new password
             user.password = password;
 
@@ -132,11 +132,11 @@ module.exports.start = function start(options) {
         seedOptions.seedAdmin = options.seedAdmin;
     }
 
-    var User = mongoose.model('User');
+    let User = mongoose.model('User');
 
     return new Promise(function (resolve, reject) {
-        var adminAccount = new User(seedOptions.seedAdmin);
-        var userAccount = new User(seedOptions.seedUser);
+        let adminAccount = new User(seedOptions.seedAdmin);
+        let userAccount = new User(seedOptions.seedUser);
 
         // If production only seed admin if it does not exist
         if (process.env.NODE_ENV === 'production') {

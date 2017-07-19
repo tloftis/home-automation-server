@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     crypto = require('crypto'),
     validator = require('validator'),
@@ -13,21 +13,21 @@ var mongoose = require('mongoose'),
 /**
  * A Validation function for local strategy properties
  */
-var validateLocalStrategyProperty = function (property) {
+let validateLocalStrategyProperty = function (property) {
     return ((this.provider !== 'local' && !this.updated) || property.length);
 };
 
 /**
  * A Validation function for local strategy email
  */
-var validateLocalStrategyEmail = function (email) {
+let validateLocalStrategyEmail = function (email) {
     return ((this.provider !== 'local' && !this.updated) || validator.isEmail(email));
 };
 
 /**
  * User Schema
  */
-var UserSchema = new Schema({
+let UserSchema = new Schema({
     firstName: {
         type: String,
         trim: true,
@@ -172,8 +172,8 @@ UserSchema.statics.findUniqueUsername = function (username, suffix, callback) {
  */
 UserSchema.statics.generateRandomPassphrase = function () {
     return new Promise(function (resolve, reject) {
-        var password = '';
-        var repeatingCharacters = new RegExp('(.)\\1{2,}', 'g');
+        let password = '';
+        let repeatingCharacters = new RegExp('(.)\\1{2,}', 'g');
 
         // iterate until the we have a valid passphrase.
         // NOTE: Should rarely iterate more than once, but we need this to ensure no repeating characters are present.

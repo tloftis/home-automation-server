@@ -3,11 +3,11 @@
 /**
  * Get unique error field name
  */
-var getUniqueErrorMessage = function (err) {
-    var output;
+let getUniqueErrorMessage = function (err) {
+    let output;
 
     try {
-        var fieldName = err.errmsg.substring(err.errmsg.lastIndexOf('.$') + 2, err.errmsg.lastIndexOf('_1'));
+        let fieldName = err.errmsg.substring(err.errmsg.lastIndexOf('.$') + 2, err.errmsg.lastIndexOf('_1'));
         output = fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + ' already exists';
     } catch (ex) {
         output = 'Unique field already exists';
@@ -20,7 +20,7 @@ var getUniqueErrorMessage = function (err) {
  * Get the error message from error object
  */
 exports.getErrorMessage = function (err) {
-    var message = '';
+    let message = '';
 
     if (err.code) {
         switch (err.code) {
@@ -32,7 +32,7 @@ exports.getErrorMessage = function (err) {
                 message = 'Something went wrong';
         }
     } else {
-        for (var errName in err.errors) {
+        for (let errName in err.errors) {
             if (err.errors[errName].message) {
                 message = err.errors[errName].message;
             }

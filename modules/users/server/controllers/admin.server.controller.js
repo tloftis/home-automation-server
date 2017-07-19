@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var path = require('path'),
+let path = require('path'),
     mongoose = require('mongoose'),
     User = mongoose.model('User'),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
@@ -21,7 +21,7 @@ exports.read = function (req, res) {
  */
 exports.createUser = function (req, res) {
     // Init Variables
-    var user = new User(req.body);
+    let user = new User(req.body);
 
     // Add missing user fields
     user.provider = 'local';
@@ -48,7 +48,7 @@ exports.createUser = function (req, res) {
  * Update a User
  */
 exports.update = function (req, res) {
-    var user = req.model;
+    let user = req.model;
 
     // For security purposes only merge these parameters
     user.firstName = req.body.firstName || user.firstName;
@@ -84,7 +84,7 @@ exports.update = function (req, res) {
  * Delete a user
  */
 exports.delete = function (req, res) {
-    var user = req.model;
+    let user = req.model;
 
     user.remove(function (err) {
         if (err) {

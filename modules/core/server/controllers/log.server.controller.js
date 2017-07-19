@@ -1,12 +1,12 @@
 'use strict';
 
-var async = require('async'),
+let async = require('async'),
     _ = require('lodash'),
     mongoose = require('mongoose'),
     chalk = require('chalk'),
     logs = mongoose.model('Logs');
 
-var debugLog = {
+let debugLog = {
     error: function(str, obj) { console.log(chalk.bold.red(str), obj || ''); },
     info: function(str, obj) { console.log(chalk.blue.bold.underline(str), obj || ''); },
     success: function(str, obj) { console.log(chalk.green.bold(str), obj || ''); }
@@ -47,7 +47,7 @@ exports.info = function(msg, data){
 };
 
 exports.list = function(req, res){
-    var limit = +(req.query || {}).limit || 100;
+    let limit = +(req.query || {}).limit || 100;
 
     logs.find({}).sort({ created: -1 }).limit(limit).lean().exec(function(err, logs){
         if (err){
@@ -65,10 +65,10 @@ exports.get = function (req, res){
 };
 
 exports.add = function (req, res){
-    var reqLog = req.body || {};
+    let reqLog = req.body || {};
 
     if (reqLog){
-        var ip = (req.headers || {})['x-forwarded-for'] || (req.connection || {}).remoteAddress;
+        let ip = (req.headers || {})['x-forwarded-for'] || (req.connection || {}).remoteAddress;
 
         return addLog(reqLog.type, reqLog.message, reqLog.data, ip, function(err, log){
             if (err) {

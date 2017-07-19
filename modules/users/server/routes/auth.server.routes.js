@@ -1,6 +1,6 @@
 'use strict';
 
-var users =require('../controllers/users.server.controller');
+let users =require('../controllers/users.server.controller');
 
 module.exports = function (app) {
     // Setting up the users password api

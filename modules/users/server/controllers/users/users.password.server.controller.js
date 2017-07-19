@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var path = require('path'),
+let path = require('path'),
     config = require(path.resolve('./config/config')),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
     mongoose = require('mongoose'),
@@ -34,8 +34,8 @@ exports.validateResetToken = function (req, res) {
  */
 exports.changePassword = function (req, res, next) {
     // Init Variables
-    var passwordDetails = req.body;
-    var message = null;
+    let passwordDetails = req.body;
+    let message = null;
 
     if (req.user) {
         if (passwordDetails.newPassword) {

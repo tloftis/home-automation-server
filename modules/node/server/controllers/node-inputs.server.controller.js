@@ -1,6 +1,6 @@
 'use strict';
 
-var async = require('async'),
+let async = require('async'),
     _ = require('lodash'),
     request = rootRequire('./config/config.js').request,
     mongoose = require('mongoose'),
@@ -38,7 +38,7 @@ exports.get = function (req, res){
 };
 
 exports.update = function (req, res){
-    var input = req.input,
+    let input = req.input,
         node = req.body.node,
         newNode = {};
 
@@ -51,14 +51,14 @@ exports.update = function (req, res){
     if (!_.isUndefined(node.config) && !_.isUndefined(node.driverId)){
         newNode.config = {};
 
-        for (var key in nodeComm.inputDriverHash[node.driverId].config){
+        for (let key in nodeComm.inputDriverHash[node.driverId].config){
             if (!_.isUndefined(node.config[key])){
                 newNode.config[key] = node.config[key];
             }
         }
     }
 
-    var info = {
+    let info = {
         url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: { input: newNode }
     };
@@ -71,7 +71,7 @@ exports.update = function (req, res){
             return res.status(400).send('Error attempting to update input');
         }
 
-        var newInput;
+        let newInput;
 
         try {
             newInput = JSON.parse(body);
@@ -96,10 +96,10 @@ exports.update = function (req, res){
 };
 
 exports.remove = function (req, res){
-    var input = req.input,
+    let input = req.input,
         index = -1;
 
-    var info = {
+    let info = {
         url: 'https://' + input.node.ip + '/api/input/' + input.id,
         form: {}
     };
@@ -126,7 +126,7 @@ exports.remove = function (req, res){
 };
 
 exports.add = function (req, res){
-    var newInput = {},
+    let newInput = {},
         node = req.node,
         newNode = req.body.input;
 
@@ -142,7 +142,7 @@ exports.add = function (req, res){
     if (!_.isUndefined(newNode.config)){
         newInput.config = {};
 
-        for (var key in nodeComm.inputDriverHash[newNode.driverId].config){
+        for (let key in nodeComm.inputDriverHash[newNode.driverId].config){
             if (!_.isUndefined(newNode.config[key])){
                 newInput.config[key] = newNode.config[key];
             }
@@ -150,7 +150,7 @@ exports.add = function (req, res){
     }
 
     if (newInput.driverId){
-        var info = {
+        let info = {
             url: 'https://' + node.ip + '/api/input',
             form: { input: newInput }
         };
@@ -162,7 +162,7 @@ exports.add = function (req, res){
                 return res.status(400).send('Error attempting to add input');
             }
 
-            var newInput,
+            let newInput,
                 input = {};
 
             try {
@@ -189,7 +189,7 @@ exports.add = function (req, res){
 };
 
 exports.change = function(req, res){
-    var input = req.input,
+    let input = req.input,
         value = req.body.value,
         type = req.body.type;
 

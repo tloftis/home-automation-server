@@ -87,15 +87,6 @@ let validateSecureMode = function (config) {
         let privateKey = fs.readFileSync(path.resolve(config.secure.privateKey), 'utf8'),
             certificate = fs.readFileSync(path.resolve(config.secure.certificate), 'utf8');
 
-        console.log({
-            rejectUnauthorized: false,
-            cert: certificate,
-            key: privateKey,
-            checkServerIdentity: function(host, key){
-                // console.log(key.raw.toString());
-            }
-        });
-
         config.secure.key = privateKey;
         config.secure.cert = certificate;
 
@@ -111,7 +102,6 @@ let validateSecureMode = function (config) {
 };
 
 let validateSessionSecret = function (config, testing) {
-
     if (process.env.NODE_ENV !== 'production') {
         return true;
     }

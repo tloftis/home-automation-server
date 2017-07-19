@@ -1,6 +1,6 @@
 'use strict';
 
-var async = require('async'),
+let async = require('async'),
     _ = require('lodash'),
     request = rootRequire('./config/config.js').request,
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),

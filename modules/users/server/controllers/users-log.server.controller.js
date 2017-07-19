@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var path = require('path'),
+let path = require('path'),
     mongoose = require('mongoose'),
     // log = require(path.resolve('./config/lib/winston')),
     errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
@@ -21,8 +21,8 @@ function masterLogger(user, msg, data, type){
     }
 
     // Init Variables
-    var UsersLog = mongoose.model('UsersLog');
-    var log = new UsersLog({ createdBy: user, username: user.displayName, msg: msg, data: data, type: type });
+    let UsersLog = mongoose.model('UsersLog');
+    let log = new UsersLog({ createdBy: user, username: user.displayName, msg: msg, data: data, type: type });
 
     // Then save the user
     log.save(function (err){
@@ -35,7 +35,7 @@ function masterLogger(user, msg, data, type){
 /**
  * Show the current user
  */
-var userLogger = function (user, msg, data){
+let userLogger = function (user, msg, data){
     masterLogger(user, msg, data, 'other');
 };
 
@@ -54,7 +54,7 @@ userLogger.create = function(user, msg, data){
 exports.logUserChange = userLogger;
 
 exports.getLogs = function (req, res) {
-    var query = mongoose.model('UsersLog').find({}).sort('-created');
+    let query = mongoose.model('UsersLog').find({}).sort('-created');
 
     if (req.query.populate){
         query = query.populate('createdBy');

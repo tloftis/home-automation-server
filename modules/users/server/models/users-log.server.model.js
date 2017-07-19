@@ -3,10 +3,10 @@
 /**
  * Module dependencies.
  */
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var UserLogSchema = new Schema({
+let UserLogSchema = new Schema({
     msg: {
         type: String,
         trim: true

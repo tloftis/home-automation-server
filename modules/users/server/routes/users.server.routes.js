@@ -2,8 +2,8 @@
 
 module.exports = function (app) {
     // User Routes
-    var users = require('../controllers/users.server.controller');
-    var usersLog = require('../controllers/users-log.server.controller');
+    let users = require('../controllers/users.server.controller');
+    let usersLog = require('../controllers/users-log.server.controller');
 
     // Setting up the users profile api
     app.route('/api/users/me').

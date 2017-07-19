@@ -3,11 +3,11 @@
 /**
  * Module dependencies.
  */
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 // NodeAPI Schema
-var NodeConfigSchema = new Schema({
+let NodeConfigSchema = new Schema({
     config: { },
     token: {
         type: String,
@@ -77,7 +77,7 @@ function removePrepNodeConfig(node){
 
 // Remove circular refs
 NodeConfigSchema.pre('save', function (next) {
-    var now = new Date();
+    let now = new Date();
 
     this.config = removePrepNodeConfig(this.config);
 

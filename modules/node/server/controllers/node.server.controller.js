@@ -1,7 +1,7 @@
 'use strict';
 
 // Only can find address in a subnet mask of 255.255.255.0
-var _ = require('lodash'),
+let _ = require('lodash'),
     async = require('async'),
     request = rootRequire('./config/config.js').request,
     fs = require('fs'),

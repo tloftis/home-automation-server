@@ -1,6 +1,6 @@
 'use strict';
 
-var nodeDriverPolicy = require('../policies/node-drivers.server.policy'),
+let nodeDriverPolicy = require('../policies/node-drivers.server.policy'),
     drivers = require('../controllers/node-drivers.server.controller.js');
 
 module.exports = function (app) {

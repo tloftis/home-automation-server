@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var config = require('../config'),
+let config = require('../config'),
     express = require('express'),
     morgan = require('morgan'),
     logger = require('./logger'),
@@ -135,7 +135,7 @@ module.exports.initModulesConfiguration = function (app, db) {
  */
 module.exports.initHelmetHeaders = function (app) {
     // Use helmet to secure Express headers
-    var SIX_MONTHS = 15778476000;
+    let SIX_MONTHS = 15778476000;
     app.use(helmet.frameguard());
     app.use(helmet.xssFilter());
     app.use(helmet.noSniff());
@@ -205,7 +205,7 @@ module.exports.initErrorRoutes = function (app) {
  */
 module.exports.configureSocketIO = function (app, db) {
     // Load the Socket.io configuration
-    var server = require('./socket.io')(app, db);
+    let server = require('./socket.io')(app, db);
     // Return server object
     return server;
 };
@@ -215,7 +215,7 @@ module.exports.configureSocketIO = function (app, db) {
  */
 module.exports.init = function (db) {
     // Initialize express app
-    var app = express();
+    let app = express();
 
     // Initialize local variables
     this.initLocalVariables(app);

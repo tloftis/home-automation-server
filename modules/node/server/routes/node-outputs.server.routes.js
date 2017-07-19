@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var nodeOutputPolicy = require('../policies/node-output.server.policy'),
+let nodeOutputPolicy = require('../policies/node-output.server.policy'),
     outputs = require('../controllers/node-outputs.server.controller.js');
 
 module.exports = function (app) {

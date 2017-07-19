@@ -1,12 +1,12 @@
 'use strict';
 
-var validator = require('validator');
+let validator = require('validator');
 
 /**
  * Render the main application page
  */
 exports.renderIndex = function (req, res) {
-    var safeUserObject = null;
+    let safeUserObject = null;
 
     if (req.user) {
         safeUserObject = {

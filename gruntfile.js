@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
+let _ = require('lodash'),
     defaultAssets = require('./config/assets/default'),
     testAssets = require('./config/assets/test'),
     testConfig = require('./config/env/test'),
@@ -78,6 +78,10 @@ module.exports = function (grunt) {
             }
         },
         eslint: {
+            options: {},
+            target: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e)
+        },
+        'eslint-force': {
             options: { fix: true },
             target: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e)
         },
@@ -143,7 +147,7 @@ module.exports = function (grunt) {
     // Make sure upload directory exists
     grunt.task.registerTask('mkdir:upload', 'Task that makes sure upload directory exists.', function () {
         // Get the callback
-        var done = this.async();
+        let done = this.async();
         grunt.file.mkdir(path.normalize(__dirname + '/modules/users/client/img/profile/uploads'));
         done();
     });
@@ -151,10 +155,10 @@ module.exports = function (grunt) {
     // Connect to the MongoDB instance and load the models
     grunt.task.registerTask('mongoose', 'Task that connects to the MongoDB instance and loads the application models.', function () {
         // Get the callback
-        var done = this.async();
+        let done = this.async();
 
         // Use mongoose configuration
-        var mongoose = require('./config/lib/mongoose.js');
+        let mongoose = require('./config/lib/mongoose.js');
 
         // Connect to database
         mongoose.connect(function (db) {
@@ -165,10 +169,10 @@ module.exports = function (grunt) {
     // Drops the MongoDB database, used in e2e testing
     grunt.task.registerTask('dropdb', 'drop the database', function () {
         // async mode
-        var done = this.async();
+        let done = this.async();
 
         // Use mongoose configuration
-        var mongoose = require('./config/lib/mongoose.js');
+        let mongoose = require('./config/lib/mongoose.js');
 
         mongoose.connect(function (db) {
             db.connection.db.dropDatabase(function (err) {
@@ -185,17 +189,18 @@ module.exports = function (grunt) {
 
     grunt.task.registerTask('server', 'Starting the server', function () {
         // Get the callback
-        var done = this.async();
-        var path = require('path');
-        var app = require(path.resolve('./config/lib/app'));
+        let done = this.async();
+        let path = require('path');
+        let app = require(path.resolve('./config/lib/app'));
 
-        var server = app.start(function () {
+        let server = app.start(function () {
             done();
         });
     });
 
     // Lint CSS and JavaScript files.
     grunt.registerTask('lint', ['eslint', 'csslint']);
+    grunt.registerTask('lint-force', ['eslint-force', 'csslint']);
 
     // Lint project files and minify them into two production files.
     grunt.registerTask('build', ['env:dev', 'lint', 'ngAnnotate', 'uglify', 'cssmin']);

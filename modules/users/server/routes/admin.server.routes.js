@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var adminPolicy = require('../policies/admin.server.policy'),
+let adminPolicy = require('../policies/admin.server.policy'),
     admin = require('../controllers/admin.server.controller');
 
 module.exports = function (app) {

@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var passport = require('passport'),
+let passport = require('passport'),
     User = require('mongoose').model('User'),
     path = require('path'),
     config = require(path.resolve('./config/config'));

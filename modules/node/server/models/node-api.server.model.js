@@ -3,11 +3,11 @@
 /**
  * Module dependencies.
  */
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 // NodeAPI Schema
-var NodeAPISchema = new Schema({
+let NodeAPISchema = new Schema({
     description: {
         type: String,
         trim: true,
@@ -42,7 +42,7 @@ var NodeAPISchema = new Schema({
 });
 
 NodeAPISchema.pre('save', function (next) {
-    var now = new Date();
+    let now = new Date();
 
     if (!this.created) {
         this.created = now;

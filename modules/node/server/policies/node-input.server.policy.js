@@ -1,6 +1,6 @@
 'use strict';
 
-var acl = require('acl'); // This is a base for building up roles, it can store to a database but exists mainly in memory
+let acl = require('acl'); // This is a base for building up roles, it can store to a database but exists mainly in memory
 
 // Using the memory backend, this means it will only exist in active memory
 acl = new acl(new acl.memoryBackend());
@@ -34,8 +34,8 @@ exports.invokeRolesPolicies = function (){
 };
 
 exports.isAllowed = function (req, res, next){
-    var roles = (req.user) ? req.user.roles : ['guest'];
-    var enabled = roles.indexOf('guest') === -1 ? (req.user || {}).enabled : true;
+    let roles = (req.user) ? req.user.roles : ['guest'];
+    let enabled = roles.indexOf('guest') === -1 ? (req.user || {}).enabled : true;
 
     // Confirm user is enabled
     if (enabled === false){

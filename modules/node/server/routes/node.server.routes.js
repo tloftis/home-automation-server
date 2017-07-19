@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var nodePolicy = require('../policies/node.server.policy'),
+let nodePolicy = require('../policies/node.server.policy'),
     node = require('../controllers/node.server.controller.js'),
     nodeComm = rootRequire('./modules/node/server/lib/node-communication.js'),
     outputs = require('../controllers/node-outputs.server.controller.js'),

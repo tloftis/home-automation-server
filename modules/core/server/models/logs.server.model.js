@@ -1,10 +1,10 @@
 'use strict';
 
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 // log Schema
-var logSchema = new Schema({
+let logSchema = new Schema({
     message: {
         type: String,
         trim: true,
@@ -27,7 +27,7 @@ var logSchema = new Schema({
 });
 
 logSchema.pre('save', function (next) {
-    var now = new Date();
+    let now = new Date();
 
     if (!this.created) {
         this.created = now;

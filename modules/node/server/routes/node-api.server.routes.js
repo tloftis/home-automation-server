@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var nodePolicy = require('../policies/node-api.server.policy'),
+let nodePolicy = require('../policies/node-api.server.policy'),
     nodeApi = require('../controllers/node-api.server.controller.js');
 
 module.exports = function (app) {

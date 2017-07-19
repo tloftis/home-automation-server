@@ -1,6 +1,6 @@
 'use strict';
 
-var defaultEnvConfig = require('./default');
+let defaultEnvConfig = require('./default');
 
 module.exports = {
     db: {

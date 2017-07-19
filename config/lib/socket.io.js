@@ -1,7 +1,7 @@
 'use strict';
 
 // Load the module dependencies
-var config = rootRequire('./config/config.js'),
+let config = rootRequire('./config/config.js'),
     path = require('path'),
     fs = require('fs'),
     http = require('http'),
@@ -18,10 +18,10 @@ var config = rootRequire('./config/config.js'),
 
 // Define the Socket.io configuration method
 module.exports = function (app, db) {
-    var server;
+    let server;
 
     if (config.secure && config.secure.ssl === true) {
-        var options = {
+        let options = {
             key: config.secure.key,
             cert: config.secure.cert,
             //    requestCert : true,
@@ -61,10 +61,10 @@ module.exports = function (app, db) {
     }
 
     // Create a new Socket.io server
-    var io = socketio.listen(server);
+    let io = socketio.listen(server);
 
     // Create a MongoDB storage object
-    var mongoStore = new MongoStore({
+    let mongoStore = new MongoStore({
         mongooseConnection: db.connection,
         collection: config.sessionCollection
     });
