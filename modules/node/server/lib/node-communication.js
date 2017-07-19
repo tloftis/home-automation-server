@@ -158,7 +158,7 @@ comms.registerNode = function(node, callback){
             }
 
             log.success('Registered new node', finalNode);
-            comms.nodeHash[finalNode.config.id] = finalNode.config;
+            comms.nodeHash[finalNode.id] = finalNode;
             comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
             return callback(undefined, finalNode);
         });
@@ -412,33 +412,35 @@ comms.updateNodeServer = (node, callback)=>{
     if (!callback) callback = function(){};
 
     let info = {
-        url: 'https://' + node.ip + '/api/register',
+        url: 'https://' + node.config.ip + '/api/server',
         form: {
-            port: process.env.PORT
+            port: process.env.PORT,
+            token: node.token
         }
     };
 
+    console.log(info);
+
     request.post(info, function(err, res, body){
         if (err){
-            log.error('Error registering server: ' + node.id, err);
+            log.error('Error registering server: ' + node.config.id, err);
             node.active = false;
             return callback(err);
         }
 
         if (res.statusCode !== 200){
-            log.error('Error registering server: ' + node.id, body);
+            log.error('Error registering server: ' + node.config.id, body);
             node.active = false;
             return callback(body);
         }
 
-        log.success('Registered server to node!', node);
-        callback();
+        log.success('Registered server to node!', node.config);
+        callback(undefined, node.config);
     });
 };
 
 comms.updateNode = (node, callback)=>{
     async.parallel([
-        (next)=>comms.updateNodeServer(node, next),
         (next)=>comms.updateNodeInputs(node, next),
         (next)=>comms.updateNodeOutputs(node, next),
         (next)=>comms.updateNodeDrivers(node, next)
@@ -455,7 +457,7 @@ comms.updateNode = (node, callback)=>{
                 nodeData.config = node;
             }
 
-            return nodeData.save((err)=>{
+            return nodeData.save((err, nodeConfig)=>{
                 if (err) {
                     log.error('Failed to add Node Config', err);
                     return callback(err);
@@ -464,7 +466,7 @@ comms.updateNode = (node, callback)=>{
                 log.info('New Node Config Added!', nodeData);
 
                 if (callback){
-                    callback(undefined, nodeData);
+                    comms.updateNodeServer(nodeConfig, callback);
                 }
             });
         });
