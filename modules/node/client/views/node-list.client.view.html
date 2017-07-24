@@ -26,6 +26,10 @@
                         </td>
 
                         <td>
+                          <strong>Enabled</strong>
+                        </td>
+
+                        <td>
                             <strong>Status</strong>
                         </td>
 
@@ -37,6 +41,9 @@
                         <td>{{node.ip}}</td>
                         <td>{{node.description}}</td>
                         <td>{{node.location}}</td>
+                        <td>
+                          <input data-ng-model="node.enabled" type="checkbox" class="form-control" data-ng-click="enableDisable(node)"/>
+                        </td>
                         <td>{{node.active ? 'Online':'Offline'}}</td>
 
                         <td class="text-center">

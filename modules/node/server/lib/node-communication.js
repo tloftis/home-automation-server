@@ -467,15 +467,19 @@ comms.updateNode = (node, callback)=>{
                 });
             };
 
-            newRef.enable = ()=>{
-              nodeData.enabled = true;
-              newRef.update();
+            newRef.enable = (callback)=>{
+                if(!callback){ callback = ()=>{}; }
+                nodeData.enabled = true;
+                newRef.update(callback);
             };
 
-            newRef.disable = ()=>{
+            newRef.disable = (callback)=>{
+                if(!callback){ callback = ()=>{}; }
                 nodeData.enabled = false;
-                newRef.update();
+                newRef.update(callback);
             };
+
+            newRef.getEnabledStat = ()=>nodeData.enabled;
 
             newRef.update((err, conf)=>{
                 comms.updateNodeServer(newRef, conf.token, callback);
@@ -499,9 +503,11 @@ comms.updateAll = (callback)=>{
     comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
 
     async.forEach(comms.nodes, (node, next)=>{
-        comms.updateNode(node, (err, node)=>{
-            if (!node.active){
-                log.error('Failed to to connect to node: ' + node.ip, node);
+        comms.updateNode(node, (err, updatedNode)=>{
+            if(err || !updatedNode){
+                log.error('Error while trying to update node', err || node);
+            }else if (!updatedNode.active){
+                log.error('Failed to to connect to node: ' + updatedNode.ip, updatedNode);
             }
 
             next()
@@ -567,7 +573,7 @@ comms.registerInit = (data)=>{
     }
 };
 
-//Veriys that node is using an existing token and that that node is enabled
+//Verify that node is using an existing token and that that node is enabled
 comms.verifyToken = (req, res, next)=>{
     let token = req.headers['x-token'],
         node = comms.nodeConfigs[token],
@@ -605,7 +611,7 @@ NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
         return cur;
     }, {});
 
-    comms.searchForNodes(()=>{
+    comms.searchForNodes('192.168.1.160', ()=>{
         console.log('Searched');
 
         comms.updateAll(()=>{

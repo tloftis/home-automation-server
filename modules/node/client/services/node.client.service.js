@@ -120,6 +120,13 @@ angular.module('node').service('nodeService', ['Utility',
             return Utility.http.put('node/' + id, { node: config });
         };
 
+        service.enableDisableNode = function (node, enabled){
+            var id = node;
+            if (node && node.id) id = node.id;
+
+            return Utility.http.put('node/' + id + '/enabled', { enabled: !!enabled });
+        };
+
         service.getOutput = function (node){
             var id = node;
             if (node && node.id) id = node.id;

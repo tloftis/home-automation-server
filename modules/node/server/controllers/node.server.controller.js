@@ -70,11 +70,41 @@ exports.register = function(req, res, next){
 };
 
 exports.list = function(req, res){
-    res.json(nodeComm.nodes.map(n=>stripObjProp(n, 'token')));
+    //Okay, the array is a reference so it can'be be modified to include enabled without modifying the base
+    // So this does a shallow clone with enabled as a property of the array.
+    res.json(nodeComm.nodes.map(n=>{
+        return Object.keys(n).reduce((clone, key)=>{
+            clone[key] = n[key];
+            return clone;
+        }, { enabled: n.getEnabledStat() });
+    }));
 };
 
 exports.get = function (req, res){
-    res.json(stripObjProp(req.node, 'token'));
+    res.json(Object.keys(req.node).reduce((clone, key)=>{
+        clone[key] = req.node[key];
+        return clone;
+    }, { enabled: req.node.getEnabledStat() }));
+};
+
+exports.enableDisable = function (req, res){
+    let selNode = req.node;
+
+    console.log(req.body);
+    
+    if((req.body || {}).enabled){
+        selNode.enable(()=>{
+            res.json({
+                message: 'Node successfully enabled!'
+            });
+        });
+    } else {
+        selNode.disable(()=>{
+            res.json({
+                message: 'Node successfully disabled!'
+            });
+        });
+    }
 };
 
 exports.update = function (req, res){
@@ -86,7 +116,6 @@ exports.update = function (req, res){
     if (node.location) newNode.location = node.location;
     if (node.description) newNode.description = node.description;
     if (typeof node.enableWebInterface === 'boolean') newNode.enableWebInterface = node.enableWebInterface;
-    //if (typeof node.enable === 'boolean') newNode.enableWebInterface = node.enableWebInterface;
 
     let info = {
         url: 'https://' + selNode.ip + '/api/server',

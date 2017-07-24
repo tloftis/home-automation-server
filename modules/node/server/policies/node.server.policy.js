@@ -24,6 +24,9 @@ exports.invokeRolesPolicies = function (){
             resources: '/api/node/:nodeId',
             permissions: '*'
         }, {
+            resources: '/api/node/:nodeId/enabled',
+            permissions: '*'
+        }, {
             resources: '/api/node/:nodeId/output',
             permissions: '*'
         }, {

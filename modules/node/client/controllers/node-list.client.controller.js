@@ -30,6 +30,14 @@ angular.module('node').controller('nodeListController', ['$scope', '$state', 'no
             $state.go('node.nodes.edit.input', { nodeId: node.id });
         };
 
+        $scope.enableDisable = function(node){
+            nodeService.enableDisableNode(node, node.enabled).then(function(){
+                return nodeService.getNodes();
+            }).then(function(nodes){
+                $scope.nodes = nodes;
+            });
+        };
+
         $scope.edit = function(node){
             $state.go('node.nodes.edit', { nodeId: node.id });
         };
