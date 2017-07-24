@@ -12,6 +12,10 @@ let _ = require('lodash'),
     log = rootRequire('./modules/core/server/controllers/log.server.controller.js'),
     nodePort = (process.env.RELAY_PORT || 2000);
 
+//So this is may be very bad practice, but to avoid latency and due to the way it use to function, all of the info
+// about previous nodes is stored in memory and is always updated
+// the nodes should be considered references and not mutable objects, as if the reference is changed all of the code will
+// freak out and weird things will happen
 let comms = {
     nodeConfigs: {},
     registered: [],
@@ -25,14 +29,26 @@ let comms = {
     inputHash: {}
 };
 
+//This really should be a built in function for objects
 function objForEach(obj, funct){
     Object.keys(obj).forEach((key)=>funct(obj[key]));
 }
 
+//Built this so that someday I may remove async, originally done during a painful debugging due to server timeout
+// being stuck at 120 seconds on windows due to windows being a bitch.
+function asyncParallel (array, funct, callback) {
+    async.parallel((array || []).map((val)=>(next)=>{
+        funct(val, next);
+    }), callback);
+}
+
+//Generates a 40 byte random stirng used to make unique id's for things and making tokens
 function genToken() {
     return crypto.randomBytes(40).toString('hex');
 }
 
+//This is a badly made function that trys to form all possible ip address for each interface the server has
+// It doesn't take many edge cases into account and really needs to be hardened and better tested
 comms.getAllIps = (intro)=>{
     let netMask,
         localIp,
@@ -46,7 +62,7 @@ comms.getAllIps = (intro)=>{
                 localIp = address.address;
 
                 let end = 0, // because this is the best option
-                    ipIntro = intro || '192.168.1.'; // because it's my default network
+                    ipIntro = intro || '192.168.1.'; // because it's very common
 
                 if (netMask) {
                     end = +netMask.split('.').pop();
@@ -83,6 +99,8 @@ comms.searchForNodes = function(){
     }
 };
 
+//This looks at all address given or looks at all possible address names the server can see and trys to request
+// from those address blindly for node configurations and then sends those off to be registered
 function searchForNodes (addresses, callback) {
     if (!callback) callback = ()=>{};
 
@@ -121,18 +139,13 @@ function searchForNodes (addresses, callback) {
             }
         });
     }, ()=>{
-        comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
-
-        comms.nodes.forEach(n=>{
-            if (!n.active){
-                log.error('Failed to to connect to node: ' + n.ip, n);
-            }
-        });
-
         callback();
     });
 }
 
+
+//This will take a json object and detirmin if it is a real node config, if so it will build the proper object out of it
+// And add it to the global comms.nodes and nodeHash vars and return back the newly made config
 comms.registerNode = function(node, callback){
     if (!callback){
         callback = ()=>{};
@@ -145,29 +158,27 @@ comms.registerNode = function(node, callback){
             name: node.name || '',
             description: node.description || '',
             location: node.location || '',
-            enableWebInterface: node.enableWebInterface || false,
+            enableWebInterface: true,
             inputDrivers: [],
             outputDrivers: [],
-            active: true
+            active: true,
+            update: ()=>{}
         };
 
-        comms.updateNode(newNode, (err, finalNode)=>{
-            if (err){
-                log.error('Error attempting add node config', err);
-                return callback(err)
-            }
+        log.success('Registered node', newNode);
 
-            log.success('Registered new node', finalNode);
-            comms.nodeHash[finalNode.id] = finalNode;
-            comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
-            return callback(undefined, finalNode);
-        });
+        comms.nodeHash[newNode.id] = newNode;
+        comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+
+        return callback(undefined, newNode);
     } else {
         log.error('Error attempting to validate new Node', node);
         callback(new Error('Error registering node!'))
     }
 };
 
+//Given a legal node config it will ask that node for all of it's inputs and add them to the node object
+// and add them to the global comms.inputs and hash array
 comms.updateNodeInputs = (node, callback)=>{
     if (!callback) callback = function(){};
 
@@ -226,14 +237,8 @@ comms.updateNodeInputs = (node, callback)=>{
     });
 };
 
-comms.updateInputs = (callback)=>{
-    if (!callback) callback = function(){};
-
-    async.each(comms.nodes, function (node, nextMain){
-        comms.updateNodeInputs(node, nextMain);
-    }, callback);
-};
-
+//Given a legal node config it will ask that node for all of it's outputs and add them to the node object
+// and add them to the global comms.outputs and hash array
 comms.updateNodeOutputs = (node, callback)=>{
     if (!callback) callback = function(){};
 
@@ -289,14 +294,8 @@ comms.updateNodeOutputs = (node, callback)=>{
     });
 };
 
-comms.updateOutputs = (callback)=>{
-    if (!callback) callback = function(){};
-
-    async.each(comms.nodes, function (node, nextMain){
-        comms.updateNodeOutputs(node, nextMain);
-    }, callback);
-};
-
+//Given a legal node config it will ask that node for all of it's drives and add them to the node object
+// and add them to the global comms.outputDrivers and comms.inputDrivers and hashs
 comms.updateNodeDrivers = (node, callback)=>{
     if (!callback) callback = function(){};
 
@@ -400,45 +399,40 @@ comms.updateNodeDrivers = (node, callback)=>{
     });
 };
 
-comms.updateDrivers = (callback)=>{
-    if (!callback) callback = function(){};
-
-    async.each(comms.nodes, function(node, nextMain){
-        comms.updateNodeDrivers(node, nextMain);
-    }, callback);
-};
-
-comms.updateNodeServer = (node, callback)=>{
+//This gives the token to the node so that the node can talk to the server, but only if the enable flag
+// is set to true in the database, only called via the updateNode function, possibly should be added to the register
+// function since it would make sense conceptually
+comms.updateNodeServer = (node, token, callback)=>{
     if (!callback) callback = function(){};
 
     let info = {
-        url: 'https://' + node.config.ip + '/api/server',
+        url: 'https://' + node.ip + '/api/server',
         form: {
             port: process.env.PORT,
-            token: node.token
+            token: token
         }
     };
 
-    console.log(info);
-
     request.post(info, function(err, res, body){
         if (err){
-            log.error('Error registering server: ' + node.config.id, err);
+            log.error('Error registering server: ' + node.id, err);
             node.active = false;
             return callback(err);
         }
 
         if (res.statusCode !== 200){
-            log.error('Error registering server: ' + node.config.id, body);
+            log.error('Error registering server: ' + node.id, body);
             node.active = false;
             return callback(body);
         }
 
-        log.success('Registered server to node!', node.config);
-        callback(undefined, node.config);
+        log.success('Registered server to node!', node);
+        callback(undefined, node);
     });
 };
 
+//This function takes a node config reference and will populate all of it's inputs, outputs and drivers directly
+// from the hardware as well as setup it's update function so that it can be updated on the fly.
 comms.updateNode = (node, callback)=>{
     async.parallel([
         (next)=>comms.updateNodeInputs(node, next),
@@ -453,26 +447,47 @@ comms.updateNode = (node, callback)=>{
 
             if (!nodeData) {
                 nodeData = new NodeConfig({ config: node, enabled: false, token: genToken() });
-            } else {
-                nodeData.config = node;
             }
 
-            return nodeData.save((err, nodeConfig)=>{
-                if (err) {
-                    log.error('Failed to add Node Config', err);
-                    return callback(err);
-                }
+            let newRef = node;
+            newRef.update = (callback)=>{
+                nodeData.config = newRef;
 
-                log.info('New Node Config Added!', nodeData);
+                nodeData.save((err, nodeConfig)=>{
+                    if (err) {
+                        log.error('Failed update Node Config', err);
+                        return callback(err);
+                    }
 
-                if (callback){
-                    comms.updateNodeServer(nodeConfig, callback);
-                }
+                    log.info('Node Config Updated!', newRef);
+
+                    if (callback){
+                        callback(null, nodeConfig)
+                    }
+                });
+            };
+
+            newRef.enable = ()=>{
+              nodeData.enabled = true;
+              newRef.update();
+            };
+
+            newRef.disable = ()=>{
+                nodeData.enabled = false;
+                newRef.update();
+            };
+
+            newRef.update((err, conf)=>{
+                comms.updateNodeServer(newRef, conf.token, callback);
             });
         });
     });
 };
 
+//Goes though all node configs currently in memory and updates all of their updates inputs, outputs, drivers
+// and also empties memory of all previously known inputs and outputs so that no non-functional ones exist
+// But that may soon be removed and have inputs, outputs, and drivers also have a store in the data base so that enven
+// if they no longer exist they can still be seen and if they currently aren't online they can still be referenced
 comms.updateAll = (callback)=>{
     comms.outputs = [];
     comms.inputs = [];
@@ -481,7 +496,17 @@ comms.updateAll = (callback)=>{
     comms.outputHash = {};
     comms.inputHash = {};
 
-    comms.searchForNodes(function(){
+    comms.nodes = Object.keys(comms.nodeHash).map(k=>comms.nodeHash[k]);
+
+    async.forEach(comms.nodes, (node, next)=>{
+        comms.updateNode(node, (err, node)=>{
+            if (!node.active){
+                log.error('Failed to to connect to node: ' + node.ip, node);
+            }
+
+            next()
+        });
+    }, ()=>{
         callback();
     });
 };
@@ -542,6 +567,7 @@ comms.registerInit = (data)=>{
     }
 };
 
+//Veriys that node is using an existing token and that that node is enabled
 comms.verifyToken = (req, res, next)=>{
     let token = req.headers['x-token'],
         node = comms.nodeConfigs[token],
@@ -565,12 +591,6 @@ comms.deRegister = (token)=>{
     });
 };
 
-function asyncParallel (array, funct, callback) {
-    async.parallel((array || []).map((val)=>(next)=>{
-        funct(val, next);
-    }), callback);
-}
-
 NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
     if (err) {
         log.error('populate nodeConfigs', err);
@@ -579,11 +599,18 @@ NodeConfig.find({}).lean().exec((err, nodeConfigs)=>{
 
     comms.nodeConfigs = (nodeConfigs || []).reduce((cur, con)=>{
         cur[con.token] = con;
+        comms.nodes.push(con.config);
+        comms.nodeHash[con.config.id] = con.config;
+        con.config.active = false;
         return cur;
     }, {});
 
-    comms.searchForNodes('localhost', ()=>{
+    comms.searchForNodes(()=>{
         console.log('Searched');
+
+        comms.updateAll(()=>{
+            console.log('All Nodes Updated Successfully!');
+        })
     });
 });
 

@@ -26,8 +26,10 @@ function stripObjProp(obj, props){
 }
 
 exports.updateNodes = function(req, res){
-    nodeComm.updateAll(function(){
-        res.send('Update Complete!');
+    nodeComm.searchForNodes(()=>{
+        nodeComm.updateAll(()=>{
+            res.send('Update Complete!');
+        })
     });
 };
 
@@ -47,8 +49,6 @@ exports.updateNode = function(req, res){
 exports.register = function(req, res, next){
     let config = req.body,
         ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':').pop();
-
-    console.log(req.body, ip);
 
     if (!config.port){
         return res.status(400).jsonp({
@@ -86,6 +86,7 @@ exports.update = function (req, res){
     if (node.location) newNode.location = node.location;
     if (node.description) newNode.description = node.description;
     if (typeof node.enableWebInterface === 'boolean') newNode.enableWebInterface = node.enableWebInterface;
+    //if (typeof node.enable === 'boolean') newNode.enableWebInterface = node.enableWebInterface;
 
     let info = {
         url: 'https://' + selNode.ip + '/api/server',
@@ -111,12 +112,14 @@ exports.update = function (req, res){
         selNode.location = newOutput.location;
         selNode.name = newOutput.name;
         selNode.active = true;
+        selNode.update(); //this updates the config in the database
         res.json(stripObjProp(selNode, 'token'));
     });
 };
 
 exports.nodeById = function (req, res, next, id){
     req.node = nodeComm.nodeHash[id];
+
     if (req.node){ return next(); }
 
     return res.status(400).send({
