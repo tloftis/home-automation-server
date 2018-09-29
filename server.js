@@ -11,15 +11,15 @@ global.rootRequire.resolve = function(str){
     return require.resolve(str);
 };
 
-require('./config/lib/app').start(function(app, db, config){
+require('./config/lib/app').start((app, db, config) => {
     if(config.secure.ssl && (config.port !== 80)){
-        var redirectApp = require('express')();
+        let redirectApp = require('express')();
 
-        redirectApp.get('*',function(req,res){
-            res.redirect('https://' + req.get('host') + req.url);
+        redirectApp.get('*',(req,res) => {
+            res.redirect(`https://${req.get('host')}:${config.port}${req.url}`);
         });
 
-        redirectApp.listen(80, function(){
+        redirectApp.listen(80, () => {
             console.log('Redirecting HTTP traffic to HTTPS');
         });
     }

@@ -28,7 +28,7 @@ module.exports = {
             //    directoryPath: process.cwd(),
             //    fileName: 'access.log',
             //    rotatingLogs: { // for more info on rotating logs - https://github.com/holidayextras/file-stream-rotator#usage
-            //        active: false, // activate to use rotating logs 
+            //        active: false, // activate to use rotating logs
             //        fileName: 'access-%DATE%.log', // if rotating logs are active, this fileName setting will be used
             //        frequency: 'daily',
             //        verbose: false
@@ -39,31 +39,5 @@ module.exports = {
     app: {
         title: defaultEnvConfig.app.title + ' - Development Environment'
     },
-    livereload: true,
-    seedDB: {
-        seed: process.env.MONGO_SEED === 'true',
-        options: {
-            logResults: !(process.env.MONGO_SEED_LOG_RESULTS === 'false'),
-            seedUser: {
-                username: process.env.MONGO_SEED_USER_USERNAME || 'user',
-                provider: 'local',
-                email: process.env.MONGO_SEED_USER_EMAIL || 'user@localhost.com',
-                firstName: 'User',
-                lastName: 'Local',
-                displayName: 'User Local',
-                enabled: true,
-                roles: ['user']
-            },
-            seedAdmin: {
-                username: process.env.MONGO_SEED_ADMIN_USERNAME || 'admin',
-                provider: 'local',
-                email: process.env.MONGO_SEED_ADMIN_EMAIL || 'admin@localhost.com',
-                firstName: 'Admin',
-                lastName: 'Local',
-                displayName: 'Admin Local',
-                enabled: true,
-                roles: ['user', 'admin']
-            }
-        }
-    }
+    livereload: true
 };

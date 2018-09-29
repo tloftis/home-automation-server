@@ -1,6 +1,6 @@
 ################### REQUIRED PARAMETERS ###################
 
-NODE_ENV=production
+NODE_ENV=development
 
 ################### OPTIONAL PARAMETERS ###################
 
@@ -13,11 +13,11 @@ NODE_ENV=production
 #SERVER_PING_INTERVAL=300
 
 ### MONGODB ###
-#MONGO_SEED=true
-#MONGODB_PATH=mongodb://localhost:27017/mes-suite
-#MONGODB_AUTH_USER=admin
-#MONGODB_AUTH_PASS=password
-#MONGODB_DEBUG=0
+MONGODB_PATH=mongodb://localhost:27017/mes-suite
+MONGODB_AUTH_USER=user
+MONGODB_AUTH_PASS=password
+MONGODB_PORT=8081
+MONGODB_DEBUG=0
 
 ### LOGGING ###
 #CONSOLE_LOGGING=1

@@ -3,18 +3,14 @@
 /**
  * Module dependencies.
  */
-var config = require('../config'),
+const config = require('../config'),
     express = require('express'),
     morgan = require('morgan'),
     logger = require('./logger'),
     bodyParser = require('body-parser'),
-    session = require('express-session'),
-    MongoStore = require('connect-mongo')(session),
-    favicon = require('serve-favicon'),
     compress = require('compression'),
     methodOverride = require('method-override'),
     cookieParser = require('cookie-parser'),
-    helmet = require('helmet'),
     flash = require('connect-flash'),
     consolidate = require('consolidate'),
     path = require('path');
@@ -32,11 +28,7 @@ module.exports.initLocalVariables = function (app) {
     }
 
     app.locals.keywords = config.app.keywords;
-    app.locals.jsFiles = config.files.client.js;
-    app.locals.cssFiles = config.files.client.css;
     app.locals.livereload = config.livereload;
-    app.locals.logo = config.logo;
-    app.locals.favicon = config.favicon;
 
     // Passing the request url to environment locals
     app.use(function (req, res, next) {
@@ -63,8 +55,6 @@ module.exports.initMiddleware = function (app) {
         level: 9
     }));
 
-    // Initialize favicon middleware
-    app.use(favicon(app.locals.favicon));
     // Enable logger (morgan)
     app.use(morgan(logger.getFormat(), logger.getOptions()));
 
@@ -103,22 +93,7 @@ module.exports.initViewEngine = function (app) {
  * Configure Express session
  */
 module.exports.initSession = function (app, db) {
-    // Express MongoDB session storage
-    app.use(session({
-        saveUninitialized: true,
-        resave: true,
-        secret: config.sessionSecret,
-        cookie: {
-            maxAge: config.sessionCookie.maxAge,
-            httpOnly: config.sessionCookie.httpOnly,
-            secure: config.sessionCookie.secure && config.secure.ssl
-        },
-        key: config.sessionKey,
-        store: new MongoStore({
-            mongooseConnection: db.connection,
-            collection: config.sessionCollection
-        })
-    }));
+    // TODO: Add token verification here
 };
 
 /**
@@ -127,39 +102,6 @@ module.exports.initSession = function (app, db) {
 module.exports.initModulesConfiguration = function (app, db) {
     config.files.server.configs.forEach(function (configPath) {
         require(path.resolve(configPath))(app, db);
-    });
-};
-
-/**
- * Configure Helmet headers configuration
- */
-module.exports.initHelmetHeaders = function (app) {
-    // Use helmet to secure Express headers
-    var SIX_MONTHS = 15778476000;
-    app.use(helmet.xframe());
-    app.use(helmet.xssFilter());
-    app.use(helmet.nosniff());
-    app.use(helmet.ienoopen());
-
-    app.use(helmet.hsts({
-        maxAge: SIX_MONTHS,
-        includeSubdomains: true,
-        force: true
-    }));
-
-    app.disable('x-powered-by');
-};
-
-/**
- * Configure the modules static routes
- */
-module.exports.initModulesClientRoutes = function (app) {
-    // Setting the app router and static folder
-    app.use('/', express.static(path.resolve('./public')));
-
-    // Globbing static routing
-    config.folders.client.forEach(function (staticPath) {
-        app.use(staticPath, express.static(path.resolve('./' + staticPath)));
     });
 };
 
@@ -205,7 +147,7 @@ module.exports.initErrorRoutes = function (app) {
  */
 module.exports.configureSocketIO = function (app, db) {
     // Load the Socket.io configuration
-    var server = require('./socket.io')(app, db);
+    let server = require('./socket.io')(app, db);
     // Return server object
     return server;
 };
@@ -215,40 +157,32 @@ module.exports.configureSocketIO = function (app, db) {
  */
 module.exports.init = function (db) {
     // Initialize express app
-    var app = express();
+    let _this = this;
+    let app = express();
 
     // Initialize local variables
-    this.initLocalVariables(app);
+    _this.initLocalVariables(app);
 
     // Initialize Express middleware
-    this.initMiddleware(app);
-
-    // Initialize Express view engine
-    this.initViewEngine(app);
-    
-    // Initialize Helmet security headers
-    this.initHelmetHeaders(app);
-
-    // Initialize modules static client routes, before session!
-    this.initModulesClientRoutes(app);
+    _this.initMiddleware(app);
 
     // Initialize Express session
-    this.initSession(app, db);
+    _this.initSession(app, db);
 
     // Initialize Modules configuration
-    this.initModulesConfiguration(app);
+    _this.initModulesConfiguration(app);
 
     // Initialize modules server authorization policies
-    this.initModulesServerPolicies(app);
+    _this.initModulesServerPolicies(app);
 
     // Initialize modules server routes
-    this.initModulesServerRoutes(app);
+    _this.initModulesServerRoutes(app);
 
     // Initialize error routes
-    this.initErrorRoutes(app);
+    _this.initErrorRoutes(app);
 
     // Configure Socket.io
-    app = this.configureSocketIO(app, db);
+    app = _this.configureSocketIO(app, db);
 
     return app;
 };
