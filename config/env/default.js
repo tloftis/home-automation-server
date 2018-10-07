@@ -16,5 +16,5 @@ module.exports = {
             }
         }
     },
-    secret: 'H0m34UT0'
+    secret: process.env.SERVER_SECRET || 'H0m34UT0'
 };

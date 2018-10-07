@@ -3,7 +3,8 @@
 /**
  * Module dependencies.
  */
-var acl = require('acl'); //This is a base for building up roles, it can store to a database but exists mainly in memory
+const acl = require('acl'); //This is a base for building up roles, it can store to a database but exists mainly in memory
+const config = rootRequire('./config/config');
 
 // Using the memory backend, this means it will only exist in active memory
 acl = new acl(new acl.memoryBackend());
@@ -49,23 +50,15 @@ exports.invokeRolesPolicies = function (){
 };
 
 exports.isAllowed = function (req, res, next){
-    var roles = (req.user) ? req.user.roles : ['guest'];
-    var enabled = roles.indexOf('guest') === -1 ? (req.user || {}).enabled : true;
-
-    //Confirm user is enabled
-    if(enabled === false){
-        req.logout();
-        return res.status(401).send('User Account Is Disabled!');
-    }else if(typeof enabled === 'undefined'){
-        req.logout();
-        return res.status(401).send('User Information Is Incorrect!');
-    }
+    let roles = req.user.roles;
 
     // Check for user roles
     acl.areAnyRolesAllowed(roles, req.route.path, req.method.toLowerCase(), function (err, isAllowed){
         if (err){
             // An authorization error occurred.
-            return res.status(500).send('Unexpected authorization error');
+            return res.status(500).json({
+                message: 'Unexpected authorization error'
+            });
         } else {
             if (isAllowed) {
                 // Access granted! Invoke next middleware

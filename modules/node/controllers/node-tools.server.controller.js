@@ -39,6 +39,7 @@ if(netMask){
     end = +netMask.split('.').pop();
 }
 
+//Get name space, I don't care to parse out the subnet, the request will fail quickly if the address is not found so no real impact on request time
 if(localIp){
     let ipArr = localIp.split('.');
     ipArr.pop();
@@ -50,7 +51,7 @@ for(let i = end; i <= 255; i++){
 }
 
 //This looks at all address on the local net. If a node is found it is added to the database if not already in the database
-function searchForNodes(callback){
+exports.searchForNodes = (callback) => {
     if(!callback) callback = function(){};
 
     async.parallel(testAddresses, function (address, next){
@@ -102,9 +103,9 @@ function searchForNodes(callback){
         });
         callback();
     });
-}
+};
 
-function registerWithNode(node, callback){
+exports.registerWithNode = (node, callback) => {
     if(!callback) callback = function(){};
 
     let info = {
@@ -115,17 +116,17 @@ function registerWithNode(node, callback){
     request.post(info, function (){
         callback();
     });
-}
+};
 
-function registerWithNodes(callback){
+exports.registerWithNodes = (callback) => {
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, next){
         registerWithNode(node, next);
     }, callback);
-}
+};
 
-function updateNodeInputs(node, callback){
+exports.updateNodeInputs = (node, callback) => {
     if(!callback) callback = function(){};
 
     request.get('http://' + node.ip + '/api/input', function (err, res, body){
@@ -172,17 +173,17 @@ function updateNodeInputs(node, callback){
             });
         }
     });
-}
+};
 
-function updateInputs(callback){
+exports.updateInputs= (callback) => {
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
         updateNodeInputs(node, nextMain);
     }, callback);
-}
+};
 
-function updateNodeOutputs(node, callback){
+exports.updateNodeOutputs= (node, callback) => {
     if(!callback) callback = function(){};
 
     request.get('http://' + node.ip + '/api/output', function (err, res, body){
@@ -229,17 +230,17 @@ function updateNodeOutputs(node, callback){
             });
         }
     });
-}
+};
 
-function updateOutputs(callback){
+exports.updateOutputs = (callback) => {
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
         updateNodeOutputs(node, nextMain)
     }, callback);
-}
+};
 
-function updateNodeDrivers(node, callback){
+exports.updateNodeDrivers = (node, callback) => {
     if(!callback) callback = function(){};
 
     async.parallel([function(nextMid){
@@ -337,17 +338,17 @@ function updateNodeDrivers(node, callback){
     }], function(){
         callback();
     });
-}
+};
 
-function updateDrivers(callback){
+exports.updateDrivers = callback => {
     if(!callback) callback = function(){};
 
     async.each(nodes, function (node, nextMain){
         updateNodeDrivers(node, nextMain);
     }, callback);
-}
+};
 
-function updateAll(callback){
+exports.updateAll = callback => {
     outputs = [];
     inputs = [];
     inputDriverHash = {};
@@ -366,15 +367,10 @@ function updateAll(callback){
             })
         });
     });
-}
-
-updateAll();
-
-exports.updateNodes = function(req, res){
-    updateAll(function(){
-        res.send('Update Complete!');
-    });
 };
+
+exports.updateAll();
+
 
 exports.updateNode = function(req, res){
     let node = req.node;
@@ -397,64 +393,4 @@ exports.updateNode = function(req, res){
         log.info('Node added back to system!', node);
         res.send('Node Updated!');
     })
-};
-
-exports.list = function(req, res){
-    res.json(nodes);
-};
-
-exports.get = function (req, res){
-    res.json(req.node);
-};
-
-exports.update = function (req, res){
-    let node = req.body.node,
-        selNode = req.node,
-        newNode = {};
-
-    if(node.name) newNode.name = node.name;
-    if(node.location) newNode.location = node.location;
-    if(node.description) newNode.description = node.description;
-
-    let info = {
-        url: 'http://' + selNode.ip + '/api/server',
-        form: { node: newNode }
-    };
-
-    request.put(info, function (err, reqs, body){
-        if(err) return res.status(400).send('Error attempting to update node server config');
-        let newOutput;
-
-        try{
-            newOutput = JSON.parse(body);
-        }catch(err){
-            return res.status(400).send('Unable to get updated node server configuration');
-        }
-
-        selNode.description = newOutput.description;
-        selNode.location = newOutput.location;
-        selNode.name = newOutput.name;
-        selNode.active = true;
-        res.json(selNode);
-    });
-};
-
-exports.nodeById = function (req, res, next, id){
-    req.node = nodeHash[id];
-    if(req.node){ return next(); }
-
-    return res.status(400).send({
-        message: 'Node could not be found'
-    });
-};
-
-//Used to register new node input and output, adds to array and gives them new ids
-exports.registerInput = function(config){
-    inputs.push(config);
-    inputHash[config.id] = config;
-};
-
-exports.registerOutput = function(config){
-    outputs.push(config);
-    outputHash[config.id] = config;
 };

@@ -3,6 +3,7 @@
 /**
  * Module dependencies.
  */
+const acl = require('acl');
 const config = require('../config'),
     express = require('express'),
     morgan = require('morgan'),
@@ -13,6 +14,7 @@ const config = require('../config'),
     cookieParser = require('cookie-parser'),
     flash = require('connect-flash'),
     consolidate = require('consolidate'),
+    token = require('./token-auth'),
     path = require('path');
 
 /**
@@ -94,6 +96,22 @@ module.exports.initViewEngine = function (app) {
  */
 module.exports.initSession = function (app, db) {
     // TODO: Add token verification here
+
+    app.use((err, req, res, next) => {
+        let token = req.cookies['x-token'];
+        let id = req.cookies['x-node-id'];
+
+        token.verifyToken(token).then(data => {
+            req.user = data;
+            req.user.id = id;
+            next();
+        }).catch(err => {
+            req.user = {
+                roles: ['guest'];
+            }
+            next();
+        })
+    });
 };
 
 /**
@@ -143,13 +161,36 @@ module.exports.initErrorRoutes = function (app) {
 };
 
 /**
- * Configure Socket.io
+ * Configure server.http
  */
-module.exports.configureSocketIO = function (app, db) {
+module.exports.configureServerHttp = function (app, db) {
     // Load the Socket.io configuration
-    let server = require('./socket.io')(app, db);
+    let server = require('./server.http')(app, db);
     // Return server object
     return server;
+};
+
+module.exports.policyValidator = function (req, res, next){
+    let roles = req.user.roles;
+
+    // Check for user roles
+    acl.areAnyRolesAllowed(roles, req.route.path, req.method.toLowerCase(), function (err, isAllowed){
+        if (err){
+            // An authorization error occurred.
+            return res.status(500).json({
+                message: 'Unexpected authorization error'
+            });
+        } else {
+            if (isAllowed) {
+                // Access granted! Invoke next middleware
+                return next();
+            } else {
+                return res.status(403).json({
+                    message: 'User is not authorized'
+                });
+            }
+        }
+    });
 };
 
 /**
@@ -175,6 +216,9 @@ module.exports.init = function (db) {
     // Initialize modules server authorization policies
     _this.initModulesServerPolicies(app);
 
+    // Add policy validation on all routes
+    _this.policyValidator(app);
+
     // Initialize modules server routes
     _this.initModulesServerRoutes(app);
 
@@ -182,7 +226,7 @@ module.exports.init = function (db) {
     _this.initErrorRoutes(app);
 
     // Configure Socket.io
-    app = _this.configureSocketIO(app, db);
+    app = _this.configureServerHttp(app, db);
 
     return app;
 };

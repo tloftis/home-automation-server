@@ -81,25 +81,6 @@ let validateSecureMode = function (config) {
     }
 };
 
-let validateSessionSecret = function (config, testing) {
-
-    if (process.env.NODE_ENV !== 'production') {
-        return true;
-    }
-
-    if (config.sessionSecret === 'MEAN') {
-        if (!testing) {
-            console.log(chalk.red('+ WARNING: It is strongly recommended that you change sessionSecret config while running in production!'));
-            console.log(chalk.red('    Please add `sessionSecret: process.env.SESSION_SECRET || \'super amazing secret\'` to '));
-            console.log(chalk.red('    `config/env/production.js` or `config/env/local.js`'));
-            console.log();
-        }
-        return false;
-    } else {
-        return true;
-    }
-};
-
 let initGlobalConfigFiles = function (config, assets) {
     // Appending files
     config.files = {
@@ -156,13 +137,10 @@ let initGlobalConfig = function () {
     // Validate Secure SSL mode can be used
     validateSecureMode(config);
 
-    // Validate session secret
-    validateSessionSecret(config);
-
     // Expose configuration utilities
     config.utils = {
         getGlobbedPaths: getGlobbedPaths,
-        validateSessionSecret: validateSessionSecret
+        policyValidator : policyValidator
     };
 
     return config;

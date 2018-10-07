@@ -3,14 +3,13 @@
 /**
  * Module dependencies.
  */
-var nodeInputPolicy = require('../policies/node-input.server.policy'),
-    inputs = require('../controllers/node-inputs.server.controller.js');
+const inputs = require('../controllers/node-inputs.server.controller.js');
 
 module.exports = function (app) {
-    app.route('/api/input').all(nodeInputPolicy.isAllowed).
+    app.route('/api/input').
         get(inputs.list);
 
-    app.route('/api/input/:inputId').all(nodeInputPolicy.isAllowed).
+    app.route('/api/input/:inputId').
         get(inputs.get).
         put(inputs.update).
         post(inputs.change).

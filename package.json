@@ -37,6 +37,7 @@
     "forever": "~0.14.2",
     "fstream": "^1.0.9",
     "glob": "^5.0.13",
+    "jsonwebtoken": "^8.3.0",
     "lodash": "^3.10.0",
     "method-override": "^2.3.3",
     "mongoose": "~4.2.3",
@@ -45,7 +46,6 @@
     "passport": "~0.2.2",
     "passport-local": "^1.0.0",
     "request": "^2.69.0",
-    "socket.io": "^1.3.7",
     "swig": "^1.4.2",
     "tar": "^2.2.1"
   }

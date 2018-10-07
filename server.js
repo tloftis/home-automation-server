@@ -3,11 +3,11 @@
 require('dotenv').load();
 global.rootDir = __dirname;
 
-global.rootRequire = function(str){
+global.rootRequire = str => {
     return require(str);
 };
 
-global.rootRequire.resolve = function(str){
+global.rootRequire.resolve = str => {
     return require.resolve(str);
 };
 
